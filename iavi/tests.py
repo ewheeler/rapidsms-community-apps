@@ -387,7 +387,7 @@ class TestApp (TestScript):
             kenya_2 > 1234
             kenya_2 < Umefanya mapenzi mara ngapi kwa masaa ishirini na nne iliopita?
             kenya_2 > 2
-            kenya_2 < Kwa masaa hiyo kumi na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
+            kenya_2 < Kwa masaa hiyo ishirini na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
             kenya_2 > 2
             kenya_2 < Maswali yamekwisha. Kumbuka kutumia mpira mpya wa kondom kila unavyo fanya mapenzi na kumeza dawa kama ulivyoshauriwa. Asante sana
         """
