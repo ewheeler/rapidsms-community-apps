@@ -129,7 +129,11 @@ def user_edit(req, id):
                 # can easily change passwords
                 user.is_staff = True;
                 user.save()
-            profile_form.save()
+            
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
+            profile_form.save_m2m()
             return HttpResponseRedirect('/iavi/users')
     else:
         user_form =  UserForm(instance=user_to_edit)
