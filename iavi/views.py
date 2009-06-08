@@ -172,7 +172,6 @@ def new_user(req):
 
 def password_change(req, id):
     user_to_edit = User.objects.get(id=id)
-    print req.user
     if req.method == 'POST': 
         password_form = AdminPasswordChangeForm(user_to_edit, req.POST)
         if password_form.is_valid():
