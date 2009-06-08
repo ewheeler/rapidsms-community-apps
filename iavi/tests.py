@@ -9,7 +9,7 @@ import datetime
 
 class TestApp (TestScript):
     apps = (reporters_app.App, App, tree_app.App )
-    fixtures = ["iavi_locations", "iavi_trees", 'test_backend']
+    fixtures = ["iavi_locations", "iavi_trees", 'test_backend', "harvard_trees"]
     
     
     
@@ -477,8 +477,72 @@ class TestApp (TestScript):
         self.assertEqual(True, u_report.condom_with_other)
         self.assertEqual("F", u_report.status)
         
+    
+    def testHarvard(self):
+        script = """
+            # base case
+            harvard_1 > harvard 1
+            harvard_1 < Hello. Send me the year of your birth.
+            harvard_1 > 1234
+            harvard_1 < How many doses of your medicine did you miss in the past 7 days? If you do not know, type "n".
+            harvard_1 > 2
+            harvard_1 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_2 > harvard 2
+            harvard_2 < Hello. Send me the year of your birth.
+            harvard_2 > 1234
+            harvard_2 < How many doses of your medicine did you miss in the past 30 days? If you do not know, type "n".
+            harvard_2 > 2
+            harvard_2 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_3 > harvard 3
+            harvard_3 < Hello. Send me the year of your birth.
+            harvard_3 > 1234
+            harvard_3 < How many doses of medicine did you miss since the last time you picked up your medicine from the pharmacy? If you do not know, type "n".
+            harvard_3 > 2
+            harvard_3 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
         
-         
+    def testHarvardLocalization(self):
+        self._register("harvard_lg", language="lg")
+        script = """
+            # base case
+            harvard_lg > harvard 1
+            harvard_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_lg > 1234
+            harvard_lg < Nemirundi engahi omubiiro mushanju eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika "n".
+            harvard_lg > 2
+            harvard_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_lg > harvard 2
+            harvard_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_lg > 1234
+            harvard_lg < Nemirundi engahi omubiiro makumi ashatu eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika "n".
+            harvard_lg > 2
+            harvard_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_lg > harvard 3
+            harvard_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_lg > 1234
+            harvard_lg < Nemirundi engahi eyobuziire kumiira omubazi gwawe kuruga obwohererukiire kwiiha emibazi yaawe  omwirwariro rya Mbarara? Ku orabe otarikugyimanya, handiika "n".
+            harvard_lg > 2
+            harvard_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+    
     def _register(self, phone="55555", id="001", pin="1234", location= "22", language="En"):
         """ Register a user, via the test script. """
         script = """

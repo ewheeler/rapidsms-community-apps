@@ -25,6 +25,11 @@ class App (rapidsms.app.App):
         self.tree_app.register_custom_transition("validate_num_times_condoms_used", 
                                                  self.validate_num_times_condoms_used)
         
+        # for Harvard
+        self.tree_app.register_custom_transition("validate_birth_year", self.validate_birth_year)
+        self.tree_app.register_custom_transition("validate_0_to_7", self.validate_0_to_7)
+        self.tree_app.register_custom_transition("validate_0_to_30", self.validate_0_to_30)
+        
         self.tree_app.set_session_listener("iavi uganda", self.uganda_session)
         self.tree_app.set_session_listener("iavi kenya", self.kenya_session)
         
@@ -375,16 +380,35 @@ class App (rapidsms.app.App):
         rep = IaviReporter.objects.get(pk=msg.reporter.pk)
         return msg.text == rep.pin
     
-    # we need to save these in order to validate the other
     sex_answers = {}
     
     def validate_1_to_19(self, msg):
+        if self.validate_numeric_range(msg, 1, 19):
+            # we need to save these in order to validate the next
+            # answer
+            self.sex_answers[msg.reporter.pk] = int(msg.text.strip())
+            return True
+        
+    def validate_0_to_7(self, msg):
+        return self.validate_numeric_range(msg, 0, 7)
+    
+    def validate_0_to_30(self, msg):
+        return self.validate_numeric_range(msg, 0, 30)
+    
+    
+    def validate_numeric_range(self, msg, lower_bound, upper_bound):
+        '''Validates a numeric range, parsing the message as a number
+           and then checking if that number falls between the lower and
+           upper bound (inclusive).'''
         value = msg.text.strip()
         if value.isdigit():
-            if 0 < int(value) < 20:
-                self.sex_answers[msg.reporter.pk] = int(value)
+            if lower_bound <= int(value) <= upper_bound:
                 return True
         return False
+    
+    def validate_birth_year(self, msg):
+        # todo
+        return True
     
     def validate_num_times_condoms_used(self, msg):
         value = msg.text.strip()
