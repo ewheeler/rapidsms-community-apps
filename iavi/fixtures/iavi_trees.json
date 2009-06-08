@@ -104,7 +104,7 @@
     "pk": 5, 
     "model": "i18n.translation", 
     "fields": {
-      "translation": "Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.", 
+      "translation": "Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.", 
       "original": "Questionnaire is complete. Thank you.", 
       "language": 2
     }

@@ -139,7 +139,7 @@ class TestApp (TestScript):
             tester2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
             tester2 > no
             nurse < 003 Passes Test            
-            tester2 < Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.
+            tester2 < Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.
         """
         self.runScript(script)
         # try another location
@@ -322,7 +322,7 @@ class TestApp (TestScript):
             ugb_2 > yes
             ugb_2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
             ugb_2 > no
-            ugb_2 < Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.
+            ugb_2 < Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.
         """
         self.runScript(script)
         
