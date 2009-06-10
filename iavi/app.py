@@ -26,10 +26,6 @@ class App (rapidsms.app.App):
         self.tree_app.register_custom_transition("validate_num_times_condoms_used", 
                                                  self.validate_num_times_condoms_used)
         
-        # for Harvard
-        self.tree_app.register_custom_transition("validate_birth_year", self.validate_birth_year)
-        self.tree_app.register_custom_transition("validate_0_to_7", self.validate_0_to_7)
-        self.tree_app.register_custom_transition("validate_0_to_30", self.validate_0_to_30)
         
         self.tree_app.set_session_listener("iavi uganda", self.uganda_session)
         self.tree_app.set_session_listener("iavi kenya", self.kenya_session)
@@ -376,12 +372,6 @@ class App (rapidsms.app.App):
             self.sex_answers[msg.reporter.pk] = int(msg.text.strip())
             return True
         
-    def validate_0_to_7(self, msg):
-        return self.validate_numeric_range(msg, 0, 7)
-    
-    def validate_0_to_30(self, msg):
-        return self.validate_numeric_range(msg, 0, 30)
-    
     
     def validate_numeric_range(self, msg, lower_bound, upper_bound):
         '''Validates a numeric range, parsing the message as a number
@@ -406,7 +396,7 @@ class App (rapidsms.app.App):
                 # interrupted between questions. we could
                 # look this up in the DB but for now we'll
                 # be dumb.  
-                # TODO: do this for real from the DB
+                # TODO?: do this for real from the DB
                 old_value = 20
             if 0 <= int(value) <= old_value:
                 self.sex_answers.pop(msg.reporter.pk)
@@ -424,9 +414,9 @@ class App (rapidsms.app.App):
             # and when it is, start it
             
             try: 
-                # super hack... add 3 hours because of the time zone difference
+                # super hack... add 2 hours because of the time zone difference
                 # i'm sure there is a better way to do this with real time zones
-                # but i'm also sure I don't want to figure it out right nowx 
+                # but i'm also sure I don't want to figure it out right now
                 now_adjusted =  datetime.now() + timedelta(hours=2) 
                 next_time = now_adjusted.time()
                 self.debug("Adjusted time: %s, checking for participants to notify" % next_time)
