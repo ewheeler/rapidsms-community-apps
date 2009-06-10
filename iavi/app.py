@@ -3,6 +3,7 @@ import re
 from rapidsms.connection import Connection 
 from rapidsms.message import Message
 from apps.reporters.models import Reporter, Location
+from apps.tree.models import Tree
 from models import *
 from apps.i18n.utils import get_translation as _
 from apps.i18n.utils import get_language_code
@@ -223,44 +224,30 @@ class App (rapidsms.app.App):
     def _initiate_tree_sequence(self, user, initiator=None):
         user_conn = user.connection()
         if user_conn:
-            db_backend = user_conn.backend
-            # we need to get the real backend from the router 
-            # to properly send it 
-            real_backend = self.router.get_backend(db_backend.slug)
-            if real_backend:
-                connection = Connection(real_backend, user_conn.identity)
-                text = self._get_tree_sequence(user)
-                if not text:
-                    return _(strings["unknown_survey_location"], get_language_code(user.connection)) % ({"location":user.location, "alias":user.study_id})
-                else:
-                    # first ask the tree app to end any sessions it has open
-                    if self.tree_app:
-                        self.tree_app.end_sessions(user_conn)
-                    if initiator:
-                        # if this was initiated by someone else
-                        # create an entry for this so they can be
-                        # notified upon completion, and also so 
-                        # we can ignore the data
-                        TestSession.objects.create(initiator=initiator, tester=user,
-                                                   status="A")
-                    start_msg = Message(connection, text)
-                    self.router.incoming(start_msg)
-                    return
-            else:
-                error = "Can't find backend %s.  Messages will not be sent" % connection.backend.slug
-                self.error(error)
-                return error
+            tree= self._get_tree(user)
+            if not tree:
+                return _(strings["unknown_survey_location"], get_language_code(user.connection)) % ({"location":user.location, "alias":user.study_id})
+            if initiator:
+                # if this was initiated by someone else
+                # create an entry for this so they can be
+                # notified upon completion, and also so 
+                # we can ignore the data
+                TestSession.objects.create(initiator=initiator, tester=user,
+                                           status="A")
+            if self.tree_app:
+                self.tree_app.start_tree(tree, user_conn)
+            
         else:
             error = "Can't find connection %s.  Messages will not be sent" % user_conn
             self.error(error)
             return error
 
-    def _get_tree_sequence(self, user):
+    def _get_tree(self, user):
         # this is very hacky
         if user.location.type.name == "Kenya Location":
-            return "iavi kenya"
+            return Tree.objects.get(trigger="iavi kenya")
         elif  user.location.type.name == "Uganda Location":
-            return "iavi uganda"
+            return Tree.objects.get(trigger="iavi uganda")
         else:
             return None
     
