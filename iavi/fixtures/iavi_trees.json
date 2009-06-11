@@ -39,7 +39,6 @@
       "name": "uganda yes"
     }
   }, 
-
   {
     "pk": 1, 
     "model": "i18n.language", 
