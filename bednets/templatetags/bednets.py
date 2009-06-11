@@ -22,7 +22,7 @@ def recent_reporters(number=4):
 
 
 @register.inclusion_tag("bednets/partials/stats.html")
-@dashboard("top_right", "bednets/partials/stats.html")
+@dashboard("top_right", "bednets/partials/stats.html", "bednets.can_view")
 def bednets_stats():
     return { "stats": [
 #        {
