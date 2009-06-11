@@ -7,38 +7,33 @@
 <![endif]-->
 {% endblock %}
 {% load cache %}
-{% load bednets-tags %}
+{% load webapp-tags %}
 
 {% block content %}
-{# cache content of dashboard for one hour #}
-{% cache 3600 dashboard %}
 <div class="tmp">
-
-
+{% element user "dummy_tag_to_work_around_a_bug" %}
 <div class="split-3">
 	<div class="left">
-		{% distribution_summary_charts %}
+            {% element user "top_left" %}
 	</div>
 	<div class="mid">
-		{% daily_progress %}
+            {% element user "top_mid" %}
 	</div>
 	<div class="right">
-		{% bednets_stats %}
+            {% element user "top_right" %}
 	</div>
 	<div class="clear-hack"></div>
 </div>
 
 <div class="split">
 	<div class="left">
-		{% pilot_summary %}
+            {% element user "bottom_left" %}
 	</div>
 	<div class="right">
-		{% logistics_summary %}
+            {% element user "bottom_right" %}
 	</div>
 	<div class="clear-hack"></div>
 </div>
 
-
 </div>
-{% endcache %}
 {% endblock %}

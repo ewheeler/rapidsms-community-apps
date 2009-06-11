@@ -12,8 +12,11 @@ from locations.models import *
 from supply.models import *
 from bednets import constants
 from bednets.models import *
+from rapidsms.webui.utils import * 
 
 @register.inclusion_tag("bednets/partials/recent.html")
+@dashboard("bottom_left", "bednets/partials/recent.html", "reporters.can_view")
+@dashboard("top_mid", "bednets/partials/recent.html", "bednets.can_view")
 def recent_reporters(number=4):
     last_connections = PersistantConnection.objects.filter(reporter__isnull=False).order_by("-last_seen")[:number]
     last_reporters = [conn.reporter for conn in last_connections]
@@ -21,6 +24,7 @@ def recent_reporters(number=4):
 
 
 @register.inclusion_tag("bednets/partials/stats.html")
+@dashboard("top_right", "bednets/partials/stats.html", "bednets.can_view")
 def bednets_stats():
     return { "stats": [
 #        {
@@ -64,6 +68,7 @@ def bednets_stats():
 
 
 @register.inclusion_tag("bednets/partials/progress.html")
+@dashboard("top_left", "bednets/partials/progress.html", "bednets.can_view")
 def daily_progress():
     start = datetime(2009, 05, 04)
     end = datetime(2009, 05, 18)
@@ -133,7 +138,6 @@ def daily_progress():
 
 @register.inclusion_tag("bednets/partials/pilot.html")
 def pilot_summary():
-    
     # fetch all of the LGAs that we want to display
     lga_names = ["DAWAKIN KUDU", "GARUN MALLAM", "KURA", "KANO MUNICIPAL"]
     lgas = LocationType.objects.get(name="LGA").locations.filter(name__in=lga_names)
