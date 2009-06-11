@@ -12,6 +12,7 @@ from apps.locations.models import *
 from apps.supply.models import *
 from apps.bednets import constants
 from apps.bednets.models import *
+from rapidsms.webui.utils import * 
 
 @register.inclusion_tag("bednets/partials/recent.html")
 def recent_reporters(number=4):
@@ -21,6 +22,7 @@ def recent_reporters(number=4):
 
 
 @register.inclusion_tag("bednets/partials/stats.html")
+@dashboard("top_right", "bednets/partials/stats.html")
 def bednets_stats():
     return { "stats": [
 #        {
@@ -64,6 +66,7 @@ def bednets_stats():
 
 
 @register.inclusion_tag("bednets/partials/progress.html")
+@dashboard("top_left", "bednets/partials/progress.html")
 def daily_progress():
     start = datetime(2009, 05, 04)
     end = datetime(2009, 05, 18)
