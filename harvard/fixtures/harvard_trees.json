@@ -32,6 +32,30 @@
     }
   }, 
   {
+    "pk": 11, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss in the past 7 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss in the past 30 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
     "pk": 3, 
     "model": "tree.tree", 
     "fields": {
@@ -55,6 +79,33 @@
     "fields": {
       "root_state": 11, 
       "trigger": "harvard 3", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 15, 
+      "trigger": "harvard child 1", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 16, 
+      "trigger": "harvard child 2", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 17, 
+      "trigger": "harvard child 3", 
       "completion_text": "Thank you for your response. Good-bye."
     }
   }, 
@@ -163,6 +214,60 @@
     }
   }, 
   {
+    "pk": 15, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 1 root"
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 2 root"
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 3 root"
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 11, 
+      "name": "harvard child 1 main"
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 12, 
+      "name": "harvard child 2 main"
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 13, 
+      "name": "harvard child 3 main"
+    }
+  }, 
+  {
     "pk": 14, 
     "model": "tree.transition", 
     "fields": {
@@ -240,6 +345,87 @@
     "fields": {
       "answer": 11, 
       "current_state": 14, 
+      "next_state": null
+    }
+  },
+  {
+    "pk": 23, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 15, 
+      "next_state": 18
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 16, 
+      "next_state": 19
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 17, 
+      "next_state": 20
+    }
+  }, 
+  {
+    "pk": 26, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 9, 
+      "current_state": 18, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 27, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 10, 
+      "current_state": 19, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 28, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 11, 
+      "current_state": 20, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 29, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 18, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 30, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 19, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 31, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 20, 
       "next_state": null
     }
   },

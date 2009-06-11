@@ -47,6 +47,41 @@ class TestApp (TestScript):
         """
         self.runScript(script)
         
+    def testHarvardChild(self):
+        self._register(phone="havard_child_1", alias="1", is_child=True)
+        script = """
+            # base case
+            havard_child_1 > harvard child 1
+            havard_child_1 < Hello. Send me the year of your birth.
+            havard_child_1 > 1234
+            havard_child_1 < How many doses of medicine did your child miss in the past 7 days? If you do not know, type "n".
+            havard_child_1 > 2
+            havard_child_1 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
+        self._register(phone="havard_child_2", alias="2", is_child=True)
+        script = """
+            # base case
+            havard_child_2 > harvard child 2
+            havard_child_2 < Hello. Send me the year of your birth.
+            havard_child_2 > 1234
+            havard_child_2 < How many doses of medicine did your child miss in the past 30 days? If you do not know, type "n".
+            havard_child_2 > 2
+            havard_child_2 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
+        self._register(phone="havard_child_3", alias="3", is_child=True)
+        script = """
+            # base case
+            havard_child_3 > harvard child 3
+            havard_child_3 < Hello. Send me the year of your birth.
+            havard_child_3 > 1234
+            havard_child_3 < How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type "n".
+            havard_child_3 > 2
+            havard_child_3 < Thank you for your response. Good-bye.
+        """
+        self.runScript(script)
+        
     def testHarvardLocalization(self):
         # create a user with lugandan localizaiton
         self._register(phone="harvard_lg", language="lg")
