@@ -116,6 +116,40 @@ class TestApp (TestScript):
         """
         self.runScript(script)
         
+    def testHarvardChildLocalization(self):
+        # create a user with lugandan localizaiton
+        self._register(phone="harvard_child_lg", language="lg", is_child=True)
+        script = """
+            # base case
+            harvard_child_lg > harvard child 1
+            harvard_child_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_child_lg > 1234
+            harvard_child_lg < Nemirundi engahi omubiiro mushanju eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika "n".
+            harvard_child_lg > 2
+            harvard_child_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_child_lg > harvard child 2
+            harvard_child_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_child_lg > 1234
+            harvard_child_lg < Nemirundi engahi omubiiro maku ashatu eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika "n".
+            harvard_child_lg > 2
+            harvard_child_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+        script = """
+            # base case
+            harvard_child_lg > harvard child 3
+            harvard_child_lg < Agandi, nyoherereza omwaka oguwazarirwemu.
+            harvard_child_lg > 1234
+            harvard_child_lg < Nemirundi engahi eyo mwaana waawe abuzire kumira omubazi gwe kuruga obwohererukire kwiha omubazi gwe omwirwariro Mbarara? Waba otarikugyimanya handiika "n". 
+            harvard_child_lg > 2
+            harvard_child_lg < Webaare kungarukamu. Ogume nobusingye.
+        """
+        self.runScript(script)
+        
     def test_participation_logic(self):
         rep = self._register()
         now = datetime.now()

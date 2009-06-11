@@ -482,5 +482,32 @@
       "original": "Thank you for your response. Good-bye.", 
       "language": 2
     }
+  },
+  {
+    "pk": 23, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro mushanju eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of medicine did your child miss in the past 7 days? If you do not know, type \"n\".", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro maku ashatu eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of medicine did your child miss in the past 30 days? If you do not know, type \"n\".", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi eyo mwaana waawe abuzire kumira omubazi gwe kuruga obwohererukire kwiha omubazi gwe omwirwariro Mbarara? Waba otarikugyimanya handiika \"n\".\r\n", 
+      "original": "How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type \"n\".", 
+      "language": 2
+    }
   }
 ]
