@@ -331,6 +331,20 @@ class TestApp (TestScript):
             ugb_2 < Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.
         """
         self.runScript(script)
+        # test error messages
+        script = """
+            ugb_2 > iavi uganda
+            ugb_2 < Ssebo/Nnyabo Yingiza ennamba yo eye'kyaama mu ssimu yo. Era ennamba eyo giwereze ku kompyuta yaffe.
+            ugb_2 > 1235
+            ugb_2 < Tusonyiwe, ennamba gyoyingiza sintuufu. Ddamu ogezeeko nga'onyiga ennamba nnya ez'akuwebwa.
+            ugb_2 > 1234
+            ugb_2 < Wetabyeeko mu kikolwa eky'omukwano n'omwagalwawo gw'olinaye mukunoonyereza kuno mu lunaku lumu oluyise?
+            ugb_2 > abc
+            ugb_2 < "abc" tekirizibwa. Olina kunyiga emu (1) bwekiba nga kituufu oba bbiri (2) bwekiba nga tekikirizibwa.
+            ugb_2 > nedda
+            ugb_2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
+        """
+        self.runScript(script)
         
     def testKenyaBasic(self):
         self._register("kenya_1")

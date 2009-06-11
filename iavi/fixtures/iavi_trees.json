@@ -208,6 +208,69 @@
     }
   },
   {
+    "pk": 27, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "\"%(answer)s\" tekirizibwa. Olina kunyiga emu (1) bwekiba nga kituufu oba bbiri (2) bwekiba nga tekikirizibwa.", 
+      "original": "\"%(answer)s\" is not a valid answer. You must enter 1 for yes or 2 for no", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 28, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "\"%(answer)s\" tekirizibwa. Olina okuyingiza ennamba wakati wa zero ne kumi na mwenda.", 
+      "original": "\"%(answer)s\" is not a valid answer. You must enter a number between 0 and 19", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 29, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Tusonyiwe, kyoyingizamu tekikirizibwa %(retries)s. Emirundi gy'okuyingizamu egikirizibwa gikomye wano. Ddamu ogezeeko oluvanyuma lw\u2019akaseera.", 
+      "original": "Sorry, invalid answer %(retries)s times. Your session will now end. Please try again later.", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 30, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Tusonyiwe, ennamba gyoyingiza sintuufu. Ddamu ogezeeko nga'onyiga ennamba nnya ez'akuwebwa.", 
+      "original": "Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 31, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "\"%(answer)s\" tekirizibwa. Nyiga \"Yee\" oba \"nedda\"", 
+      "original": "\"%(answer)s\" is not a valid answer. You must enter yes or no", 
+      "language": 2
+    }
+  }, 
+  {
+    "pk": 32, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "\"%(answer)s\" tekirizibwa. Olina okuyingiza ennamba eri wansi oba eyenkana ne gyewasose okuyingizamu", 
+      "original": "\"%(answer)s\" is not a valid answer. You must enter a number less than or equal to the previous answer", 
+      "language": 2
+    }
+  },
+  {
+    "pk": 33, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "\"%(answer)s\" silo jibu sahihi. Lazima ubonyeze nambari inayolingana au iliyo chini ya jibu uliopeana hapo awali", 
+      "original": "\"%(answer)s\" is not a valid answer. You must enter a number less than or equal to the previous answer", 
+      "language": 3
+    }
+  },
+  {
     "pk": 1, 
     "model": "tree.question", 
     "fields": {
