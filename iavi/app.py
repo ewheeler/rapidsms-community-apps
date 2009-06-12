@@ -336,10 +336,6 @@ class App (rapidsms.app.App):
                 return True
         return False
     
-    def validate_birth_year(self, msg):
-        # todo
-        return True
-    
     def validate_num_times_condoms_used(self, msg):
         value = msg.text.strip()
         if value.isdigit():
