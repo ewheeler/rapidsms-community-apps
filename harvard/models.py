@@ -38,6 +38,9 @@ class StudyParticipant(models.Model):
     # be updated in 10-day increments
     next_start_time = models.DateTimeField(null=True, blank=True)
     
+    # stores the current active session with the tree app
+    active_report = models.ForeignKey("HarvardReport", null=True, blank=True)
+    
     def __unicode__(self):
         return "%s: %s - %s" % (self.reporter, self.start_date, self.end_date)
 
@@ -55,6 +58,9 @@ class HarvardReport(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
     
     answer = models.IntegerField(null=True, blank=True)
+    # the number of times we had to initiate this survey before 
+    # it was successful (if it was sucessful)
+    num_tries = models.IntegerField()
     
     @property
     def is_child(self):
