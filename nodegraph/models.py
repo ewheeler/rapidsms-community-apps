@@ -41,6 +41,38 @@ class AbstractNode(models.Model):
     """
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
+
+    def get_ancestors(self,max_alt=None):
+        """max_alt=None means no limit"""
+        seen=set()
+
+        if max_alt is not None:
+            max_alt=int(max_alt)
+            if max_alt<1:
+                return
+            max_alt
+            
+        def _recurse(node,alt):
+            if node is None or \
+                    (max_alt is not None and alt>max_alt) or \
+                    node in seen:
+                print "done"
+                return
+
+            seen.add(node)
+            for a in node.immediate_ancestors:
+                _recurse(a,alt+1)
+
+
+        _recurse(self,0)
+        seen.remove(self)
+        return seen
+
+    @property
+    def immediate_ancestors(self):
+        """The groups this node is a member of"""
+        return self.parents.all()
+
     def __unicode__(self):
         return self.debug_id
 
@@ -71,10 +103,6 @@ class Node(AbstractNode):
         for grp in grps:
             self.remove_from_group(self)
 
-    @property
-    def groups(self):
-        """The groups this node is a member of"""
-        return list(self.nodeset_set.all())
 
 class NodeSet(AbstractNode):
     """
@@ -87,8 +115,8 @@ class NodeSet(AbstractNode):
 
     """
 
-    _subgroups = models.ManyToManyField('self',symmetrical=False)
-    _subleaves = models.ManyToManyField(Node)
+    _subgroups = models.ManyToManyField('self',related_name='parents',symmetrical=False)
+    _subleaves = models.ManyToManyField(Node,related_name='parents') 
     
     def __unicode__(self):
         """
@@ -202,17 +230,17 @@ class NodeSet(AbstractNode):
         Breaks cycles.
 
         """
+        # hold unique set of NodeSets we've visited to break cycles
+        seen=set()
+        leaves=set()
 
         if max_depth is not None:
             max_depth=int(max_depth)
             if max_depth<1:
-                return
+                return leaves # empty set
 
-        # hold unique set of NodeSets we've visited to break cycles
-        seen=set()
-        leaves=set()
         # recursive function to do the flattening
-        def _recurse(nodeset, depth, max_depth=None):
+        def _recurse(nodeset, depth):
             # check terminating cases
             # - node is None (shouldn't happen but why not be safe?)                        
             # - reached max_depth
@@ -230,10 +258,10 @@ class NodeSet(AbstractNode):
 
             # recurse to its subgroups
             for ns in nodeset.subgroups:
-                _recurse(ns, depth+1, max_depth=max_depth)
+                _recurse(ns, depth+1)
                 
         # Now call recurse
-        _recurse(self, 0, max_depth)
+        _recurse(self, 0)
         
         return leaves
 

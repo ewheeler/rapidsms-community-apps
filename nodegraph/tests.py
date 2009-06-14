@@ -41,45 +41,59 @@ class TestApp (TestScript):
     
     m_names = ['matt','larry','jim','joe','mohammed']
     w_names = ['jen','julie','mary','fatou','sue']
-        
+    girl_names = ['jennie','sue-y']
+    boy_names = ['johnny', 'jimmie']
 
     def setUp(self):
         TestScript.setUp(self)
-        
+            
         # make some nodes and graphs
         # imagine this is users and groups for clarity
         self.m_nodes = [_user(n) for n in self.m_names]
         self.w_nodes = [_user(n) for n in self.w_names]
+        self.girl_nodes = [_user(n) for n in self.girl_names]
+        self.boy_nodes = [_user(n) for n in self.boy_names]
         
         self.m_group = _group('men',*self.m_nodes)
         self.w_group = _group('women',*self.w_nodes)
+        self.g_group = _group('girls',*self.girl_nodes)
+        self.g_group.add_to_group(self.w_group)
+        self.b_group = _group('boys',*self.boy_nodes)
+        self.b_group.add_to_group(self.m_group)
+
         self.people_group = _group('people', self.m_group, self.w_group)
+
+        # set up Cyclic(A(B(*A,woman),man))
+        self.cyc_a=_group('a',self.m_nodes[0])
+        self.cyc_b=_group('b',self.cyc_a,self.w_nodes[0])
+        self.cyc_a._add_subnodes(self.cyc_b)
+        self.cyclic_group=_group('cyclic',self.cyc_a)
+               
+        # simple tree 
+        self.leaf1=_user('leaf1')
+        self.leaf2=_user('leaf2')
+        self.simple_tree=_group('tree', _group('L1',_group('L2',self.leaf1, _group('L3',self.leaf2))))
         
     def testNode(self):
+#        print self.people_group
+#        print self.cyclic_group
+#        print self.cyclic_group.flatten()
+#        print dir(NodeSet)
         print
-        ro=Node(debug_id='Rowena')
-        ro.save()
-        jw=Node(debug_id='Jeff')
-        jw.save()
-        terra=Node(debug_id='Terra')
-        terra.save()
-        unicef=NodeSet(debug_id='UNICEF')
-        unicef.save()
-        java=NodeSet(debug_id='java')
-        java.save()
-        coders=NodeSet(debug_id='Coders')
-        coders.save()
-        hackers=NodeSet(debug_id='Hacks')
-        hackers.save()
-        ro.add_to_group(coders)
-        jw.add_to_groups(hackers, java)
-        coders.add_to_group(coders)
-        unicef._add_subnodes(terra, coders)
-        coders._add_subnodes(java,hackers)
-        print unicef
-        print "Flat: %s" % unicef.flatten(3)
-#        print coders
-"""
+
+
+        print self.m_nodes[0].get_ancestors(1)
+        
+        print
+#        print "Boys: %s" % self.b_group.immediate_ancestors
+#        print "Men: %s" % self.m_group.immediate_ancestors
+#        print "People: %s" % self.people_group.immediate_ancestors
+       # print self.cyc_a.nodeset_set.all()
+#        print self.girl_nodes[1].immediate_ancestors
+#        print self.w_group.get_ancestors()
+        """
+
+
         skiers=_group('skiers', self.m_group.subleaves[1])
         snowbs=_group('snowboarders', self.m_group.subleaves[1], *self.w_group.subleaves[0:2])
         sporty=_group('sporty',skiers,snowbs,self.people_group)
@@ -105,7 +119,7 @@ class TestApp (TestScript):
         snowbs.add_to_group(self.w_group)
         print docs
         print self.people_group
-"""
+        """
 
 
 
