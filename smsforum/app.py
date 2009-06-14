@@ -74,14 +74,15 @@ class App(rapidsms.app.App):
 
         # fetch a list of all the backends
         # that we already have objects for
-        known_backends = PersistantBackend.objects.values_list("slug", flat=True)
+        #known_backends = PersistantBackend.objects.values_list("slug", flat=True)
         
         # find any running backends which currently
         # don't have objects, and fill in the gaps
-        for be in self.router.backends:
+        """for be in self.router.backends:
             if not be.slug in known_backends:
                 self.info("Creating PersistantBackend object for %s (%s)" % (be.slug, be.title))
                 PersistantBackend(slug=be.slug, title=be.title).save()
+        """
     
     
     def parse(self, msg):
