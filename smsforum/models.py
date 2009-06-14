@@ -8,7 +8,25 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from rapidsms.webui.managers import *
 from apps.patterns.models import Pattern
+
 from apps.locations.models import *
+from apps.nodegraph.models import NodeSet
+
+#
+# NEW STYLE COMMUNITIES/VILLAGES
+#
+
+class Community(NodeSet):
+    name = models.CharField(max_length=255,blank=True,null=True)
+    pass
+
+
+class Village(NodeSet):
+    name = models.CharField(max_length=255,blank=True,null=True)
+    location = models.ForeignKey(Location, null=True, blank=True)
+    pass
+
+
 
 
 # TODO: remove this. it's a slightly weird version
