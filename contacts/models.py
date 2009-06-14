@@ -60,6 +60,10 @@ class Contact(Node):
     age_months = models.IntegerField(null=True,blank=True)
     # locale via ForeignKey in LocalePreference
     
+    @property
+    def my_villages(self):
+        return self.groups
+    
     """ Permissions for the webUI
     class Meta:
         ordering = ["last_name", "first_name"]
