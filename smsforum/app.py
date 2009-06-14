@@ -94,7 +94,7 @@ class App(rapidsms.app.App):
         # dta into the message for other apps
         msg.persistent_channel= CommunicationChannelFromMessage(msg)
         msg.persistant_connection = ChannelConnectionFromMessage(msg)
-        msg.contact = ContactFromMessage(msg)
+        msg.sender = ContactFromMessage(msg)
         
         # store a handy dictionary, containing the most useful persistance
         # information that we have. this is useful when creating an object
@@ -108,11 +108,11 @@ class App(rapidsms.app.App):
         #   # this object will be linked to a reporter,
         #   # if one exists - otherwise, a connection
         #   SomeObject(stuff="hello", **msg.persistance_dict)
-        if msg.contact: msg.persistance_dict = { "reporter": msg.contact }
+        if msg.sender: msg.persistance_dict = { "reporter": msg.sender }
         else:            msg.persistance_dict = { "connection": msg.persistant_connection }
         
         # log, whether we know who the sender is or not
-        if msg.contact: self.info("Identified: %s as %r" % (msg.persistant_connection.user_identifier, msg.contact))
+        if msg.sender: self.info("Identified: %s as %r" % (msg.persistant_connection.user_identifier, msg.sender))
         else:            self.info("Unidentified: %s" % (msg.persistant_connection.user_identifier))
     
     def handle(self, msg):
@@ -177,28 +177,19 @@ class App(rapidsms.app.App):
         print "REPORTER:JOIN"
         #loc = Locations.objects.all().filter(name=village)
 
-        villes = Village.objects.all().filter(name=village)
+        villes = Village.objects.filter(name=village)
         if len(villes)==0:
             msg.respond( _("village does not exist") )
             #default join
             rep = self.join(msg,DEFAULT_VILLAGE)
             return rep
-
+        
         ville = villes[0]
-        sender = Contact()
         #create new Contact
-        sender.save()
         #create new membership
-        sender.add_to_group(ville)
-        #create new channelconnection
-        ChannelConnection(user_identifier=msg.persistant_connection.user_identifier, \
-                          communication_channel=msg.persistent_channel, contact=sender)
-        
-        # attach the reporter to the current connection
-        msg.contact = sender
-        
-        msg.respond( self.__str("first-login", sender) % {"village": village } )
-        return sender
+        msg.sender.add_to_group(ville)
+        msg.respond( self.__str("first-login", msg.sender) % {"village": village } )
+        return msg.sender
         # TODO: remove this for production
         """except:
             msg.respond(
@@ -207,7 +198,7 @@ class App(rapidsms.app.App):
         """
  
     def blast(self, msg, txt):
-        sender = msg.contact
+        sender = msg.sender
         if sender is None:
             #join default village and send to default village
             sender = self.join(msg)
@@ -216,12 +207,12 @@ class App(rapidsms.app.App):
         # TODO: check for valid village/group/etc.
         print "REPORTER:BLAST"
         #find all reporters from the same location
-        villages = sender.immediate_ancestors
+        villages = [n.village for n in sender.immediate_ancestors]
         if len(villages)==0:
             msg.respond( _("You must join a village before sending messages") )
             return
         for ville in villages:
-            recipients = ville.subleaves()
+            recipients = ville.flatten()
             
             # it makes sense to complete all of the sending
             # before sending the confirmation sms
@@ -233,7 +224,7 @@ class App(rapidsms.app.App):
                 #todo: limit chars to 1 txt message?
                 conns = ChannelConnection.objects.all().filter(contact=recipient)
                 for conn in conns:
-                    be = self.router.get_backend(conn.channel_connection,)
+                    be = self.router.get_backend(conn.communication_channel,)
                     be.message(conn.unique_identifier, announcement).send()
                     
         msg.respond( _("success! %s recvd msg: %s" % (sender.location.name,txt) ) )
@@ -249,14 +240,14 @@ class App(rapidsms.app.App):
         #try:
             print "REPORTER:LEAVE"
             lang = ''
-            if msg.contact is not None:
-                if len(msg.contact.my_villages)>0:
+            if msg.sender is not None:
+                if len(msg.sender.my_villages)>0:
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
-                    for ville in msg.contact.my_villages:
-                        if len(msg.contact.language) > 0:
+                    for ville in msg.sender.my_villages:
+                        if len(msg.sender.language) > 0:
                             lang = msg.reporter.language
-                        msg.contact.delete()
+                        msg.sender.delete()
                         msg.respond(
                             self.__str("leave-success", lang=lang) % {
                              "village": ville })
@@ -278,15 +269,15 @@ class App(rapidsms.app.App):
         # so that users don't have to register in order to get going
         print "REPORTER:LANG"
         err = None
-        if msg.contact is None:
+        if msg.sender is None:
             err = "denied"
-            msg.contact = self.join(msg)
+            msg.sender = self.join(msg)
         
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
         if code in self.MSG:
-            msg.contact.language = code
-            msg.contact.save()
+            msg.sender.language = code
+            msg.sender.save()
             resp = "lang-set"
         
         # invalid language code. don't do
@@ -296,8 +287,8 @@ class App(rapidsms.app.App):
         # always send *some*
         # kind of response
         
-        response = self.__str(resp, msg.contact)
+        response = self.__str(resp, msg.sender)
         if err is not None:
-            response = response + self.__str(err, msg.contact) + self.__str("period", msg.contact)       
+            response = response + self.__str(err, msg.sender) + self.__str("period", msg.sender)       
         msg.respond( response )
         
