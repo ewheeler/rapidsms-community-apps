@@ -187,10 +187,11 @@ class ChannelConnection(models.Model):
     contact = models.ForeignKey(Contact) 
 
     def __unicode__(self):
-        pass
+        return "UserID: %s, Contact DebugID: %s" % \
+            (self.user_identifier, self.contact.debug_id)
         
     class Meta:
-        unique_together = ('user_id', 'communication_channel')
+        unique_together = ('user_identifier', 'communication_channel')
 
 
 
@@ -240,7 +241,7 @@ def ChannelConnectionFromMessage(msg,save=True):
 
     # try to get an existing ChannelConnection
     chan_con=None
-    rs=ChannelConnection.objects.filter(user_id__exact=u_id, \
+    rs=ChannelConnection.objects.filter(user_identifier__exact=u_id, \
                                             communication_channel__exact=comm_c)
     if len(rs)==0:
         # didn't find an existing connection, which means this specific
@@ -248,7 +249,7 @@ def ChannelConnectionFromMessage(msg,save=True):
         # combo aren't known, so we need a blank Contact for this combo.
         contact=Contact(debug_id=u_id)
         contact.save()
-        chan_con=ChannelConnection(user_id=u_id,\
+        chan_con=ChannelConnection(user_identifier=u_id,\
                                        communication_channel=comm_c,\
                                        contact=contact)
         if save:
