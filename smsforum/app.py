@@ -74,14 +74,14 @@ class App(rapidsms.app.App):
 
         # fetch a list of all the backends
         # that we already have objects for
-        #known_backends = PersistantBackend.objects.values_list("slug", flat=True)
+        #known_backends = ChannelConnection.objects.values_list("slug", flat=True)
         
         # find any running backends which currently
         # don't have objects, and fill in the gaps
         """for be in self.router.backends:
             if not be.slug in known_backends:
                 self.info("Creating PersistantBackend object for %s (%s)" % (be.slug, be.title))
-                PersistantBackend(slug=be.slug, title=be.title).save()
+                ChannelConnection(slug=be.slug, title=be.title).save()
         """
     
     
@@ -211,7 +211,9 @@ class App(rapidsms.app.App):
         if len(villages)==0:
             msg.respond( _("You must join a village before sending messages") )
             return
+        village_names = ''
         for ville in villages:
+            village_names = ( ("%s %s") % (village_names, ville.name) )
             recipients = ville.flatten()
             
             # it makes sense to complete all of the sending
@@ -219,15 +221,18 @@ class App(rapidsms.app.App):
             # iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
             for recipient in recipients:
-                #add signature
-                anouncement = _("%s:to [%s] %s") % ( txt, ville.name, sender.signature() )
-                #todo: limit chars to 1 txt message?
-                conns = ChannelConnection.objects.all().filter(contact=recipient)
-                for conn in conns:
-                    be = self.router.get_backend(conn.communication_channel,)
-                    be.message(conn.unique_identifier, announcement).send()
+                print "SENDING ANNOUNCEMENT TO RECIPIENT" + str(recipient.id)
+                if int(recipient.id) != int(sender.id):
+                    #add signature
+                    anouncement = _("%s:to [%s] %s") % ( txt, ville.name, sender.signature() )
+                    #todo: limit chars to 1 txt message?
+                    conns = ChannelConnection.objects.all().filter(contact=recipient)
+                    for conn in conns:
+                        print "SENDING ANNOUNCEMENT TO" + conn.user_identifier
+                        be = self.router.get_backend(conn.communication_channel.slug)
+                        be.message(conn.user_identifier, anouncement).send()
                     
-        msg.respond( _("success! %s recvd msg: %s" % (sender.location.name,txt) ) )
+        msg.respond( _("success! %s recvd msg: %s" % (village_names,txt) ) )
         return sender
         # TODO: remove this for production
         """except:
