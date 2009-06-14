@@ -48,14 +48,14 @@ class Contact(Node):
     But in general *given_name* should identify individuals and *family_name*
     identifies families.
 
-    unique_id -- A uniqued field that can hold a unique id across all Contacts.
+    national_id -- A uniqued field that can hold a unique id across all Contacts.
     It is not required but useful for storing things that a national id (e.g. SocSec number)
 
     """
     # channel_connections[] -- via ForeignKey in ChannelConnection
     given_name = models.CharField(max_length=255,blank=True)
     family_name =  models.CharField(max_length=255,blank=True)
-    unique_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
+    national_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
     gender = models.CharField(max_length=1,choices=GENDER_CHOICES,blank=True) 
     age_months = models.IntegerField(null=True,blank=True)
     # locale via ForeignKey in LocalePreference
@@ -193,7 +193,6 @@ class ChannelConnection(models.Model):
 # Read online that this is a cleaner way to do this thatn @classmethod
 # or @staticmethod which can have weird calling behavior
 #
-
 def CommunicationChannelFromMessage(msg, save=True):
     """
     Create a ChannelConnection object from a Message.
