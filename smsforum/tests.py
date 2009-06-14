@@ -1,6 +1,6 @@
 from rapidsms.tests.scripted import TestScript
 from apps.reporters.models import *
-import apps.contacts.app as reporter_app
+import apps.smsforum.app as reporter_app
 import apps.default.app as default_app
 from app import App
 from django.core.management.commands.dumpdata import Command
