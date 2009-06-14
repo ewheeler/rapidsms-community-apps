@@ -69,7 +69,8 @@ class TestApp (TestScript):
         print "\nPrint Channel Connection Test:"
         con1=connection.Connection(self.backend,'4153773715')
         msg=message.Message(con1, 'test message')
-        print msg.connection.backend.slug
+        print contacts_models.ChannelConnectionFromMessage(msg)
+        msg = message.Message(con1, 'Another Message')
         print contacts_models.ChannelConnectionFromMessage(msg)
         pass
         

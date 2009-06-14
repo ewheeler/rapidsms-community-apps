@@ -146,13 +146,16 @@ class ChannelConnection(models.Model):
     Maps phone# to communication channel
 
     """
-    user_id = models.CharField(max_length=64)
+    user_identifier = models.CharField(max_length=64)
     communication_channel = models.ForeignKey(CommunicationChannel)
 
     # always associated with a Contact, though contact
     # may be _blank_
     contact = models.ForeignKey(Contact) 
 
+    def __unicode__(self):
+        pass
+        
     class Meta:
         unique_together = ('user_id', 'communication_channel')
 
@@ -185,8 +188,6 @@ def CommunicationChannelFromMessage(msg, save=True):
         cc=rs[0]
             
     return cc
-
-
 
 
 def ContactFromMessage(msg,save=True):
