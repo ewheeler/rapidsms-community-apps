@@ -7,7 +7,7 @@ import time
 
 # helpers
 def _user(name, *grps):
-    u=Node(name=name)
+    u=Contact(name=name)
     u.save()
     for grp in grps:
         u.add_to_group(grp)

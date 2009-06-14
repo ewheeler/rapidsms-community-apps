@@ -34,7 +34,15 @@ class AbstractNode(models.Model):
 
     """
 
-    name = models.CharField(max_length=255)
+    """
+    For testing only. If you want a real name, id, or any other data,
+    make Node and NodeSet subclasses
+
+    """
+    name = models.CharField(max_length=16,blank=True,null=True)
+    
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         abstract=True
@@ -47,7 +55,7 @@ class Node(AbstractNode):
     Contains common properties of Set and Leaf.
     
     """
-    
+
     # helpers 'cause directionality can be confusing
     def add_to_group(self,grp):
         grp._add_subnodes(self)
@@ -114,7 +122,7 @@ class NodeSet(AbstractNode):
                 _recurse(sub,index)
                 index+=1
 
-            leaves=u','.join([l.name for l in node.subleaves])
+            leaves=u','.join([unicode(l) for l in node.subleaves])
             if len(leaves)>0:
                 if index>0:
                     buf.append(u',')
@@ -230,6 +238,8 @@ class NodeSet(AbstractNode):
         return leaves
                 
 
+class Contact(Node):
+    pass
     
 
 
