@@ -17,15 +17,12 @@ from apps.nodegraph.models import NodeSet
 #
 
 class Community(NodeSet):
-    name = models.CharField(max_length=255,blank=True,null=True)
+    name = models.CharField(max_length=255,unique=True, blank=False)
     pass
 
 
 class Village(NodeSet):
-    name = models.CharField(max_length=255,blank=True,null=True)
+    name = models.CharField(max_length=255,unique=True, blank=False)
     location = models.ForeignKey(Location, null=True, blank=True)
     pass
-
-
-
 
