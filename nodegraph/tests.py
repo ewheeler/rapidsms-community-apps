@@ -7,7 +7,7 @@ import time
 
 # helpers
 def _user(name, *grps):
-    u=Contact(name=name)
+    u=Contact(debug_id=name)
     u.save()
     for grp in grps:
         u.add_to_group(grp)
@@ -15,7 +15,7 @@ def _user(name, *grps):
     return u
 
 def _group(name, *children):
-    g=NodeSet(name=name)
+    g=NodeSet(debug_id=name)
     g.save()
     g._add_subnodes(*children)
     return g
@@ -57,19 +57,19 @@ class TestApp (TestScript):
         
     def testNode(self):
         print
-        ro=Node(name='Rowena')
+        ro=Node(debug_id='Rowena')
         ro.save()
-        jw=Node(name='Jeff')
+        jw=Node(debug_id='Jeff')
         jw.save()
-        terra=Node(name='Terra')
+        terra=Node(debug_id='Terra')
         terra.save()
-        unicef=NodeSet(name='UNICEF')
+        unicef=NodeSet(debug_id='UNICEF')
         unicef.save()
-        java=NodeSet(name='java')
+        java=NodeSet(debug_id='java')
         java.save()
-        coders=NodeSet(name='Coders')
+        coders=NodeSet(debug_id='Coders')
         coders.save()
-        hackers=NodeSet(name='Hacks')
+        hackers=NodeSet(debug_id='Hacks')
         hackers.save()
         ro.add_to_group(coders)
         jw.add_to_groups(hackers, java)
