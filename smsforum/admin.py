@@ -3,12 +3,11 @@
 
 
 from django.contrib import admin
-from apps.reporters.models import *
+from apps.smsforum.models import *
 
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('identity','last_name')
 
-admin.site.register(Role)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(PersistantBackend)
 admin.site.register(PersistantConnection)
