@@ -62,7 +62,7 @@ class Node(AbstractNode):
 
     def add_to_groups(self,*grps):
         for grp in grps:
-            self.add_to_group(self)
+            self.add_to_group(grp)
 
     def remove_from_group(self,grp):
         grp._remove_subnodes(self)
@@ -236,11 +236,27 @@ class NodeSet(AbstractNode):
         _recurse(self, 0, max_depth)
         
         return leaves
-                
+
+class Community(NodeSet):
+    # communiy name
+    pass
+
+class Village(NodeSet):
+    # Village Name
+    # Location
+    pass
 
 class Contact(Node):
+    # ( id, backend )+ 
+    # given_name
+    # family_name
+    # national_id
+    # staff_id?
+    # gender (enum)
+    # age (years)
     pass
     
 
 
     
+

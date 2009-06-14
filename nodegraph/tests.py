@@ -57,6 +57,29 @@ class TestApp (TestScript):
         
     def testNode(self):
         print
+        ro=Node(name='Rowena')
+        ro.save()
+        jw=Node(name='Jeff')
+        jw.save()
+        terra=Node(name='Terra')
+        terra.save()
+        unicef=NodeSet(name='UNICEF')
+        unicef.save()
+        java=NodeSet(name='java')
+        java.save()
+        coders=NodeSet(name='Coders')
+        coders.save()
+        hackers=NodeSet(name='Hacks')
+        hackers.save()
+        ro.add_to_group(coders)
+        jw.add_to_groups(hackers, java)
+        coders.add_to_group(coders)
+        unicef._add_subnodes(terra, coders)
+        coders._add_subnodes(java,hackers)
+        print unicef
+        print "Flat: %s" % unicef.flatten(3)
+#        print coders
+"""
         skiers=_group('skiers', self.m_group.subleaves[1])
         snowbs=_group('snowboarders', self.m_group.subleaves[1], *self.w_group.subleaves[0:2])
         sporty=_group('sporty',skiers,snowbs,self.people_group)
@@ -82,7 +105,7 @@ class TestApp (TestScript):
         snowbs.add_to_group(self.w_group)
         print docs
         print self.people_group
-
+"""
 
 
 
