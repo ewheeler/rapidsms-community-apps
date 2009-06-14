@@ -52,13 +52,13 @@ class Contact(Node):
     It is not required but useful for storing things that a national id (e.g. SocSec number)
 
     """
-    # channel_connections[] -- via ForeignKey in ChannelConnection
+    # channel_connections[] -- is available via ForeignKey in ChannelConnection
     given_name = models.CharField(max_length=255,blank=True)
     family_name =  models.CharField(max_length=255,blank=True)
     national_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
     gender = models.CharField(max_length=1,choices=GENDER_CHOICES,blank=True) 
     age_months = models.IntegerField(null=True,blank=True)
-    # locale via ForeignKey in LocalePreference
+    # locale is available via ForeignKey in LocalePreference
     
     @property
     def my_villages(self):
@@ -67,7 +67,7 @@ class Contact(Node):
     """ Permissions for the webUI
     class Meta:
         ordering = ["last_name", "first_name"]
-
+        
         # define a permission for this app to use the @permission_required
         # decorator in reporter's views
         # in the admin's auth section, we have a group called 'manager' whose
@@ -102,8 +102,16 @@ class Contact(Node):
 
     @property
     def locales(self):
+        #loc = LocalePreference.objects.get(contact=self)
         """Return priority ordered list of locales"""
-        pass
+        # TODO: fix
+        return ["en"]
+    
+    @property
+    def locale(self):
+        """Return top priority locales"""
+        # TODO: fix
+        return "en"
 
     def add_locale(self,locale_str, priority=0):
         """
@@ -232,6 +240,7 @@ def CommunicationChannelFromMessage(msg, save=True):
 
 def ContactFromMessage(msg,save=True):
     return ChannelConnectionFromMessage(msg,save).contact
+
 
 
 def ChannelConnectionFromMessage(msg,save=True):
