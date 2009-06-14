@@ -59,23 +59,46 @@ class TestApp (TestScript):
         self.w_group = _group('women',*self.w_nodes)
         self.people_group = _group('people', self.m_group, self.w_group)
         
+        self.people_group_unicode=u'people(men(matt,larry,jim,joe,mohammed),women(jen,julie,mary,fatou,sue)'
+
         self.backend=test.Backend(None)
+
+    def testFlattenTest(self):
+        print "\nFlatten Test:"
+        men_set=self.m_group.flatten()
+#        self.assertTrue(men_set==frozenset(self.m_nodes))
+        print men_set
+        print frozenset(self.m_nodes)
+
+        print "\nTry a group with a cycle:\n"
+#        print self.cyclic_group.flatten()
 
     def testPrint(self):
         print "\nPrint Test:"
-        print self.people_group
+        out=unicode(self.people_group)
+        self.assertTrue(out==self.people_group_unicode)
+        print out
 
     def testChannelConnectionFromMessage(self):
         print "\nPrint Channel Connection Test:"
-        con1=connection.Connection(self.backend,'4153773715')
+        uid0='4156661212'
+        uid1='6175551212'
+
+        con1=connection.Connection(self.backend,uid0)
         msg=message.Message(con1, 'test message')
-        channel_con=contacts_models.ChannelConnectionFromMessage(msg)
-        print channel_con
-        channel_con.contact.debug_id='foo'
-        channel_con.contact.save()
-        
+        channel_con0=contacts_models.ChannelConnectionFromMessage(msg)
+
+        # assert that the ChannelConnection's contact has the correct ID
+        self.assertTrue(channel_con0.contact.debug_id==uid0)
+
+        # create a _different_ message on the same connection
         msg = message.Message(con1, 'Another Message')
-        print contacts_models.ChannelConnectionFromMessage(msg)
+        channel_con1=contacts_models.ChannelConnectionFromMessage(msg)
+
+        # assert channel_connections are the SAME
+        self.assertTrue(channel_con0==channel_con1)
+
+        
         pass
         
 
