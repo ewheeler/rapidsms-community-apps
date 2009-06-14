@@ -9,6 +9,8 @@ from models import *
 from apps.locations.models import *
 import gettext
 
+from apps.contacts.models import *
+
 _ = gettext.gettext
 
 DEFAULT_VILLAGE="unassociated"
@@ -38,15 +40,15 @@ class App(rapidsms.app.App):
         }
     
     
-    def __str(self, key, reporter=None, lang=None):
+    def __str(self, key, contact=None, lang=None):
         
         # if no language was explicitly requested,
         # inherit it from the reporter, or fall
         # back to english. because everyone in the
         # world speaks english... right?
         if lang is None:
-            if reporter is not None:
-                lang = reporter.language
+            if contact is not None:
+                lang = contact.locale
             
             # fall back
             if lang is None:
@@ -68,11 +70,8 @@ class App(rapidsms.app.App):
         # since the functionality of this app depends on a default group
         # make sure that this group is created explicitly in this app 
         # (instead of depending on a fixture)
-        locs = Location.objects.all().filter(name=DEFAULT_VILLAGE)
-        if len(locs)==0: 
-            loc = Location(name=DEFAULT_VILLAGE)
-            loc.save()
-        
+        Village.objects.get_or_create(name=DEFAULT_VILLAGE)
+
         # fetch a list of all the backends
         # that we already have objects for
         known_backends = PersistantBackend.objects.values_list("slug", flat=True)
@@ -92,9 +91,9 @@ class App(rapidsms.app.App):
         # one if this is the first time we've
         # seen the sender), and stuff the meta-
         # dta into the message for other apps
-        conn = PersistantConnection.from_message(msg)
-        msg.persistant_connection = conn
-        msg.reporter = conn.reporter
+        msg.persistent_channel= CommunicationChannelFromMessage(msg)
+        msg.persistant_connection = ChannelConnectionFromMessage(msg)
+        msg.contact = ContactFromMessage(msg)
         
         # store a handy dictionary, containing the most useful persistance
         # information that we have. this is useful when creating an object
@@ -108,17 +107,12 @@ class App(rapidsms.app.App):
         #   # this object will be linked to a reporter,
         #   # if one exists - otherwise, a connection
         #   SomeObject(stuff="hello", **msg.persistance_dict)
-        if msg.reporter: msg.persistance_dict = { "reporter": msg.reporter }
+        if msg.contact: msg.persistance_dict = { "reporter": msg.contact }
         else:            msg.persistance_dict = { "connection": msg.persistant_connection }
         
         # log, whether we know who the sender is or not
-        if msg.reporter: self.info("Identified: %s as %r" % (conn, msg.reporter))
-        else:            self.info("Unidentified: %s" % (conn))
-        
-        # update last_seen, which automatically
-        # populates the same property 
-        conn.seen()
-            
+        if msg.contact: self.info("Identified: %s as %r" % (msg.persistant_connection.user_identifier, msg.contact))
+        else:            self.info("Unidentified: %s" % (msg.persistant_connection.user_identifier))
     
     def handle(self, msg):
         print "REPORTER:HANDLE"
@@ -163,12 +157,8 @@ class App(rapidsms.app.App):
             # TODO: add administrator authentication
             print "REPORTER:CREATEVILLAGE"
             
-            v = Location.objects.all().filter(name=village)
-            if len(v)!=0:
-                msg.respond("village already exists")
-                return
-            loc = Location(name=village)
-            loc.save()
+            
+            ville = Village.objects.get_or_create(name=village)
             
             msg.respond( ("village %s created") % (village) )
             return
@@ -186,24 +176,28 @@ class App(rapidsms.app.App):
         print "REPORTER:JOIN"
         #loc = Locations.objects.all().filter(name=village)
 
-        v = Location.objects.all().filter(name=village)
-        if len(v)==0:
+        villes = Village.objects.all().filter(name=village)
+        if len(villes)==0:
             msg.respond( _("village does not exist") )
-            print "village does not exist"
             #default join
-            rep = self.join(msg)
+            rep = self.join(msg,DEFAULT_VILLAGE)
             return rep
-        
-        v = Location.objects.get(name=village)
-        rep = Contact(location=v, identity=msg.connection.identity)
-        rep.save()
+
+        ville = villes[0]
+        sender = Contact()
+        #create new Contact
+        sender.save()
+        #create new membership
+        sender.add_to_group(ville)
+        #create new channelconnection
+        ChannelConnection(user_identifier=msg.persistant_connection.user_identifier, \
+                          communication_channel=msg.persistent_channel, contact=sender)
         
         # attach the reporter to the current connection
-        msg.persistant_connection.reporter = rep
-        msg.persistant_connection.save()
+        msg.contact = sender
         
-        msg.respond( self.__str("first-login", rep) % {"village": village } )
-        return rep
+        msg.respond( self.__str("first-login", sender) % {"village": village } )
+        return sender
         # TODO: remove this for production
         """except:
             msg.respond(
@@ -212,39 +206,37 @@ class App(rapidsms.app.App):
         """
  
     def blast(self, msg, txt):
-        if msg.reporter is None:
+        sender = msg.contact
+        if sender is None:
             #join default village and send to default village
-            msg.reporter = self.join(msg)
+            sender = self.join(msg)
         #try:
         # parse the name, and create a reporter
         # TODO: check for valid village/group/etc.
         print "REPORTER:BLAST"
         #find all reporters from the same location
-        sender = msg.reporter
-        if sender.location is None:
-            msg.respond( _("Unrecognized village") )
-            return
-        if len(sender.location.name)==0:
-            #some default behaviour
+        villages = sender.my_villages
+        if len(villages)==0:
             msg.respond( _("You must join a village before sending messages") )
             return
-        recipients = Contact.objects.all().filter(location=sender.location)
-        
-        # it makes sense to complete all of the sending
-        # before sending the confirmation sms
-        # iterate every member of the group we are broadcasting
-        # to, and queue up the same message to each of them
-        for recipient in recipients:
-            if recipient.identity != sender.identity:
+        for ville in villages:
+            recipients = ville.subleaves()
+            
+            # it makes sense to complete all of the sending
+            # before sending the confirmation sms
+            # iterate every member of the group we are broadcasting
+            # to, and queue up the same message to each of them
+            for recipient in recipients:
                 #add signature
-                anouncement = _("%s:to [%s] %s") % ( txt, sender.location, sender.signature() )
+                anouncement = _("%s:to [%s] %s") % ( txt, ville.name, sender.signature() )
                 #todo: limit chars to 1 txt message?
-                conns = PersistantConnection.objects.all().filter(reporter=recipient.identity)
+                conns = ChannelConnection.objects.all().filter(contact=recipient)
                 for conn in conns:
-                    Message(connection=conn.backend,text=anouncement).send()
-
+                    be = self.router.get_backend(conn.channel_connection,)
+                    be.message(conn.unique_identifier, announcement).send()
+                    
         msg.respond( _("success! %s recvd msg: %s" % (sender.location.name,txt) ) )
-        return msg.reporter
+        return sender
         # TODO: remove this for production
         """except:
             msg.respond(
@@ -256,24 +248,20 @@ class App(rapidsms.app.App):
         #try:
             print "REPORTER:LEAVE"
             lang = ''
-            village = ''
-            if msg.reporter is not None:
-                #default to deleting all persistent connections with the same identity
-                #we can always come back later and make sure we are deleting the right backend
-                pcs = PersistantConnection.objects.all().filter(identity=msg.reporter.identity)
-                for pc in pcs:
-                    pc.delete()
-                if len(msg.reporter.language) > 0:
-                    lang = msg.reporter.language
-                if msg.reporter.location is not None:
-                    if len(msg.reporter.location.name) > 0:
-                        village = msg.reporter.location.name
-                msg.reporter.delete()
-            
-            msg.respond(
-                self.__str("leave-success", lang=lang) % {
-                 "village": village })
-        
+            if msg.contact is not None:
+                if len(msg.contact.my_villages)>0:
+                    #default to deleting all persistent connections with the same identity
+                    #we can always come back later and make sure we are deleting the right backend
+                    for ville in msg.contact.my_villages:
+                        if len(msg.contact.language) > 0:
+                            lang = msg.reporter.language
+                        msg.contact.delete()
+                        msg.respond(
+                            self.__str("leave-success", lang=lang) % {
+                             "village": ville })
+                    return
+            msg.respond( _("nothing to leave") )
+            return
         # something went wrong - at the
         # moment, we don't care what
             """except:
@@ -289,15 +277,15 @@ class App(rapidsms.app.App):
         # so that users don't have to register in order to get going
         print "REPORTER:LANG"
         err = None
-        if msg.reporter is None:
+        if msg.contact is None:
             err = "denied"
-            msg.reporter = self.join(msg)
+            msg.contact = self.join(msg)
         
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
         if code in self.MSG:
-            msg.reporter.language = code
-            msg.reporter.save()
+            msg.contact.language = code
+            msg.contact.save()
             resp = "lang-set"
         
         # invalid language code. don't do
@@ -307,8 +295,8 @@ class App(rapidsms.app.App):
         # always send *some*
         # kind of response
         
-        response = self.__str(resp, msg.reporter)
+        response = self.__str(resp, msg.contact)
         if err is not None:
-            response = response + self.__str(err, msg.reporter) + self.__str("period", msg.reporter)       
+            response = response + self.__str(err, msg.contact) + self.__str("period", msg.contact)       
         msg.respond( response )
         
