@@ -209,18 +209,18 @@ class NodeSet(AbstractNode):
     @property
     def subgroups(self):
         """All the direct sub-NodeSets"""
-        return list(self._subgroups.all())
+        return self._subgroups.all()
 
     @property
     def subleaves(self):
         """All the direct sub-Nodes"""
-        return list(self._subleaves.all())
+        return self._subleaves.all()
 
     @property
     def subnodes(self):
         """A list of both the sub-NodeSets and sub-Nodes"""
         return self.subgroups+self.subleaves
-
+    
     # full graph access methods
     def flatten(self, max_depth=None):
         """
