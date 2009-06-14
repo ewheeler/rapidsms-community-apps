@@ -1,8 +1,12 @@
 from rapidsms.tests.scripted import TestScript
+from rapidsms import message,connection,person
+from rapidsms.backends import test
 from app import App
 import apps.nodegraph.app as nodegraph_app
 from models import *
-from apps.nodegraph.models import *
+import apps.contacts.models as contacts_models
+from apps.contacts.models import *
+from apps.smsforum.models import Village,Community
 import time
 
 # helpers
@@ -55,57 +59,23 @@ class TestApp (TestScript):
         self.w_group = _group('women',*self.w_nodes)
         self.people_group = _group('people', self.m_group, self.w_group)
         
-    def testNode(self):
-        print
-        ro=Node(debug_id='Rowena')
-        ro.save()
-        jw=Node(debug_id='Jeff')
-        jw.save()
-        terra=Node(debug_id='Terra')
-        terra.save()
-        unicef=NodeSet(debug_id='UNICEF')
-        unicef.save()
-        java=NodeSet(debug_id='java')
-        java.save()
-        coders=NodeSet(debug_id='Coders')
-        coders.save()
-        hackers=NodeSet(debug_id='Hacks')
-        hackers.save()
-        ro.add_to_group(coders)
-        jw.add_to_groups(hackers, java)
-        coders.add_to_group(coders)
-        unicef._add_subnodes(terra, coders)
-        coders._add_subnodes(java,hackers)
-        print unicef
-        print "Flat: %s" % unicef.flatten(3)
-#        print coders
-"""
-        skiers=_group('skiers', self.m_group.subleaves[1])
-        snowbs=_group('snowboarders', self.m_group.subleaves[1], *self.w_group.subleaves[0:2])
-        sporty=_group('sporty',skiers,snowbs,self.people_group)
-        sporty.add_to_group(self.people_group)
-        sporty.remove_from_group(self.people_group)
+        self.backend=test.Backend(None)
 
-        tb=_user('tranny boy',self.people_group)
-#        print self.people_group.flatten()
-#        print self.people_group.flatten(max_depth=1)
-        #print self.people_group.flatten()
-        #self.w_group.remove_from_group(self.people_group)
-        #self.m_group.subleaves[0].remove_from_group(self.m_group)
-        #print self.people_group.flatten()
-
-        docs=_group('docs', *self.m_nodes[0:2])
-        peds=_group('pediatricians', *self.w_nodes[1:3])
-        peds.add_to_group(docs)
-        docs._add_subnodes(*self.w_nodes[2:])
-        docs.add_to_group(peds)
-
-        skiers.add_to_group(self.m_group)
-        sporty.add_to_group(skiers)
-        snowbs.add_to_group(self.w_group)
-        print docs
+    def testPrint(self):
+        print "\nPrint Test:"
         print self.people_group
-"""
+
+    def testChannelConnectionFromMessage(self):
+        print "\nPrint Channel Connection Test:"
+        con1=connection.Connection(self.backend,'4153773715')
+        msg=message.Message(con1, 'test message')
+        print contacts_models.ChannelConnectionFromMessage(msg)
+        msg = message.Message(con1, 'Another Message')
+        print contacts_models.ChannelConnectionFromMessage(msg)
+        pass
+        
+
+
 
 
 

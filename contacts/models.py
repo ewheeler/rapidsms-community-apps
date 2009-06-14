@@ -166,9 +166,12 @@ class CommunicationChannel(models.Model):
     E.g. a modem communicating with Zain and another to MTN
 
     """
-    slug  = models.CharField(max_length=30, unique=True)
-    title = models.CharField(max_length=255, blank=True)
-    
+    slug  = models.CharField(max_length=30,primary_key=True)
+    title = models.CharField(max_length=255,blank=True)
+
+    class Meta:
+        unique_together = ('slug','title')
+            
 
 # basically persistent connection
 class ChannelConnection(models.Model):
@@ -183,6 +186,9 @@ class ChannelConnection(models.Model):
     # may be _blank_
     contact = models.ForeignKey(Contact) 
 
+    def __unicode__(self):
+        pass
+        
     class Meta:
         unique_together = ('user_id', 'communication_channel')
 
@@ -204,15 +210,16 @@ def CommunicationChannelFromMessage(msg, save=True):
 
     slug = msg.connection.backend.slug
 
-    cc=CommunicationChannel.objects.get(slug__isexact=slug)
-    if cc is None:
-        # make one
+    rs=CommunicationChannel.objects.filter(slug=slug)
+    cc=None
+    if len(rs)==0:
         cc=CommunicationChannel(slug)
         if save:
             cc.save()
-
+    else:
+        cc=rs[0]
+            
     return cc
-    pass
 
 
 def ContactFromMessage(msg,save=True):
@@ -232,20 +239,22 @@ def ChannelConnectionFromMessage(msg,save=True):
     u_id=msg.connection.identity
 
     # try to get an existing ChannelConnection
-    chan_con=ChannelConnection.objects.get(user_id__exact=u_id, \
-                                               communication_channel__exact=comm_c)
-
-    if chan_con is None:
+    chan_con=None
+    rs=ChannelConnection.objects.filter(user_id__exact=u_id, \
+                                            communication_channel__exact=comm_c)
+    if len(rs)==0:
         # didn't find an existing connection, which means this specific
         # CommunicationChannel (e.g. service provider) and id (e.g. phone number)
         # combo aren't known, so we need a blank Contact for this combo.
         contact=Contact(debug_id=u_id)
+        contact.save()
         chan_con=ChannelConnection(user_id=u_id,\
                                        communication_channel=comm_c,\
                                        contact=contact)
         if save:
             chan_con.save()
-
+    else:
+        chan_con=rs[0]
     return chan_con
 
 
