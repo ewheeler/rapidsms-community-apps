@@ -78,7 +78,7 @@ class Contact(Node):
     """
     
     def __unicode__(self):
-        return self.signature()
+        return unicode(self.signature())
 
     """
     def __json__(self):
@@ -122,8 +122,11 @@ class Contact(Node):
     def signature(self):
         if len(self.given_name)==0:
             if len(self.family_name)==0:
-                connection = ChannelConnection.objects.get(contact=self)
-                return ( "%s" % connection.user_identifier )
+                rs = ChannelConnection.objects.filter(contact=self)
+                if len(rs)==0:
+                    return self.id
+                else:
+                    return ( "%s" % rs[0].user_identifier )
             return ( "%s" % self.family_name )
         return (("%s %s") % (self.given_name + self.family_name))
     
