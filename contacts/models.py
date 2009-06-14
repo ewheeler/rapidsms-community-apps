@@ -4,7 +4,6 @@
 
 from django.db import models
 
-# Models from other apps
 from rapidsms import message,connection
 from apps.nodegraph.models import *
 
@@ -61,6 +60,32 @@ class Contact(Node):
     age_months = models.IntegerField(null=True,blank=True)
     # locale via ForeignKey in LocalePreference
     
+    """ Permissions for the webUI
+    class Meta:
+        ordering = ["last_name", "first_name"]
+
+        # define a permission for this app to use the @permission_required
+        # decorator in reporter's views
+        # in the admin's auth section, we have a group called 'manager' whose
+        # users have this permission -- and are able to see this section
+        permissions = (
+            ("can_view", "Can view"),
+        )
+    """
+    
+    def __unicode__(self):
+        return self.signature()
+
+    """
+    def __json__(self):
+    return {
+        "pk":         self.pk,
+        "identity":   self.identity,
+        "first_name": self.first_name,
+        "last_name":  self.last_name,
+        "str":        unicode(self) }
+    """
+    
     @property
     def age_years(self):
         if self.age_months is None:
@@ -90,6 +115,14 @@ class Contact(Node):
         """Remove the locale from the list"""
         pass
 
+    def signature(self):
+        if len(self.given_name)==0:
+            if len(self.family_name)==0:
+                connection = ChannelConnection.objects.get(contact=self)
+                return ( "%s" % connection.user_identifier )
+            return ( "%s" % self.family_name )
+        return (("%s %s") % (self.given_name + self.family_name))
+    
 class Locale(models.Model):
     """
     Holds a 'locale' string in ISO 639.2 form of xxx_CC@variation
