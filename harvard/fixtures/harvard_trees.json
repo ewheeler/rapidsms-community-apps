@@ -163,7 +163,7 @@
     "pk": 9, 
     "model": "tree.treestate", 
     "fields": {
-      "num_retries": 1, 
+      "num_retries": 2, 
       "question": 7, 
       "name": "harvard 1 root"
     }
