@@ -20,23 +20,22 @@ class App(rapidsms.app.App):
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
         (SUPPORTED_LANGUAGES[0], [ #english
-            ("join",  ["[#\*\.]?join (whatever)"]), # optionally: join village name m/f age
-            ("leave",  ["[#\*\.]?leave"]),
-            ("lang",  ["[#\*\.]?lang (slug)", "[#\*\.]?language (slug)"]),
-            ("lang",  []),
-            ("createvillage",  ["###create (whatever)"]),
+            ("join",  ["[ ]*[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*[#\*\.]?leave[ ]*"]),
+            ("lang",  ["[ ]*[#\*\.]?lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
+            ("createvillage",  ["[ ]*###create (whatever)[ ]*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
-            ("join",  ["fr[#\*\.]?join (whatever)"]), # optionally: join village name m/f age
-            ("leave",  ["fr[#\*\.]?leave"]),
+            ("join",  ["[ ]*fr[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*fr[#\*\.]?leave[ ]*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["pu[#\*\.]?join (whatever)"]), # optionally: join village name m/f age
-            ("leave",  ["pu[#\*\.]?leave"]),
+            ("join",  ["[ ]*pu[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*pu[#\*\.]?leave[ ]*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
-            ("join",  ["dy[#\*\.]?join (whatever)"]), # optionally: join village name m/f age
-            ("leave",  ["dy[#\*\.]?leave"]),
+            ("join",  ["[ ]*dy[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*dy[#\*\.]?leave[ ]*"]),
         ])
      ]
     
