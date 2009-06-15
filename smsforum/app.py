@@ -213,10 +213,15 @@ class App(rapidsms.app.App):
             for ville in villages:
                 village_names = ("%s %s") % (village_names, ville.name) 
                 recipients = ville.flatten()
+
+                # because the group can be _long_ and messages are delivered
+                # serially on a single modem install, it can take a long time
+                # (minutes, 10s of minutes) to send all.
+                # SO to keep people from thinking it didn't work and resending, 
+                # send there response first
+                msg.respond( _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} ) 
                 
-                # it makes sense to complete all of the sending
-                # before sending the confirmation sms
-                # iterate every member of the group we are broadcasting
+                # now iterate every member of the group we are broadcasting
                 # to, and queue up the same message to each of them
                 for recipient in recipients:
                     if int(recipient.id) != int(sender.id):
@@ -233,7 +238,6 @@ class App(rapidsms.app.App):
                         
             village_names = village_names.strip()
             print( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt} ) 
-            msg.respond( _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} ) 
             return sender
         except:
             traceback.print_exc()
