@@ -30,17 +30,22 @@ msgstr "village does not exist"
 msgid "first-login"
 msgstr "first-login %(village)s"
 
+msgid "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "message too long. Max len=%(max_chars)d"
+
 #: app.py:204
 msgid "You must join a village before sending messages"
 msgstr "join-first"
 
-#: app.py:218
-msgid "%s - sent to [%s] from %s"
-msgstr "%s - sent to [%s] from %s"
+#: app.py:214
+#, python-format
+msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr "%(txt)s - sent to [%(ville)s] from %(sender)s"
 
-#: app.py:227
-msgid "success! %s recvd msg: %s"
-msgstr "success! %s recvd msg: %s"
+#: app.py:225 app.py:226
+#, python-format
+msgid "success! %(villes)s recvd msg: %(txt)s"
+msgstr "success! %(villes)s recvd msg: %(txt)s"
 
 #: app.py:231
 msgid "blast-fail"
@@ -48,7 +53,7 @@ msgstr "blast-fail"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "leave-success"
+msgstr "leave-success %(village)s"
 
 #: app.py:250
 msgid "nothing to leave"

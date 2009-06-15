@@ -1,77 +1,88 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-06-15 04:09+GMT\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-06-15 20:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: utf-8\n"
-"Generated-By: pygettext.py 1.5\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
 
-
-#: app.py:158
+#: app.py:144
+#, python-format
 msgid "village %s created"
-msgstr "village %s created"
+msgstr ""
 
-#: app.py:163 app.py:189
+#: app.py:149 app.py:159 app.py:160 app.py:178 app.py:179
 msgid "register-fail"
-msgstr "Sorry, I couldn't register you."
+msgstr ""
 
-#: app.py:176
-msgid "village does not exist"
-msgstr "village does not exist"
+#: app.py:156 app.py:157
+#, python-format
+msgid "Hello %s!"
+msgstr ""
 
-#: app.py:185
+#: app.py:168
+#, python-format
+msgid "%s does not exist"
+msgstr ""
+
+#: app.py:174 app.py:175
 msgid "first-login"
-msgstr "Thank you for joining the village %(village)s"
+msgstr ""
 
-#: app.py:204
+#: app.py:188
+#, python-format
+msgid ""
+"Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr ""
+
+#: app.py:199 app.py:200
 msgid "You must join a village before sending messages"
-msgstr "You must join a village before sending messages"
+msgstr ""
 
-#: app.py:208
-msgid "%s %s"
-msgstr "%s %s"
+#: app.py:214
+#, python-format
+msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr ""
 
-#: app.py:218
-msgid "%s - sent to [%s] from %s"
-msgstr "%s - sent to [%s] from %s"
-
-#: app.py:227
-msgid "success! %s recvd msg: %s"
-msgstr "success! %s recvd msg: %s"
+#: app.py:225 app.py:226
+#, python-format
+msgid "success! %(villes)s recvd msg: %(txt)s"
+msgstr ""
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Sorry, I couldn't send that message."
+msgstr ""
+
+#: app.py:246
+msgid "leave-success"
+msgstr ""
 
 #: app.py:248
-msgid "leave-success"
-msgstr "Good-bye from village %(village)s"
-
-#: app.py:250
 msgid "nothing to leave"
-msgstr "nothing to leave"
+msgstr ""
 
-#: app.py:256
+#: app.py:254
 msgid "leave-fail"
-msgstr "'Leave' failed due to some unknown error."
+msgstr ""
 
-#: app.py:267
+#: app.py:265
 msgid "denied"
-msgstr "Please join a village by texting us: #join villagename"
+msgstr ""
 
-#: app.py:275
+#: app.py:274 app.py:275
 msgid "lang-set"
-msgstr "I will now speak to you in English, where possible."
+msgstr ""
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "Lang not recognized"
-
+msgstr ""

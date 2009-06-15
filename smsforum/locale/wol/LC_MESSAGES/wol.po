@@ -1,4 +1,4 @@
-# Language wol translations for PACKAGE package.
+# Language eng translations for PACKAGE package.
 # Copyright (C) 2009 ORGANIZATION
 # Rowena <rowena@rowena-vm>, 2009.
 #
@@ -8,11 +8,19 @@ msgstr ""
 "POT-Creation-Date: 2009-06-15 04:09+GMT\n"
 "PO-Revision-Date: 2009-06-15 04:21+0000\n"
 "Last-Translator: Rowena <rowena@rowena-vm>\n"
-"Language-Team: Language wol\n"
+"Language-Team: Language eng\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
+
+#: app.py:158
+msgid "join"
+msgstr "join"
+
+#: app.py:158
+msgid "leave"
+msgstr "leave"
 
 #: app.py:158
 msgid "village %s created"
@@ -30,21 +38,22 @@ msgstr "village does not exist"
 msgid "first-login"
 msgstr "Thank you for joining the village %(village)s"
 
+msgid "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "Message was not delivered. Please send less than %(max_chars)d characters."
+
 #: app.py:204
 msgid "You must join a village before sending messages"
 msgstr "You must join a village before sending messages"
 
-#: app.py:208
-msgid "%s %s"
-msgstr "%s %s"
+#: app.py:214
+#, python-format
+msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr "%(txt)s - sent to [%(ville)s] from %(sender)s"
 
-#: app.py:218
-msgid "%s - sent to [%s] from %s"
-msgstr "%s - sent to [%s] from %s"
-
-#: app.py:227
-msgid "success! %s recvd msg: %s"
-msgstr "success! %s recvd msg: %s"
+#: app.py:225 app.py:226
+#, python-format
+msgid "success! %(villes)s recvd msg: %(txt)s"
+msgstr "success! %(villes)s recvd msg: %(txt)s"
 
 #: app.py:231
 msgid "blast-fail"
@@ -56,20 +65,22 @@ msgstr "Good-bye from village %(village)s"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "nothing to leave"
+msgstr "You have already left all villages"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "'Leave' failed due to some unknown error."
+msgstr "'Leave' failed."
 
 #: app.py:267
 msgid "denied"
-msgstr "Please join a village by texting us: #join villagename"
+msgstr "Please join a village by texting: join villagename"
 
 #: app.py:275
 msgid "lang-set"
-msgstr "I will now speak to you in Wollof, where possible."
+msgstr "I will now speak to you in English, where possible."
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "Lang not recognized"
+msgstr "That language code is not recognized"
+
+

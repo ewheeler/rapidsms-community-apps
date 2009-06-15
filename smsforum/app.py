@@ -15,6 +15,7 @@ from apps.contacts.models import *
 
 DEFAULT_VILLAGE="unassociated"
 DEFAULT_LANGUAGE="fre"
+MAX_BLAST_CHARS=130
 
 class App(rapidsms.app.App):
     SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu','deb']
@@ -71,7 +72,7 @@ class App(rapidsms.app.App):
         # don't have objects, and fill in the gaps
         for be in self.router.backends:
             if not be.slug in known_backends:
-                self.info("Creating PersistantBackend object for %s (%s)" % (be.slug, be.title))
+                self.info("Creating PersistantBackenD object for %s (%s)" % (be.slug, be.title))
                 CommunicationChannel(slug=be.slug, title=be.title).save()    
     
     def parse(self, msg):
@@ -181,9 +182,16 @@ class App(rapidsms.app.App):
         txt = txt.strip()
         try:
             sender = msg.sender
-            if sender is None:
-                #join default village and send to default village
-                sender = self.join(msg)
+
+            # check for message length, and bounce messages that are too long
+            if len(txt) > MAX_BLAST_CHARS:
+                msg.respond( _("Message was not delivered. Please send less than %(max_chars)d characters." % {'max_chars': MAX_BLAST_CHARS} ))
+                return
+
+            #if sender is None:
+            #    #join default village and send to default village
+            #    sender = self.join(msg)
+
             print "REPORTER:BLAST"
             #find all reporters from the same location
             villages = VillagesForContact(sender)
@@ -203,7 +211,8 @@ class App(rapidsms.app.App):
                 for recipient in recipients:
                     if int(recipient.id) != int(sender.id):
                         #add signature
-                        anouncement = _("%s - sent to [%s] from %s") % ( txt, ville.name, sender.signature() )
+                        anouncement = _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+                                 { 'txt':txt, 'ville':ville.name, 'sender':sender.signature() }
                         #todo: limit chars to 1 txt message?
                         conns = ChannelConnection.objects.all().filter(contact=recipient)
                         for conn in conns:
@@ -213,8 +222,8 @@ class App(rapidsms.app.App):
                             be.message(conn.user_identifier, anouncement).send()
                         
             village_names = village_names.strip()
-            print( _("success! %s recvd msg: %s") % (village_names,txt) ) 
-            msg.respond( _("success! %s recvd msg: %s") % (village_names,txt) ) 
+            print( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt} ) 
+            msg.respond( _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} ) 
             return sender
         except:
             traceback.print_exc()
