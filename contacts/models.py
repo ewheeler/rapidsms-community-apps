@@ -102,16 +102,18 @@ class Contact(Node):
 
     @property
     def locales(self):
-        return self.locale_prefs.all()
+        return [lp.locale_string for lp in self.locale_prefs.all()]
     
     @property
     def locale(self):
         """Return top priority locale"""
-        return self.locale_prefs.all()[0]
+        return self.locale_prefs.all()[0].local_string
 
     @locale.setter
     def locale(self,value):
-        """set locale as top priority"""
+        """set locale as top priority
+           value is a locale_string
+        """
         self.add_locale(value,0)
 
     def add_locale(self,locale_code, priority=0):
