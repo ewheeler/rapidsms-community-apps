@@ -24,6 +24,14 @@ def _group(name, *children):
     g._add_subnodes(*children)
     return g
 
+class Worker(Contact):
+    pass
+
+class StealWorker(Worker):
+    pass
+
+
+
 class TestApp (TestScript):
     apps = (App, nodegraph_app.App)
  
@@ -62,6 +70,51 @@ class TestApp (TestScript):
         self.people_group_unicode=u'people(men(matt,larry,jim,joe,mohammed),women(jen,julie,mary,fatou,sue)'
 
         self.backend=test.Backend(None)
+
+    def testLocales(self):
+        print "\n\nLocale Test..."
+        # TODO: Make these all asserts
+        en='en_US'
+        fr='fr_CA@euro'
+        wo='wo_SN'
+        es='es_AR'
+
+        p1=self.m_nodes[0]
+        p2=self.w_nodes[1]
+
+        print p1.locales
+        print p1.locale
+        p1.locale=fr
+        print p1.locales
+        print p1.locale
+        p1.locale=en
+        print p1.locales
+        print p1.locale
+        p1.add_locale(wo,1)
+        p1.add_locale(fr,2)
+        p1.add_locale(en,3)
+        p1.add_locale(fr,4)
+        print p1.locales
+        print p1.locale
+        p2.locale=wo
+        print 'p2 %s' % p2.locales
+        print 'p1 %s' % p1.locales
+
+    def testDowncast(self):
+        v=Village(name='v1')
+        v.save()
+        v._add_subnodes(*self.m_nodes[0:2])
+        print [o.__class__ for o in self.m_nodes[0].get_ancestors(klass=Village)]
+
+        sw=StealWorker(debug_id='bob builder')
+        sw.save()
+        workers=NodeSet(debug_id='workers')
+        workers.save()
+        sw.add_to_group(workers)
+
+        print [o.__class__ for o in workers.flatten(klass=Worker)]
+        print [o.__class__ for o in workers.flatten(klass=StealWorker)]
+
 
     def testFlattenTest(self):
         print "\nFlatten Test:"

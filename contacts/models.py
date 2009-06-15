@@ -62,7 +62,7 @@ class Contact(Node):
     
     @property
     def my_villages(self):
-        return [n.village for n in self.immediate_ancestors]
+        return self.get_immediate_ancestors(klass=Village)
     
     """ Permissions for the webUI
     class Meta:
@@ -102,20 +102,25 @@ class Contact(Node):
 
     @property
     def locales(self):
-        return LocalePreference.objects.filter(contact=self) # self.locale_prefs.all()
+        return [lp.locale_string for lp in self.locale_prefs.all()]
     
     @property
     def locale(self):
         """Return top priority locale"""
-        top_locales = LocalePreference.objects.filter(contact=self,priority=0)
-        if len(top_locales)==0: return None
-        return top_locales[0].locale_string
+        rs=self.locale_prefs.all()
+        if len(rs)==0:
+            return None
+        else:
+            return rs[0].locale_string
 
-    def set_locale(self,value):
-        #set locale as top priority
+    @locale.setter
+    def locale(self,value):
+        """set locale as top priority
+           value is a locale_string
+        """
         self.add_locale(value,0)
 
-    def add_locale(self,locale_code, priority=0):
+    def add_locale(self,locale_string, priority=0):
         """
         Add a locale preference. NO VALIDATION.
 
@@ -123,15 +128,24 @@ class Contact(Node):
         overwrites the existing one.
 
         """
-        most_preferred_locale = LocalePreference.objects.get_or_create(priority=0, contact=self)[0]
-        if most_preferred_locale.locale_string != locale_code:
-            most_preferred_locale.locale_string = locale_code
-            most_preferred_locale.save()
+
+        # since they are exclusive, see if I have this priority already
+        rs=self.locale_prefs.filter(priority=priority,contact=self)
+        if len(rs)>0:
+            rs[0].locale_string=locale_string
+            rs[0].save()
+        else:
+            # create it
+            lp=LocalePreference(priority=priority,\
+                                    locale_string=locale_string,\
+                                    contact=self)
+            lp.save()
+            self.locale_prefs.add(lp)
 
     def remove_locale(self,locale_code):
         """Remove the locale from the list"""
 
-        rs=self.local_prefs.filter(locale_string=locale_code,contact=self)
+        rs=self.locale_prefs.filter(locale_string=locale_code,contact=self)
         for r in rs:
             r.delete()
 
@@ -161,8 +175,8 @@ class LocalePreference(models.Model):
                      meaningful (like a valid ISO 639.2 code)
 
     """
-    priority = models.PositiveSmallIntegerField(default=0,unique=True)
-    locale_string = models.CharField(max_length=20,unique=True)
+    priority = models.PositiveSmallIntegerField(default=0)
+    locale_string = models.CharField(max_length=20)
     contact = models.ForeignKey(Contact,related_name='locale_prefs')
 
     class Meta:
@@ -207,8 +221,6 @@ class ChannelConnection(models.Model):
         
     class Meta:
         unique_together = ('user_identifier', 'communication_channel')
-
-
 
 #
 # Module level methods (more or less equiv to Java static methods)

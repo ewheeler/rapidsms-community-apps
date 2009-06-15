@@ -85,12 +85,7 @@ class TestApp (TestScript):
         print self.m_nodes[0].get_ancestors(1)
         
         print
-#        print "Boys: %s" % self.b_group.immediate_ancestors
-#        print "Men: %s" % self.m_group.immediate_ancestors
-#        print "People: %s" % self.people_group.immediate_ancestors
-       # print self.cyc_a.nodeset_set.all()
-#        print self.girl_nodes[1].immediate_ancestors
-#        print self.w_group.get_ancestors()
+
         """
 
 
