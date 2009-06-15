@@ -207,7 +207,7 @@ class App(rapidsms.app.App):
         # TODO: check for valid village/group/etc.
         print "REPORTER:BLAST"
         #find all reporters from the same location
-        villages = [n.village for n in sender.immediate_ancestors]
+        villages = sender.get_immediate_ancestors(klass=Village)
         if len(villages)==0:
             msg.respond( _("You must join a village before sending messages") )
             return

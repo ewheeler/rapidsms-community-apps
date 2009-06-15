@@ -63,6 +63,21 @@ class TestApp (TestScript):
 
         self.backend=test.Backend(None)
 
+    def testDowncast(self):
+        v=Village(name='v1')
+        v.save()
+        v._add_subnodes(*self.m_nodes[0:2])
+        print [o.__class__ for o in self.m_nodes[0].get_ancestors(klass=Village)]
+        
+        w=Worker(debug_id='bob builder')
+        w.save()
+        self.m_group._add_subnodes(w)
+
+        print [o.__class__ for o in self.m_group.flatten()]
+        print [o.__class__ for o in self.m_group.flatten(klass=Contact)]
+        print [o.__class__ for o in self.m_group.flatten(klass=Worker)]
+
+
     def testFlattenTest(self):
         print "\nFlatten Test:"
         men_set=self.m_group.flatten()

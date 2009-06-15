@@ -62,7 +62,7 @@ class Contact(Node):
     
     @property
     def my_villages(self):
-        return [n.village for n in self.immediate_ancestors]
+        return self.get_immediate_ancestors(klass=Village)
     
     """ Permissions for the webUI
     class Meta:
@@ -205,7 +205,8 @@ class ChannelConnection(models.Model):
     class Meta:
         unique_together = ('user_identifier', 'communication_channel')
 
-
+class Worker(Contact):
+    pass
 
 #
 # Module level methods (more or less equiv to Java static methods)

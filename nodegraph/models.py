@@ -42,8 +42,12 @@ class AbstractNode(models.Model):
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
 
-    def get_ancestors(self,max_alt=None):
-        """max_alt=None means no limit"""
+    def get_ancestors(self,max_alt=None,klass=None):
+        """max_alt=None means no limit
+        
+           if 'klass' is a Class, downcast results
+
+        """
         seen=set()
 
         if max_alt is not None:
@@ -60,22 +64,74 @@ class AbstractNode(models.Model):
                 return
 
             seen.add(node)
-            for a in node.immediate_ancestors:
+            for a in node.get_immediate_ancestors():
                 _recurse(a,alt+1)
 
 
         _recurse(self,0)
         seen.remove(self)
-        return seen
+        ret=None
+        if klass is not None:
+            ret = [r._downcast(klass) for r in seen]
+        else:
+            ret = list(seen) # make a list so indexable, but order not guaranteed
+        return ret
 
-    @property
-    def immediate_ancestors(self):
-        """The groups this node is a member of"""
-        return self.parents.all()
+    def get_immediate_ancestors(self,klass=None):
+        """The groups this node is a member of.
+
+           Downcasted to 'klass' if provided (see downcast() for more info)
+
+           """
+        rents=self.parents.all()
+        if klass is not None:
+            return [r._downcast(klass) for r in rents]
+        else:
+            return rents
 
     def __unicode__(self):
         return self.debug_id
 
+    def _downcast(self, klass):
+        """Multiple-inherited models are weird.
+           If you access a subclass from a superclass manager, you
+           get an object of superclass type.
+
+           E.g. You do aNone=Node.objects.all()[0], you will get Node classes
+           even if the actual object is a subclass like a Contact.
+
+           The 'contact' object will be availble as aNode.contact
+
+           This method, given a target Class, will return the properly typed
+           subclass.
+
+           Usage example: aWorker=aNode.downcast(Worker)
+
+           NOTE: If the object is not fully downcastable, it
+           casts as far as possible, so return values may be of
+           differing types.
+
+           Take this obj map where '<' means inherits from:
+           d<c<b<a
+
+           If you have a set of objects (d,c,b,a), all know as 'a' type, and
+           you downcast to 'd', the resulting list will be typed (d,c,b,a)
+
+
+           """
+        self_cname=self.__class__.__name__
+        
+        cast_cnames=[c.__name__ for c in klass.__mro__]
+        cast_cnames=[cn.lower() for cn in cast_cnames[:cast_cnames.index(self_cname)]]
+        cast_cnames.reverse()
+        casted=self
+        for cn in cast_cnames:
+            if hasattr(casted,cn):
+                casted=getattr(casted,cn)
+            else:
+                break
+        return casted
+        
     class Meta:
         abstract=True
 
@@ -222,7 +278,7 @@ class NodeSet(AbstractNode):
         return self.subgroups+self.subleaves
     
     # full graph access methods
-    def flatten(self, max_depth=None):
+    def flatten(self, max_depth=None,klass=None):
         """
         Flattens the graph from the given node to max_depth returning
         a set of all leaves.
@@ -263,5 +319,11 @@ class NodeSet(AbstractNode):
         # Now call recurse
         _recurse(self, 0)
         
-        return leaves
+        # downcast if requested and make sure returns are
+        # indexable lists
+        if klass is not None:
+            return [l._downcast(klass) for l in leaves]
+        else:
+            return list(leaves)
+
 
