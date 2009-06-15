@@ -27,6 +27,7 @@ class App(rapidsms.app.App):
             ("register_name",  ["\s*[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]leave.*"]),
             ("lang",  ["\s*[#\*\.]lang (slug)", "[#\*\.]?language (slug)\s*"]),
+            ("help",  ["[ ]*[#\*\.]help.*"]),
             ("createvillage",  ["\s*###create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
@@ -53,7 +54,9 @@ class App(rapidsms.app.App):
         ])
      ]
     
-    
+    def help(self, msg):
+        msg.respond("Available Commands: #join VILLAGE - #name YOURNAME - #leave - #lang ENG")
+
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
     
@@ -165,9 +168,15 @@ class App(rapidsms.app.App):
             print "REPORTER:JOIN"
             villes = Village.objects.filter(name=village)
             if len(villes)==0:
-                msg.respond( _("%s does not exist") % village )
-                rep = self.join(msg,DEFAULT_VILLAGE)
-                return rep            
+                # TODO: when this scales up, show 3 most similar village names
+                all_villes = Village.objects.all()[:2]
+                resp =  _( ("I do not recognize %s. Please txt: #join VILLAGE_NAME") % village ) 
+                if all_villes is not None:
+                    resp = ("%s %s") % (resp, _("where VILLAGE_NAME is") )
+                    for i in all_villes:
+                        resp = ("%s %s") % (resp, i.name) 
+                msg.respond(resp)
+                return msg.sender
             ville = villes[0]
             #create new membership
             msg.sender.add_to_group(ville)
@@ -177,6 +186,7 @@ class App(rapidsms.app.App):
         except:
             print( _("register-fail") )
             msg.respond( _("register-fail") )
+            
  
     def blast(self, msg, txt):
         txt = txt.strip()
