@@ -24,6 +24,14 @@ def _group(name, *children):
     g._add_subnodes(*children)
     return g
 
+class Worker(Contact):
+    pass
+
+class StealWorker(Worker):
+    pass
+
+
+
 class TestApp (TestScript):
     apps = (App, nodegraph_app.App)
  
@@ -68,14 +76,15 @@ class TestApp (TestScript):
         v.save()
         v._add_subnodes(*self.m_nodes[0:2])
         print [o.__class__ for o in self.m_nodes[0].get_ancestors(klass=Village)]
-        
-        w=Worker(debug_id='bob builder')
-        w.save()
-        self.m_group._add_subnodes(w)
 
-        print [o.__class__ for o in self.m_group.flatten()]
-        print [o.__class__ for o in self.m_group.flatten(klass=Contact)]
-        print [o.__class__ for o in self.m_group.flatten(klass=Worker)]
+        sw=StealWorker(debug_id='bob builder')
+        sw.save()
+        workers=NodeSet(debug_id='workers')
+        workers.save()
+        sw.add_to_group(workers)
+
+        print [o.__class__ for o in workers.flatten(klass=Worker)]
+        print [o.__class__ for o in workers.flatten(klass=StealWorker)]
 
 
     def testFlattenTest(self):

@@ -205,9 +205,6 @@ class ChannelConnection(models.Model):
     class Meta:
         unique_together = ('user_identifier', 'communication_channel')
 
-class Worker(Contact):
-    pass
-
 #
 # Module level methods (more or less equiv to Java static methods)
 # Read online that this is a cleaner way to do this thatn @classmethod
