@@ -12,7 +12,7 @@ class IaviReporterForm(forms.Form):
     location = forms.ModelChoiceField(Location.objects.all(), required=True)
     phone = forms.CharField(max_length=15, required=True)
     pin = forms.CharField(min_length=4, max_length=4, required=True)
-    end_date = forms.DateField(required=False)
+    end_date = forms.DateField(required=False, help_text = "YYYY-MM-DD")
     
     def clean_pin(self):
         if not self.cleaned_data["pin"].isdigit():

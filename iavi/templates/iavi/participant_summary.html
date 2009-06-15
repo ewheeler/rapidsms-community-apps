@@ -15,8 +15,24 @@
         <td><b>{{reporter.location}}</b></td>
     </tr>
     <tr>
-        <td align="right">Registered</td>
-        <td><b>{{reporter.registered|date:"d-M-Y"}}</b></td>
+        <td align="right">Started</td>
+        <td><b>{% if reporter.start_date %}
+                  {{reporter.start_date|date:"d-M-Y"}}
+               {% else %}
+                  N/A
+               {% endif %}
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td align="right">Ends</td>
+        <td><b>{% if reporter.end_date %}
+                  {{reporter.end_date|date:"d-M-Y"}}
+               {% else %}
+                  Never
+               {% endif %}
+            </b>
+        </td>
     </tr>
     <tr>
         <td align="right">Phone #</td>

@@ -212,9 +212,15 @@ def participant_summary(req, id):
     template_name="iavi/participant_summary.html"
     try:
         reporter = IaviReporter.objects.get(pk=id)
-    except IaviReporter.NotFound:
-        reporter = None 
-    # todo - see if we wnat to put these back in
+        data = StudyParticipant.objects.get(reporter=reporter)
+        reporter.start_date = data.start_date 
+        reporter.end_date = data.end_date 
+    except IaviReporter.DoesNotExist:
+        reporter = None
+    except StudyParticpant.DoesNotExist:
+        # no study data, this is okay, the fields will just show up blank
+        pass 
+    # todo - see if we want to put these back in
     kenya_reports = KenyaReport.objects.filter(reporter=reporter).order_by("-started")
     uganda_reports = UgandaReport.objects.filter(reporter=reporter).order_by("-started")
     return render_to_response(req, template_name, {"reporter" : reporter,"kenya_reports":kenya_reports, "uganda_reports":uganda_reports})
@@ -239,17 +245,32 @@ def participant_edit(req, id):
             conn = reporter.connection() 
             conn.identity = form.cleaned_data["phone"]
             conn.save()
+            end_date = form.cleaned_data["end_date"]
+            try:
+                participant = StudyParticipant.objects.get(reporter=reporter)
+                participant.end_date = end_date
+                participant.save()
+            except StudyParticipant.DoesNotExist:
+                # nothing to do with the end date
+                pass
             return HttpResponseRedirect('/iavi/participants/%s/' % id) 
     else:
         try:
             reporter = IaviReporter.objects.get(pk=id)
+            try:
+                study_data = StudyParticipant.objects.get(reporter=reporter)
+                reporter.end_date = study_data.end_date
+            except StudyParticipant.DoesNotExist:
+                reporter.end_date = None
             if reporter.location:
                 form = IaviReporterForm(initial={"participant_id" :reporter.study_id, "location" : reporter.location.pk,
-                                                 "pin" : reporter.pin, "phone" : reporter.connection().identity } )
+                                                 "pin" : reporter.pin, "phone" : reporter.connection().identity, 
+                                                 "end_date" : reporter.end_date } )
             else: 
                 form = IaviReporterForm({"participant_id" :reporter.study_id, 
-                                         "pin" : reporter.pin, "phone" : reporter.connection().identity } )
-        except IaviReporter.NotFound:
+                                         "pin" : reporter.pin, "phone" : reporter.connection().identity, 
+                                         "end_date" : reporter.end_date } )
+        except IaviReporter.DoesNotExist:
             form = IaviReporterForm()
 
     template_name="iavi/participant_edit.html"
