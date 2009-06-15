@@ -44,7 +44,7 @@ msgstr "%s - sent to [%s] from %s"
 
 #: app.py:227
 msgid "success! %s recvd msg: %s"
-msgstr "success! %s recvd msg: %s"
+msgstr "pulsuccess! %s recvd msg: %s"
 
 #: app.py:231
 msgid "blast-fail"
