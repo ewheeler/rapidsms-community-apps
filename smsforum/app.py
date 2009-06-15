@@ -13,7 +13,7 @@ import traceback
 from apps.smsforum.models import *
 from apps.contacts.models import *
 
-DEFAULT_VILLAGE="unassociated"
+DEFAULT_VILLAGE="Keur Samba Laube"
 DEFAULT_LANGUAGE="fre"
 MAX_BLAST_CHARS=130
 
@@ -166,28 +166,37 @@ class App(rapidsms.app.App):
         try:
             # parse the name, and create a contact
             print "REPORTER:JOIN"
-            villes = Village.objects.filter(name=village)
-            if len(villes)==0:
+            ville = self.__best_match( Village,village )
+            if ville is None:
                 # TODO: when this scales up, show 3 most similar village names
-                all_villes = Village.objects.all()[:2]
+                all_villes = Village.objects.all()[:3]
                 resp =  _( ("I do not recognize %s. Please txt: #join VILLAGE_NAME") % village ) 
                 if all_villes is not None:
-                    resp = ("%s %s") % (resp, _("where VILLAGE_NAME is") )
+                    resp = ("%s %s") % (resp, _("where VILLAGE_NAME could be ") )
                     for i in all_villes:
-                        resp = ("%s %s") % (resp, i.name) 
+                        resp = resp + ", " + i.name
                 msg.respond(resp)
                 return msg.sender
-            ville = villes[0]
             #create new membership
             msg.sender.add_to_group(ville)
-            print( _("first-login") % {"village": village } )
-            msg.respond( _("first-login") % {"village": village } )
+            print( _("first-login") % {"village": ville.name } )
+            msg.respond( _("first-login") % {"village": ville.name } )
             return msg.sender
         except:
             print( _("register-fail") )
             msg.respond( _("register-fail") )
             
- 
+    #TODO: do this properly somewhere else
+    def __best_match(self, Village, village_name):
+        villages = Village.objects.all()
+        for v in villages:
+            if len(village_name) <= 4:
+                if v.name.lower() == village_name.lower(): 
+                    return v
+            elif v.name.lower().startswith(village_name.lower()): 
+                return v
+        return None
+    
     def blast(self, msg, txt):
         txt = txt.strip()
         try:
