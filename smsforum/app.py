@@ -22,34 +22,34 @@ class App(rapidsms.app.App):
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
         (SUPPORTED_LANGUAGES[0], [ #english
-            ("join",  ["[ ]*[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("register_name",  ["[ ]*[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*[#\*\.]leave.*"]),
-            ("lang",  ["[ ]*[#\*\.]lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
+            ("join",  ["\s*[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]leave.*"]),
+            ("lang",  ["\s*[#\*\.]lang (slug)", "[#\*\.]?language (slug)\s*"]),
             ("help",  ["[ ]*[#\*\.]help.*"]),
-            ("createvillage",  ["[ ]*###create (whatever)[ ]*"]),
+            ("createvillage",  ["\s*###create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
-            ("join",  ["[ ]*fr[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("register_name",  ["[ ]*fr[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*fr[#\*\.]leave.*"]),
+            ("join",  ["\s*fr[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*fr[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*fr[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["[ ]*pu[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("register_name",  ["[ ]*pu[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*pu[#\*\.]leave.*"]),
+            ("join",  ["\s*pu[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*pu[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*pu[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
-            ("join",  ["[ ]*dy[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("register_name",  ["[ ]*dy[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*dy[#\*\.]leave.*"]),
+            ("join",  ["\s*dy[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*dy[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*dy[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #english
-            ("join",  ["[ ]*[#\*\.]djoin (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("register_name",  ["[ ]*[#\*\.]rname (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*[#\*\.]dleave.*"]),
-            ("lang",  ["[ ]*[#\*\.]dlang (slug)"]),
-            ("createvillage",  ["[ ]*###dcreate (whatever)[ ]*"])
+            ("join",  ["\s*[#\*\.]djoin (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]rname (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]dleave.*"]),
+            ("lang",  ["\s*[#\*\.]dlang (slug)"]),
+            ("createvillage",  ["\s*###dcreate (whatever)\s*"])
         ])
      ]
     

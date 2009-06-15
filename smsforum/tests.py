@@ -17,7 +17,11 @@ class TestApp (TestScript):
     def setUp(self):
         TestScript.setUp(self)
         #should setup default village in here
-        
+
+    testJunk = """
+           8005551210 > #djoin blargh        
+    """
+    
     testJoinAndBlast = """
            8005551210 > ###dcreate village
            8005551210 < village village created
@@ -90,4 +94,5 @@ class TestApp (TestScript):
            8005551212 > msg_to_blast
         """
         
+
 
