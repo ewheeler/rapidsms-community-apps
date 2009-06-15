@@ -228,7 +228,8 @@ class App(rapidsms.app.App):
                     #todo: limit chars to 1 txt message?
                     conns = ChannelConnection.objects.all().filter(contact=recipient)
                     for conn in conns:
-                        print "SENDING ANNOUNCEMENT TO" + conn.user_identifier
+                        # todo: what is BE is gone? Use different one?
+                        print "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug)
                         be = self.router.get_backend(conn.communication_channel.slug)
                         be.message(conn.user_identifier, anouncement).send()
                     
@@ -251,7 +252,7 @@ class App(rapidsms.app.App):
                     #we can always come back later and make sure we are deleting the right backend
                     for ville in msg.sender.my_villages:
                         if len(msg.sender.language) > 0:
-                            lang = msg.reporter.language
+                            lang = msg.reporter.locale
                         msg.sender.delete()
                         msg.respond(
                             self.__str("leave-success", lang=lang) % {
@@ -281,7 +282,7 @@ class App(rapidsms.app.App):
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
         if code in self.MSG:
-            msg.sender.language = code
+            msg.sender.locale = code
             msg.sender.save()
             resp = "lang-set"
         

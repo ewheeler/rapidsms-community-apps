@@ -58,11 +58,11 @@ class Contact(Node):
     national_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
     gender = models.CharField(max_length=1,choices=GENDER_CHOICES,blank=True) 
     age_months = models.IntegerField(null=True,blank=True)
-    # locale is available via ForeignKey in LocalePreference
+    # LocalePresences are available via ForeignKey in LocalePreference
     
     @property
     def my_villages(self):
-        return self.groups
+        return [n.village for n in self.immediate_ancestors]
     
     """ Permissions for the webUI
     class Meta:
@@ -102,18 +102,19 @@ class Contact(Node):
 
     @property
     def locales(self):
-        #loc = LocalePreference.objects.get(contact=self)
-        """Return priority ordered list of locales"""
-        # TODO: fix
-        return ["en"]
+        return self.locale_prefs.all()
     
     @property
     def locale(self):
-        """Return top priority locales"""
-        # TODO: fix
-        return "en"
+        """Return top priority locale"""
+        return self.locale_prefs.all()[0]
 
-    def add_locale(self,locale_str, priority=0):
+    @locale.setter
+    def locale(self,value):
+        """set locale as top priority"""
+        self.add_locale(value,0)
+
+    def add_locale(self,locale_code, priority=0):
         """
         Add a locale preference. NO VALIDATION.
 
@@ -121,11 +122,15 @@ class Contact(Node):
         overwrites the existing one.
 
         """
-        pass
 
-    def remove_locale(self,locale_srt):
+        self.local_prefs.add(LocalePref(locale_string=locale_code,priority=0,contact=self))
+
+    def remove_locale(self,locale_code):
         """Remove the locale from the list"""
-        pass
+
+        rs=self.local_prefs.filter(locale_string=locale_code,contact=self)
+        for r in rs:
+            r.delete()
 
     def signature(self):
         if len(self.given_name)==0:
@@ -138,18 +143,6 @@ class Contact(Node):
             return ( "%s" % self.family_name )
         return (("%s %s") % (self.given_name + self.family_name))
     
-class Locale(models.Model):
-    """
-    Holds a 'locale' string in ISO 639.2 form of xxx_CC@variation
-
-    TODO: Read a list in via a text file and make this a choice.
-    TODO: Validation and pre-built locales
-    """
-    locale_string = models.CharField(max_length=20,unique=True)
-
-    class Meta:
-        ordering = ('locale_string',)
-    
 
 class LocalePreference(models.Model):
     """
@@ -159,14 +152,18 @@ class LocalePreference(models.Model):
     ordered list!
 
     priority -- 0 is highest priority. Only one locale per priority
+    locale_string -- ISO 639.2 string like en_US or wo_SN. 
+                     NOTE: THESE ARE NOT CURRENTLY VALIDATED, just held.
+                     it's up to the app logic to put in something
+                     meaningful (like a valid ISO 639.2 code)
 
     """
     priority = models.PositiveSmallIntegerField(default=0,unique=True)
-    locale = models.ForeignKey(Locale)
-    contact = models.ForeignKey(Contact)
+    locale_string = models.CharField(max_length=20,unique=True)
+    contact = models.ForeignKey(Contact,related_name='locale_prefs')
 
     class Meta:
-        unique_together = ('locale','contact')
+        unique_together = ('priority','contact')
         ordering = ('priority',)
 
 
