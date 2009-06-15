@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-import re
+import re, os
 import rapidsms
 from rapidsms.parsers import Matcher
 from rapidsms.message import Message
@@ -14,10 +14,13 @@ from apps.contacts.models import *
 _ = gettext.gettext
 
 DEFAULT_VILLAGE="unassociated"
+DEFAULT_LANGUAGE="fre"
 
 class App(rapidsms.app.App):
+    SUPPORTED_LANGUAGES = ['eng','fre','wol','dyu','pul']
+    
     MSG = {
-        "en": {
+        "eng": {
             "period": ". ",
             "denied": "Please join a village by texting us: #join villagename",
             "first-login": "Thank you for joining the village %(village)s",
@@ -28,7 +31,7 @@ class App(rapidsms.app.App):
             "lang-set":    "I will now speak to you in English, where possible." },
             
         # TODO: move to an i18n app!
-        "fr": {
+        "fre": {
             "period": ". ",
             "denied": "Svp join a village by texting us: #join villagename",
             "first-login": "Merci for joining the village %(village)s",
@@ -39,6 +42,14 @@ class App(rapidsms.app.App):
             "lang-set":    "I will now speak to you in French, where possible." },
         }
     
+    def __init__(self, router):
+        Rapidsms.app.App.__init__(self, router)
+        self.translators = {}
+        path = os.path.join(os.path.dirname(__file__),"locale")
+        for lang in self.SUPPORTED_LANGUAGES:
+            trans = gettext.translation(lang,path,[lang])
+            self.translators.update( {lang:trans} )
+        _ = self.translators[DEFAULT_LANGUAGE].lgettext
     
     def __str(self, key, contact=None, lang=None):
         
@@ -52,26 +63,29 @@ class App(rapidsms.app.App):
             
             # fall back
             if lang is None:
-                lang = "en"
+                lang = "eng"
 
         # look for an exact match, in the language
         # that the reporter has chosen as preferred
         if lang is not None:
             if lang in self.MSG:
-                if key in self.MSG[lang]:
-                    return self.MSG[lang][key]
+                _ = self.translators[lang]
+                #if key in self.MSG[lang]:
+                #    return self.MSG[lang][key]
         
+        return _(key)
         # not found in localized language. try again in english
         # TODO: allow the default to be set in rapidsms.ini
-        return self.__str(key, lang="en") if lang != "en" else None
+        #return self.__str(key, lang="en") if lang != "en" else None
     
     
     def start(self):
         # since the functionality of this app depends on a default group
         # make sure that this group is created explicitly in this app 
         # (instead of depending on a fixture)
-        Village.objects.get_or_create(name=DEFAULT_VILLAGE)
-
+        self.__loadFixtures()
+        
+        
         # fetch a list of all the backends
         # that we already have objects for
         #known_backends = ChannelConnection.objects.values_list("slug", flat=True)
@@ -221,14 +235,14 @@ class App(rapidsms.app.App):
             # iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
             for recipient in recipients:
-                print "SENDING ANNOUNCEMENT TO RECIPIENT" + str(recipient.id)
                 if int(recipient.id) != int(sender.id):
                     #add signature
                     anouncement = _("%s:to [%s] %s") % ( txt, ville.name, sender.signature() )
                     #todo: limit chars to 1 txt message?
                     conns = ChannelConnection.objects.all().filter(contact=recipient)
                     for conn in conns:
-                        print "SENDING ANNOUNCEMENT TO" + conn.user_identifier
+                        print "SENDING ANNOUNCEMENT TO " + conn.user_identifier + \
+                            " VIA " + str(conn.communication_channel.slug)
                         be = self.router.get_backend(conn.communication_channel.slug)
                         be.message(conn.user_identifier, anouncement).send()
                     
@@ -296,4 +310,7 @@ class App(rapidsms.app.App):
         if err is not None:
             response = response + self.__str(err, msg.sender) + self.__str("period", msg.sender)       
         msg.respond( response )
-        
+    
+    def __loadFixtures(self):
+         Village.objects.get_or_create(name=DEFAULT_VILLAGE)
+         
