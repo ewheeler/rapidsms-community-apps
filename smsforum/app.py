@@ -8,7 +8,9 @@ from rapidsms.message import Message
 from models import *
 from apps.locations.models import *
 import gettext
+import traceback
 
+from apps.smsforum.models import *
 from apps.contacts.models import *
 
 DEFAULT_VILLAGE="unassociated"
@@ -29,14 +31,14 @@ class App(rapidsms.app.App):
         
         # fetch a list of all the backends
         # that we already have objects for
-        known_backends = ChannelConnection.objects.values_list("slug", flat=True)
+        known_backends = CommunicationChannel.objects.values_list("slug", flat=True)
         
         # find any running backends which currently
         # don't have objects, and fill in the gaps
         for be in self.router.backends:
             if not be.slug in known_backends:
                 self.info("Creating PersistantBackend object for %s (%s)" % (be.slug, be.title))
-                ChannelConnection(slug=be.slug, title=be.title).save()    
+                CommunicationChannel(slug=be.slug, title=be.title).save()    
     
     def parse(self, msg):
         print "REPORTER:PARSE"
@@ -153,7 +155,7 @@ class App(rapidsms.app.App):
                 sender = self.join(msg)
             print "REPORTER:BLAST"
             #find all reporters from the same location
-            villages = sender.my_villages
+            villages = VillagesForContact(sender)
             if len(villages)==0:
                 msg.respond( _("You must join a village before sending messages") )
                 return
@@ -182,6 +184,7 @@ class App(rapidsms.app.App):
             msg.respond( _("success! %s recvd msg: %s") % (village_names,txt) ) 
             return sender
         except:
+            traceback.print_exc()
             msg.respond(
                 _("blast-fail") 
             )
@@ -191,10 +194,11 @@ class App(rapidsms.app.App):
         try:
             print "REPORTER:LEAVE"
             if msg.sender is not None:
-                if len(msg.sender.my_villages)>0:
+                villages=VillagesForContact(msg.sender)
+                if len(villages)>0:
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
-                    for ville in msg.sender.my_villages:
+                    for ville in villages:
                         msg.sender.delete()
                         msg.respond(
                             _("leave-success") % { "village": ville })

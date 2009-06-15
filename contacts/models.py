@@ -60,10 +60,6 @@ class Contact(Node):
     age_months = models.IntegerField(null=True,blank=True)
     # LocalePresences are available via ForeignKey in LocalePreference
     
-    @property
-    def my_villages(self):
-        return self.get_immediate_ancestors(klass=Village)
-    
     """ Permissions for the webUI
     class Meta:
         ordering = ["last_name", "first_name"]

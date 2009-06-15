@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-
-import re
-from datetime import datetime
 from django.db import models
 from django.core.urlresolvers import reverse
-from rapidsms.webui.managers import *
-from apps.patterns.models import Pattern
 
 from apps.locations.models import *
 from apps.nodegraph.models import NodeSet
@@ -26,3 +21,10 @@ class Village(NodeSet):
     location = models.ForeignKey(Location, null=True, blank=True)
     pass
 
+#
+# 'Statics' as module level
+#
+def VillagesForContact(contact):
+    return contact.get_immediate_ancestors(klass=Village)
+    
+   
