@@ -253,7 +253,7 @@ class App(rapidsms.app.App):
                     for ville in villages:
                         msg.sender.delete()
                         msg.respond(
-                            _("leave-success") % { "village": ville })
+                            _("leave-success") % { "village": ville.name })
                     return
             msg.respond( _("nothing to leave") )
             return
