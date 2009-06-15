@@ -1,76 +1,33 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-import re
+import re, os
 import rapidsms
 from rapidsms.parsers import Matcher
 from rapidsms.message import Message
 from models import *
 from apps.locations.models import *
 import gettext
+_ = gettext.gettext
 
 from apps.contacts.models import *
 
-_ = gettext.gettext
-
 DEFAULT_VILLAGE="unassociated"
+DEFAULT_LANGUAGE="fre"
 
 class App(rapidsms.app.App):
-    MSG = {
-        "en": {
-            "period": ". ",
-            "denied": "Please join a village by texting us: #join villagename",
-            "first-login": "Thank you for joining the village %(village)s",
-            "blast-fail": "Sorry, I couldn't send that message.",
-            "register-fail": "Sorry, I couldn't register you.",
-            "leave-success": "Good-bye from village %(village)s",
-            "leave-fail": "'Leave' failed due to some unknown error.",
-            "lang-set":    "I will now speak to you in English, where possible." },
-            
-        # TODO: move to an i18n app!
-        "fr": {
-            "period": ". ",
-            "denied": "Svp join a village by texting us: #join villagename",
-            "first-login": "Merci for joining the village %(village)s",
-            "register-fail": "Je m'excuse, I couldn't register you.",
-            "blast-fail": "Je m'excuse, I couldn't send that message.",
-            "leave-success": "Au revoir from village %(village)s",
-            "leave-fail": "'Partez' failed due to some unknown error.",
-            "lang-set":    "I will now speak to you in French, where possible." },
-        }
+    SUPPORTED_LANGUAGES = ['eng','fre','wol','dyu','pul']
     
-    
-    def __str(self, key, contact=None, lang=None):
-        
-        # if no language was explicitly requested,
-        # inherit it from the reporter, or fall
-        # back to english. because everyone in the
-        # world speaks english... right?
-        if lang is None:
-            if contact is not None:
-                lang = contact.locale
-            
-            # fall back
-            if lang is None:
-                lang = "en"
-
-        # look for an exact match, in the language
-        # that the reporter has chosen as preferred
-        if lang is not None:
-            if lang in self.MSG:
-                if key in self.MSG[lang]:
-                    return self.MSG[lang][key]
-        
-        # not found in localized language. try again in english
-        # TODO: allow the default to be set in rapidsms.ini
-        return self.__str(key, lang="en") if lang != "en" else None
-    
+    def __init__(self, router):
+        rapidsms.app.App.__init__(self, router)
     
     def start(self):
         # since the functionality of this app depends on a default group
         # make sure that this group is created explicitly in this app 
         # (instead of depending on a fixture)
-        Village.objects.get_or_create(name=DEFAULT_VILLAGE)
+        self.__loadFixtures()
+        self.__initTranslators()
+
 
         # fetch a list of all the backends
         # that we already have objects for
@@ -141,6 +98,11 @@ class App(rapidsms.app.App):
             ("blast",  ["(whatever)"])
         ]
         
+        if msg.sender.locale is not None:
+            _ = self.translators[msg.sender.locale].lgettext
+        else: 
+            _ = self.translators[DEFAULT_LANGUAGE].lgettext
+        
         # search the map for a match, dispatch
         # the message to it, and return/stop
         for method, patterns in map:
@@ -154,96 +116,92 @@ class App(rapidsms.app.App):
       
     # admin utility!
     def createvillage(self, msg, village=DEFAULT_VILLAGE):
-        #try:
+        try:
             # TODO: add administrator authentication
             print "REPORTER:CREATEVILLAGE"
             
             
             ville = Village.objects.get_or_create(name=village)
             
-            msg.respond( ("village %s created") % (village) )
+            msg.respond( _("village %s created") % (village) )
             return
             # TODO: remove this for production
-            """except:
-                msg.respond(
-                    self.__str("register-fail", rep) 
-                )
-            """
+        except:
+            msg.respond(
+                _("register-fail") 
+            )
+            
             
     def join(self, msg, village=DEFAULT_VILLAGE):
-    #try:
-        # parse the name, and create a reporter
-        # TODO: check for valid village/group/etc.
-        print "REPORTER:JOIN"
-        #loc = Locations.objects.all().filter(name=village)
-
-        villes = Village.objects.filter(name=village)
-        if len(villes)==0:
-            msg.respond( _("village does not exist") )
-            #default join
-            rep = self.join(msg,DEFAULT_VILLAGE)
-            return rep
-        
-        ville = villes[0]
-        #create new Contact
-        #create new membership
-        msg.sender.add_to_group(ville)
-        msg.respond( self.__str("first-login", msg.sender) % {"village": village } )
-        return msg.sender
-        # TODO: remove this for production
-        """except:
+        try:
+            # parse the name, and create a reporter
+            # TODO: check for valid village/group/etc.
+            print "REPORTER:JOIN"
+            #loc = Locations.objects.all().filter(name=village)
+    
+            villes = Village.objects.filter(name=village)
+            if len(villes)==0:
+                msg.respond( _("village does not exist") )
+                #default join
+                rep = self.join(msg,DEFAULT_VILLAGE)
+                return rep
+            
+            ville = villes[0]
+            #create new Contact
+            #create new membership
+            msg.sender.add_to_group(ville)
+            msg.respond( _("first-login") % {"village": village } )
+            return msg.sender
+        except:
             msg.respond(
-                self.__str("register-fail", rep) 
+                _("register-fail") 
             )
-        """
  
     def blast(self, msg, txt):
-        sender = msg.sender
-        if sender is None:
-            #join default village and send to default village
-            sender = self.join(msg)
-        #try:
-        # parse the name, and create a reporter
-        # TODO: check for valid village/group/etc.
-        print "REPORTER:BLAST"
-        #find all reporters from the same location
-        villages = sender.get_immediate_ancestors(klass=Village)
-        if len(villages)==0:
-            msg.respond( _("You must join a village before sending messages") )
-            return
-        village_names = ''
-        for ville in villages:
-            village_names = ( ("%s %s") % (village_names, ville.name) )
-            recipients = ville.flatten()
-            
-            # it makes sense to complete all of the sending
-            # before sending the confirmation sms
-            # iterate every member of the group we are broadcasting
-            # to, and queue up the same message to each of them
-            for recipient in recipients:
-                print "SENDING ANNOUNCEMENT TO RECIPIENT" + str(recipient.id)
-                if int(recipient.id) != int(sender.id):
-                    #add signature
-                    anouncement = _("%s:to [%s] %s") % ( txt, ville.name, sender.signature() )
-                    #todo: limit chars to 1 txt message?
-                    conns = ChannelConnection.objects.all().filter(contact=recipient)
-                    for conn in conns:
-                        # todo: what is BE is gone? Use different one?
-                        print "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug)
-                        be = self.router.get_backend(conn.communication_channel.slug)
-                        be.message(conn.user_identifier, anouncement).send()
-                    
-        msg.respond( _("success! %s recvd msg: %s" % (village_names,txt) ) )
-        return sender
-        # TODO: remove this for production
-        """except:
+        try:
+            sender = msg.sender
+            if sender is None:
+                #join default village and send to default village
+                sender = self.join(msg)
+            # parse the name, and create a reporter
+            # TODO: check for valid village/group/etc.
+            print "REPORTER:BLAST"
+            #find all reporters from the same location
+            villages = sender.get_immediate_ancestors(klass=Village)
+            if len(villages)==0:
+                msg.respond( _("You must join a village before sending messages") )
+                return
+            village_names = ''
+            for ville in villages:
+                village_names = ("%s %s") % (village_names, ville.name) 
+                recipients = ville.flatten()
+                
+                # it makes sense to complete all of the sending
+                # before sending the confirmation sms
+                # iterate every member of the group we are broadcasting
+                # to, and queue up the same message to each of them
+                for recipient in recipients:
+                    if int(recipient.id) != int(sender.id):
+                        #add signature
+                        anouncement = _("%s - sent to [%s] from %s") % ( txt, ville.name, sender.signature() )
+                        #todo: limit chars to 1 txt message?
+                        conns = ChannelConnection.objects.all().filter(contact=recipient)
+                        for conn in conns:
+                            # todo: what is BE is gone? Use different one?
+                            print "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug)
+                            be = self.router.get_backend(conn.communication_channel.slug)
+                            be.message(conn.user_identifier, anouncement).send()
+                        
+            msg.respond( _("success! %s recvd msg: %s") % (village_names,txt) ) 
+            return sender
+        except:
             msg.respond(
-                self.__str("blast-fail", rep) 
+                _("blast-fail") 
             )
-        """
+        
 
     def leave(self, msg):
-        #try:
+        try:
             print "REPORTER:LEAVE"
             lang = ''
             if msg.sender is not None:
@@ -255,18 +213,16 @@ class App(rapidsms.app.App):
                             lang = msg.reporter.locale
                         msg.sender.delete()
                         msg.respond(
-                            self.__str("leave-success", lang=lang) % {
-                             "village": ville })
+                            _("leave-success") % { "village": ville })
                     return
             msg.respond( _("nothing to leave") )
             return
         # something went wrong - at the
         # moment, we don't care what
-            """except:
-                msg.respond(
-                    self.__str("leave-fail", rep) 
-                )
-                """   
+        except:
+            msg.respond(
+                _("leave-fail") 
+            )
     
 
                     
@@ -276,25 +232,35 @@ class App(rapidsms.app.App):
         print "REPORTER:LANG"
         err = None
         if msg.sender is None:
-            err = "denied"
+            err = _("denied")
             msg.sender = self.join(msg)
         
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
-        if code in self.MSG:
-            msg.sender.locale = code
+        if code in self.SUPPORTED_LANGUAGES:
+            msg.sender.set_locale(code)
             msg.sender.save()
-            resp = "lang-set"
+            _ = self.translators[code].lgettext
+            resp = _("lang-set")
         
         # invalid language code. don't do
         # anything, just send an error message
-        else: resp = "bad-lang"
+        else: resp = _("bad-lang")
         
         # always send *some*
         # kind of response
         
-        response = self.__str(resp, msg.sender)
         if err is not None:
-            response = response + self.__str(err, msg.sender) + self.__str("period", msg.sender)       
-        msg.respond( response )
-        
+            resp = ("%s %s.") % (resp,err)       
+        msg.respond( resp )
+    
+    def __loadFixtures(self):
+         Village.objects.get_or_create(name=DEFAULT_VILLAGE)
+         
+    def __initTranslators(self):
+        self.translators = {}
+        path = os.path.join(os.path.dirname(__file__),"locale")
+        for lang in self.SUPPORTED_LANGUAGES:
+            trans = gettext.translation(lang,path,[lang])
+            self.translators.update( {lang:trans} )
+        _ = self.translators[DEFAULT_LANGUAGE].lgettext
