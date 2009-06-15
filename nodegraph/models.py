@@ -117,15 +117,32 @@ class AbstractNode(models.Model):
            If you have a set of objects (d,c,b,a), all know as 'a' type, and
            you downcast to 'd', the resulting list will be typed (d,c,b,a)
 
+           NOTE2: PROBABLY WONT WORK WITH MULTIPLE INHERITENCE!! SO
+           DON'T USE IT, IT'S DUMB ANYWAY. YOU _REALLY_ WANT duck-typing OR
+           delegation OR component model instead.
 
            """
+        # what class do I think I am?
+        # e.g. 'Node'
         self_cname=self.__class__.__name__
         
+        # what are all the target-class's superclasses?
+        # e.g. Man<Person<Node<AbstractNode<object
         cast_cnames=[c.__name__ for c in klass.__mro__]
+
+        # truncate list to only classes between target class and what
+        # I think I am.
+        # e.g. Man<Person
         cast_cnames=[cn.lower() for cn in cast_cnames[:cast_cnames.index(self_cname)]]
+
+        # swap order for the walk
+        # e.g. Person>Man
         cast_cnames.reverse()
         casted=self
         for cn in cast_cnames:
+            # See if I have the Django inherited model attrib
+            # and remeber that pointer
+            # # self.person
             if hasattr(casted,cn):
                 casted=getattr(casted,cn)
             else:
