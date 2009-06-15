@@ -22,27 +22,32 @@ class App(rapidsms.app.App):
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
         (SUPPORTED_LANGUAGES[0], [ #english
-            ("join",  ["[ ]*[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*[#\*\.]?leave.*"]),
-            ("lang",  ["[ ]*[#\*\.]?lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
+            ("join",  ["[ ]*[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("register_name",  ["[ ]*[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*[#\*\.]leave.*"]),
+            ("lang",  ["[ ]*[#\*\.]lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
             ("createvillage",  ["[ ]*###create (whatever)[ ]*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
-            ("join",  ["[ ]*fr[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*fr[#\*\.]?leave.*"]),
+            ("join",  ["[ ]*fr[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("register_name",  ["[ ]*fr[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*fr[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["[ ]*pu[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*pu[#\*\.]?leave.*"]),
+            ("join",  ["[ ]*pu[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("register_name",  ["[ ]*pu[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*pu[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
-            ("join",  ["[ ]*dy[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*dy[#\*\.]?leave.*"]),
+            ("join",  ["[ ]*dy[#\*\.]join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("register_name",  ["[ ]*dy[#\*\.]name (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*dy[#\*\.]leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #english
-            ("join",  ["[ ]*[#\*\.]?djoin (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*[#\*\.]?dleave.*"]),
-            ("lang",  ["[ ]*[#\*\.]?dlang (slug)"]),
+            ("join",  ["[ ]*[#\*\.]djoin (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("register_name",  ["[ ]*[#\*\.]rname (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*[#\*\.]dleave.*"]),
+            ("lang",  ["[ ]*[#\*\.]dlang (slug)"]),
             ("createvillage",  ["[ ]*###dcreate (whatever)[ ]*"])
         ])
      ]
@@ -142,19 +147,24 @@ class App(rapidsms.app.App):
             msg.respond(
                 _("register-fail") 
             )
-            
-            
+             
+    def register_name(self, msg, family_name):
+        try:
+            msg.sender.family_name = family_name
+            msg.sender.save()
+            print( _("Hello %s!") % family_name )
+            msg.respond( _("Hello %s!") % family_name )
+        except:
+            print( _("register-fail") )
+            msg.respond( _("register-fail") )
+
     def join(self, msg, village=DEFAULT_VILLAGE):
         try:
-            # parse the name, and create a reporter
-            # TODO: check for valid village/group/etc.
+            # parse the name, and create a contact
             print "REPORTER:JOIN"
-            #loc = Locations.objects.all().filter(name=village)
-    
             villes = Village.objects.filter(name=village)
             if len(villes)==0:
                 msg.respond( _("%s does not exist") % village )
-                #default join
                 rep = self.join(msg,DEFAULT_VILLAGE)
                 return rep            
             ville = villes[0]

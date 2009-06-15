@@ -25,6 +25,8 @@ class TestApp (TestScript):
            8005551210 < first-login village
            8005551210 > msg_to_blast
            8005551210 < success! village recvd msg: msg_to_blast
+           8005551210 > #name Joe
+           8005551210 < Hello Joe!
         """
 
     testGroupBlast = """
@@ -36,6 +38,11 @@ class TestApp (TestScript):
            8005551213 < first-login village2
            8005551212 > msg_to_blast
            8005551213 < msg_to_blast - sent to [village2] from 8005551212
+           8005551212 < success! village2 recvd msg: msg_to_blast
+           8005551212 > #name Joey
+           8005551212 < Hello Joey!
+           8005551212 > msg_to_blast
+           8005551213 < msg_to_blast - sent to [village2] from Joey
            8005551212 < success! village2 recvd msg: msg_to_blast
            8005551212 > #dleave
            8005551212 < leave-success
@@ -63,7 +70,8 @@ class TestApp (TestScript):
            8005551215 > #dleave
            8005551215 < leave-success
         """
-    # later
+    
+    # test lang after you have localization set up properly
     """
            8005551212 > #dlang eng
            8005551212 > lang-set
