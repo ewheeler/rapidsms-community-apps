@@ -162,7 +162,7 @@ class App(rapidsms.app.App):
             msg.respond( _("register-fail") )
 
     def join(self, msg, village=DEFAULT_VILLAGE):
-        #try:
+        try:
             # parse the name, and create a contact
             print "REPORTER:JOIN"
             villes = Village.objects.filter(name=village)
@@ -182,10 +182,10 @@ class App(rapidsms.app.App):
             print( _("first-login") % {"village": village } )
             msg.respond( _("first-login") % {"village": village } )
             return msg.sender
-            """except:
-                print( _("register-fail") )
-                msg.respond( _("register-fail") )
-            """
+        except:
+            print( _("register-fail") )
+            msg.respond( _("register-fail") )
+            
  
     def blast(self, msg, txt):
         txt = txt.strip()
