@@ -17,27 +17,33 @@ DEFAULT_VILLAGE="unassociated"
 DEFAULT_LANGUAGE="fre"
 
 class App(rapidsms.app.App):
-    SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu']
+    SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu','deb']
     
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
         (SUPPORTED_LANGUAGES[0], [ #english
             ("join",  ["[ ]*[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*[#\*\.]?leave[ ]*"]),
+            ("leave",  ["[ ]*[#\*\.]?leave.*"]),
             ("lang",  ["[ ]*[#\*\.]?lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
             ("createvillage",  ["[ ]*###create (whatever)[ ]*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
             ("join",  ["[ ]*fr[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*fr[#\*\.]?leave[ ]*"]),
+            ("leave",  ["[ ]*fr[#\*\.]?leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
             ("join",  ["[ ]*pu[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*pu[#\*\.]?leave[ ]*"]),
+            ("leave",  ["[ ]*pu[#\*\.]?leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
             ("join",  ["[ ]*dy[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
-            ("leave",  ["[ ]*dy[#\*\.]?leave[ ]*"]),
+            ("leave",  ["[ ]*dy[#\*\.]?leave.*"]),
+        ]),
+        (SUPPORTED_LANGUAGES[4], [ #english
+            ("join",  ["[ ]*[#\*\.]?djoin (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*[#\*\.]?dleave.*"]),
+            ("lang",  ["[ ]*[#\*\.]?dlang (slug)"]),
+            ("createvillage",  ["[ ]*###dcreate (whatever)[ ]*"])
         ])
      ]
     
@@ -124,6 +130,7 @@ class App(rapidsms.app.App):
       
     # admin utility!
     def createvillage(self, msg, village=DEFAULT_VILLAGE):
+        village = village.strip()
         try:
             # TODO: add administrator authentication
             print "REPORTER:CREATEVILLAGE"
@@ -161,6 +168,7 @@ class App(rapidsms.app.App):
             msg.respond( _("register-fail") )
  
     def blast(self, msg, txt):
+        txt = txt.strip()
         try:
             sender = msg.sender
             if sender is None:
@@ -194,6 +202,7 @@ class App(rapidsms.app.App):
                             be = self.router.get_backend(conn.communication_channel.slug)
                             be.message(conn.user_identifier, anouncement).send()
                         
+            village_names = village_names.strip()
             print( _("success! %s recvd msg: %s") % (village_names,txt) ) 
             msg.respond( _("success! %s recvd msg: %s") % (village_names,txt) ) 
             return sender
