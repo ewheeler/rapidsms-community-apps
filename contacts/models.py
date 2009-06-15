@@ -109,8 +109,7 @@ class Contact(Node):
         else:
             return rs[0].locale_string
 
-    @locale.setter
-    def locale(self,value):
+    def set_locale(self,value):
         """set locale as top priority
            value is a locale_string
         """

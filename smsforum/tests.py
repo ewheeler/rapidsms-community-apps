@@ -19,12 +19,36 @@ class TestApp (TestScript):
         #should setup default village in here
         
     testJoin = """
+           8005551212 > #lang wol
+           8005551212 > msg_to_blast
+           8005551212 > #language eng
+           8005551212 > msg_to_blast
            8005551212 > ###create village
-           8005551212 > #join village
-           8005551213 > #join village
-           8005551212 > blast
-           8005551212 > blast again
-           8005551212 > #leave
+           8005551212 > pu#join village
+           8005551212 > msg_to_blast
          """
     
- 
+"""
+           8005551212 > #lang eng
+           8005551212 > msg_to_blast
+           8005551212 > #lang fre
+           8005551212 > msg_to_blast
+           8005551212 > #lang wol
+           8005551212 > msg_to_blast
+           8005551212 > #lang dyu
+           8005551212 > msg_to_blast
+           8005551212 > #lang pul
+           8005551212 > msg_to_blast
+
+
+           8005551212 > #join unassociated
+           8005551213 > #join unassociated
+           8005551212 > blast text
+
+
+   8005551212 > #join village
+   8005551213 > #join village
+   8005551212 > blast
+   8005551212 > blast again
+   8005551212 > #leave
+""" 

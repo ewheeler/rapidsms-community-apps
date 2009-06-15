@@ -17,7 +17,30 @@ DEFAULT_VILLAGE="unassociated"
 DEFAULT_LANGUAGE="fre"
 
 class App(rapidsms.app.App):
-    SUPPORTED_LANGUAGES = ['eng','fre','wol','dyu','pul']
+    SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu']
+    
+    # TODO: move to db
+    MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
+        (SUPPORTED_LANGUAGES[0], [ #english
+            ("join",  ["[ ]*[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*[#\*\.]?leave[ ]*"]),
+            ("lang",  ["[ ]*[#\*\.]?lang (slug)", "[#\*\.]?language (slug)[ ]*"]),
+            ("createvillage",  ["[ ]*###create (whatever)[ ]*"]),
+        ]),
+        (SUPPORTED_LANGUAGES[1], [ #french
+            ("join",  ["[ ]*fr[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*fr[#\*\.]?leave[ ]*"]),
+        ]),
+        (SUPPORTED_LANGUAGES[2], [ #pular
+            ("join",  ["[ ]*pu[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*pu[#\*\.]?leave[ ]*"]),
+        ]),
+        (SUPPORTED_LANGUAGES[3], [ #dyula
+            ("join",  ["[ ]*dy[#\*\.]?join (whatever)[ ]*"]), # optionally: join village name m/f age
+            ("leave",  ["[ ]*dy[#\*\.]?leave[ ]*"]),
+        ])
+     ]
+    
     
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
@@ -79,32 +102,22 @@ class App(rapidsms.app.App):
         # replace it *with* the keyworder, or extract it
         # into a parser of its own
         
-        # swap in and out based on translations
-        # but perhaps we want to accept commands in all known languages?
-        map = [ #search algorithm should be ordered
-            ("join",  ["#join (whatever)"]), # optionally: join village name m/f age
-            ("join",  ["\*join (whatever)"]),
-            ("createvillage",  ["###create (whatever)"]),
-            #"#name":  ["add_name (whatever)"],
-            #"*name":  ["add_name (whatever)"],
-            #"#stats":  ["stats (letters) (numbers)"],
-            #"*stats":  ["stats (letters) (numbers)"],
-            ("leave",  ["#leave"]),
-            ("leave",  ["\*leave"]),            
-            ("lang",  ["#lang (slug)"]),
-            ("lang",  ["\*lang (slug)"]),
-            ("blast",  ["(whatever)"])
-        ]
-        
-        self.__setLocale(msg.sender.locale)
-        
         # search the map for a match, dispatch
         # the message to it, and return/stop
-        for method, patterns in map:
-            if matcher(*patterns) and hasattr(self, method):  
-                getattr(self, method)(msg, *matcher.groups)
-                return True
-        
+        for lang, map in self.MULTILINGUAL_MAP:
+            for method, patterns in map: # search through language in default preference order
+                if matcher(*patterns) and hasattr(self, method):
+                    msg.sender.set_locale(lang)
+                    msg.sender.save()
+                    self.__setLocale(lang)
+                    getattr(self, method)(msg, *matcher.groups)
+                    return True
+        method = "blast"
+        patterns = ["(whatever)"]
+        if matcher(*patterns) and hasattr(self, method):
+            getattr(self, method)(msg, *matcher.groups)
+            return True
+
         # no matches, so this message is not
         # for us; allow processing to continue
         return False
@@ -140,12 +153,12 @@ class App(rapidsms.app.App):
             ville = villes[0]
             #create new membership
             msg.sender.add_to_group(ville)
+            print( _("first-login") % {"village": village } )
             msg.respond( _("first-login") % {"village": village } )
             return msg.sender
         except:
-            msg.respond(
-                _("register-fail") 
-            )
+            print( _("register-fail") )
+            msg.respond( _("register-fail") )
  
     def blast(self, msg, txt):
         try:
@@ -157,6 +170,7 @@ class App(rapidsms.app.App):
             #find all reporters from the same location
             villages = VillagesForContact(sender)
             if len(villages)==0:
+                print _("You must join a village before sending messages")
                 msg.respond( _("You must join a village before sending messages") )
                 return
             village_names = ''
