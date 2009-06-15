@@ -8,7 +8,6 @@ from rapidsms.message import Message
 from models import *
 from apps.locations.models import *
 import gettext
-_ = gettext.gettext
 
 from apps.contacts.models import *
 
@@ -27,20 +26,17 @@ class App(rapidsms.app.App):
         # (instead of depending on a fixture)
         self.__loadFixtures()
         self.__initTranslators()
-
-
+        
         # fetch a list of all the backends
         # that we already have objects for
-        #known_backends = ChannelConnection.objects.values_list("slug", flat=True)
+        known_backends = ChannelConnection.objects.values_list("slug", flat=True)
         
         # find any running backends which currently
         # don't have objects, and fill in the gaps
-        """for be in self.router.backends:
+        for be in self.router.backends:
             if not be.slug in known_backends:
                 self.info("Creating PersistantBackend object for %s (%s)" % (be.slug, be.title))
-                ChannelConnection(slug=be.slug, title=be.title).save()
-        """
-    
+                ChannelConnection(slug=be.slug, title=be.title).save()    
     
     def parse(self, msg):
         print "REPORTER:PARSE"
@@ -98,10 +94,7 @@ class App(rapidsms.app.App):
             ("blast",  ["(whatever)"])
         ]
         
-        if msg.sender.locale is not None:
-            _ = self.translators[msg.sender.locale].lgettext
-        else: 
-            _ = self.translators[DEFAULT_LANGUAGE].lgettext
+        self.__setLocale(msg.sender.locale)
         
         # search the map for a match, dispatch
         # the message to it, and return/stop
@@ -119,10 +112,7 @@ class App(rapidsms.app.App):
         try:
             # TODO: add administrator authentication
             print "REPORTER:CREATEVILLAGE"
-            
-            
             ville = Village.objects.get_or_create(name=village)
-            
             msg.respond( _("village %s created") % (village) )
             return
             # TODO: remove this for production
@@ -141,13 +131,11 @@ class App(rapidsms.app.App):
     
             villes = Village.objects.filter(name=village)
             if len(villes)==0:
-                msg.respond( _("village does not exist") )
+                msg.respond( _("%s does not exist") % village )
                 #default join
                 rep = self.join(msg,DEFAULT_VILLAGE)
-                return rep
-            
+                return rep            
             ville = villes[0]
-            #create new Contact
             #create new membership
             msg.sender.add_to_group(ville)
             msg.respond( _("first-login") % {"village": village } )
@@ -163,11 +151,9 @@ class App(rapidsms.app.App):
             if sender is None:
                 #join default village and send to default village
                 sender = self.join(msg)
-            # parse the name, and create a reporter
-            # TODO: check for valid village/group/etc.
             print "REPORTER:BLAST"
             #find all reporters from the same location
-            villages = [n.village for n in sender.immediate_ancestors]
+            villages = sender.my_villages
             if len(villages)==0:
                 msg.respond( _("You must join a village before sending messages") )
                 return
@@ -192,6 +178,7 @@ class App(rapidsms.app.App):
                             be = self.router.get_backend(conn.communication_channel.slug)
                             be.message(conn.user_identifier, anouncement).send()
                         
+            print( _("success! %s recvd msg: %s") % (village_names,txt) ) 
             msg.respond( _("success! %s recvd msg: %s") % (village_names,txt) ) 
             return sender
         except:
@@ -203,14 +190,11 @@ class App(rapidsms.app.App):
     def leave(self, msg):
         try:
             print "REPORTER:LEAVE"
-            lang = ''
             if msg.sender is not None:
                 if len(msg.sender.my_villages)>0:
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
                     for ville in msg.sender.my_villages:
-                        if len(msg.sender.language) > 0:
-                            lang = msg.reporter.locale
                         msg.sender.delete()
                         msg.respond(
                             _("leave-success") % { "village": ville })
@@ -240,7 +224,8 @@ class App(rapidsms.app.App):
         if code in self.SUPPORTED_LANGUAGES:
             msg.sender.set_locale(code)
             msg.sender.save()
-            _ = self.translators[code].lgettext
+            self.__setLocale(code)
+            print _("lang-set")
             resp = _("lang-set")
         
         # invalid language code. don't do
@@ -263,4 +248,11 @@ class App(rapidsms.app.App):
         for lang in self.SUPPORTED_LANGUAGES:
             trans = gettext.translation(lang,path,[lang])
             self.translators.update( {lang:trans} )
-        _ = self.translators[DEFAULT_LANGUAGE].lgettext
+        self.translators[DEFAULT_LANGUAGE].install()
+
+    def __setLocale(self, locale):
+        if locale is not None:
+            self.translators[locale].install()
+        else: 
+            self.translators[DEFAULT_LANGUAGE].install()
+
