@@ -150,6 +150,7 @@ class App(rapidsms.app.App):
             return
             # TODO: remove this for production
         except:
+            traceback.print_exc()
             msg.respond(
                 _("register-fail") 
             )
@@ -161,6 +162,7 @@ class App(rapidsms.app.App):
             rsp=( _("name-register-success %(name)s") % {'name':family_name} )
             msg.respond(rsp)
         except:
+            traceback.print_exc()
             print( _("register-fail") )
             msg.respond( _("register-fail") )
 
@@ -278,6 +280,7 @@ class App(rapidsms.app.App):
         # something went wrong - at the
         # moment, we don't care what
         except:
+            traceback.print_exc()
             msg.respond(
                 _("leave-fail") 
             )
