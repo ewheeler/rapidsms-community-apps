@@ -18,15 +18,6 @@ DEFAULT_VILLAGE="Keur Samba Laube"
 DEFAULT_LANGUAGE="fre"
 MAX_BLAST_CHARS=130
 
-def safe_print(s):
-    try:
-        print s
-    except:
-        try:
-            print s.encode('latin-1')
-        except:
-            print "SAFE_PRINT: failed, but continuing"
-
 
 class App(rapidsms.app.App):
     SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu','deb']
@@ -91,7 +82,7 @@ class App(rapidsms.app.App):
                 CommunicationChannel(slug=be.slug, title=be.title).save()    
     
     def parse(self, msg):
-        print "REPORTER:PARSE"
+        self.debug("REPORTER:PARSE")
         # fetch the persistantconnection object
         # for this message's sender (or create
         # one if this is the first time we've
@@ -121,7 +112,7 @@ class App(rapidsms.app.App):
         else:            self.info("Unidentified: %s" % (msg.persistant_connection.user_identifier))
     
     def handle(self, msg):
-        print "REPORTER:HANDLE"
+        self.debug("REPORTER:HANDLE")
         matcher = Matcher(msg)
         
         # TODO: this is sort of a lightweight implementation
@@ -154,7 +145,7 @@ class App(rapidsms.app.App):
         village = village.strip()
         try:
             # TODO: add administrator authentication
-            print "REPORTER:CREATEVILLAGE"
+            self.debug("REPORTER:CREATEVILLAGE")
             ville = Village.objects.get_or_create(name=village)
             msg.respond( _("village %s created") % (village) )
             return
@@ -171,8 +162,9 @@ class App(rapidsms.app.App):
             rsp=( _("name-register-success %(name)s") % {'name':family_name} )
             msg.respond(rsp)
         except:
-            safe_print( _("register-fail") )
-            msg.respond( _("register-fail") )
+            rsp= _("register-fail")
+            self.debug(rsp)
+            msg.respond(rsp)
 
     def join(self, msg, village=DEFAULT_VILLAGE):
         try:
@@ -190,13 +182,15 @@ class App(rapidsms.app.App):
                 return msg.sender
             #create new membership
             msg.sender.add_to_group(ville)
-            safe_print( _("first-login") % {"village": ville.name } )
-            msg.respond( _("first-login") % {"village": ville.name } )
+            rsp=_("first-login") % {"village": ville.name } 
+            self.debug(rsp)
+            msg.respond(rsp)
             return msg.sender
         except:
             traceback.print_exc()
-            safe_print( _("register-fail") )
-            msg.respond( _("register-fail") )
+            rsp=_("register-fail")
+            self.debug(rsp)
+            msg.respond(rsp)
             
     #TODO: do this properly somewhere else
     def __best_match(self, village_name):
@@ -226,12 +220,13 @@ class App(rapidsms.app.App):
             #    #join default village and send to default village
             #    sender = self.join(msg)
 
-            print "REPORTER:BLAST"
+            self.debug("REPORTER:BLAST")
             #find all reporters from the same location
             villages = VillagesForContact(sender)
             if len(villages)==0:
-                print _("You must join a village before sending messages")
-                msg.respond( _("You must join a village before sending messages") )
+                rsp=_("You must join a village before sending messages")
+                self.debug(rsp)
+                msg.respond(rsp)
                 return
             village_names = ''
             for ville in villages:
@@ -257,12 +252,12 @@ class App(rapidsms.app.App):
                         conns = ChannelConnection.objects.all().filter(contact=recipient)
                         for conn in conns:
                             # todo: what is BE is gone? Use different one?
-                            print "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug)
+                            self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
                             be = self.router.get_backend(conn.communication_channel.slug)
                             be.message(conn.user_identifier, anouncement).send()
                         
             village_names = village_names.strip()
-            safe_print( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt} ) 
+            self.debug( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return sender
         except:
             traceback.print_exc()
@@ -273,7 +268,7 @@ class App(rapidsms.app.App):
 
     def leave(self, msg):
         try:
-            print "REPORTER:LEAVE"
+            self.debug("REPORTER:LEAVE")
             if msg.sender is not None:
                 villages=VillagesForContact(msg.sender)
                 if len(villages)>0:
@@ -298,7 +293,7 @@ class App(rapidsms.app.App):
     def lang(self, msg, code):
         # TODO: make this a decorator to be used in all functions
         # so that users don't have to register in order to get going
-        print "REPORTER:LANG"
+        self.debug("REPORTER:LANG")
         
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
@@ -306,8 +301,8 @@ class App(rapidsms.app.App):
             msg.sender.set_locale(code)
             msg.sender.save()
             self.__setLocale(code)
-            print _("lang-set")
             resp = _("lang-set %(lang_code)s") % { 'lang_code':code }
+            self.debug(resp)
         
         # invalid language code. don't do
         # anything, just send an error message
