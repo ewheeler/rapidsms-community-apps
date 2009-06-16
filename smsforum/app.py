@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 
 import re, os
@@ -28,12 +29,13 @@ class App(rapidsms.app.App):
             ("leave",  ["\s*[#\*\.]leave.*"]),
             ("lang",  ["\s*[#\*\.]lang (slug)", "[#\*\.]?language (slug)\s*"]),
             ("help",  ["[ ]*[#\*\.]help.*"]),
-            ("createvillage",  ["\s*###create (whatever)\s*"]),
+            ("createvillage",  ["\s*#[##]?create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
-            ("join",  ["\s*fr[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*fr[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*fr[#\*\.]leave.*"]),
+            ("join",  ["\s*fr[#\*\.]entrer (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*fr[#\*\.]nom (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*fr[#\*\.]quitter.*"]),
+            ("createvillage",  ["\s*#[##]?cr[ée]er (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
             ("join",  ["\s*pu[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
