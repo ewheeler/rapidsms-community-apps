@@ -23,15 +23,19 @@ msgid "leave"
 msgstr "quitter"
 
 msgid "create"
-msgstr "créer"
+msgstr "creer"
+#msgstr "créer"
+
 
 #: app.py:158
 msgid "village %s created"
-msgstr "La communauté %s a été créée"
+msgstr "La communaute %s a ete creee"
+#msgstr "La communauté %s a été créée"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "Désolé, je ne reconnair pas cet endroit. SVP, écrivez # entrer puis 'noms de villages'"
+msgstr "Desole, je ne reconnair pas cet endroit. SVP, ecrivez # entrer puis 'noms de villages'"
+#msgstr "Désolé, je ne reconnair pas cet endroit. SVP, écrivez # entrer puis 'noms de villages'"
 
 #: app.py:176
 msgid "village does not exist"
@@ -45,7 +49,8 @@ msgid "name-register-success %(name)s"
 msgstr "Bonjour %(name)s. Merci d'avon enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Désolé, ce message ait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
+msgstr "Desole, ce message ait plus de %(max_chars)d caracteres. Merci de le reccourcir et de l'envoyer a nouveau."
+#msgstr "Désolé, ce message ait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
 msgid "You must join a village before sending messages"
@@ -59,11 +64,13 @@ msgstr "%(txt)s - de %(sender)s"
 #: app.py:225 app.py:226
 #, python-format
 msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
+msgstr "Felicitations! Votre message a ete envoye à la communaute '%(villes)s'"
+#msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard"
+msgstr "Desole, il y a eu un probleme. Merci d'enayer a nouveau plus tard"
+#msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard"
 
 #: app.py:248
 msgid "leave-success"
@@ -71,7 +78,8 @@ msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "Vous n'appartenez à aucune communauté pour le momement. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
+msgstr "Vous n'appartenez a aucune communaute pour le momement. Pour nous rejoindre, vueillez ecrire # puis 'nom de village"
+#msgstr "Vous n'appartenez à aucune communauté pour le momement. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
 
 #: app.py:256
 msgid "leave-fail"
@@ -83,10 +91,12 @@ msgstr "denied"
 
 #: app.py:275
 msgid "lang-set"
-msgstr "La langue que vous aves sélectionnée est '%(lang_code)s'"
+msgstr "La langue que vous aves selectionnee est '%(lang_code)s'"
+#msgstr "La langue que vous aves sélectionnée est '%(lang_code)s'"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "Le code pour changer de langue n'est pas reconnu. Mercí d'enayer à nouveau"
+msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'enayer a nouveau"
+#msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'enayer à nouveau"
 
 
