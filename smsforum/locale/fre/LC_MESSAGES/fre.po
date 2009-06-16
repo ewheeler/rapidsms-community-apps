@@ -23,7 +23,7 @@ msgid "leave"
 msgstr "quitter"
 
 msgid "create"
-msgstr "créer
+msgstr "créer"
 
 #: app.py:158
 msgid "village %s created"
@@ -41,8 +41,8 @@ msgstr "village does not exist"
 msgid "first-login"
 msgstr "Merci d'avon rejoint la communauté '%(village)s' - bienvennue!"
 
-msgid: "name-register-success %(name)s"
-msgstr: "Bonjour %(name)s. Merci d'avon enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
+msgid "name-register-success %(name)s"
+msgstr "Bonjour %(name)s. Merci d'avon enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
 msgstr "Désolé, ce message ait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
