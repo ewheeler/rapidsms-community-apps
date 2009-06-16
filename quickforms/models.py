@@ -39,16 +39,21 @@ class FormEntry(models.Model):
     form = models.ForeignKey(Form)
     date = models.DateTimeField(auto_now_add=True)
 
+    def __unicode__(self):
+        return "%s %s" % (self.form.description, self.date)
+
 class FieldEntry(models.Model):
     form_entry = models.ForeignKey(FormEntry)
     field = models.ForeignKey(Field)
     data = models.CharField(max_length=160, blank=True, null=True)
 
+    def __unicode__(self):
+        return "%s: %s" % (self.field.title, self.data)
+
 class Action(models.Model):
     ACTION_TYPES = (("silent", "Silent function"),
                     ("responding", "Responding function"))
     keyword = models.ForeignKey(Keyword)
-    #type = models.ForeignKey("ActionType")
     type = models.CharField(choices=ACTION_TYPES, max_length=25)
 
     def __unicode__(self):

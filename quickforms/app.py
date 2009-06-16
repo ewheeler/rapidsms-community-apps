@@ -40,6 +40,7 @@ class App (rapidsms.app.App):
         fields = form.field_set.all()
         errors = []
         info = []
+
         # create and save a FormEntry
         # TODO also save Reporter
         formentry = FormEntry(form=form)
@@ -60,6 +61,7 @@ class App (rapidsms.app.App):
                         data = "True"
                     if data.startswith(('n', 'f')):
                         data = "False"
+
                 # create and save FieldEntry
                 fieldentry = FieldEntry(form_entry=formentry, field=f, data=data)
                 fieldentry.save()
@@ -69,6 +71,7 @@ class App (rapidsms.app.App):
                 # if we cant match (maybe there was a string where we expected
                 # a number), prepare a descriptive error message 
                 errors.append("Could not parse '%s' into '%s' for %s" % (p, f.data_type, f.title))
+
         if fields.count() != len(pieces):
             # if we are lacking data, prepare a descriptive error message
             errors.append("%s form has %d data fields. You submitted %d pieces of data" % (form.title, fields.count(), len(pieces)))
