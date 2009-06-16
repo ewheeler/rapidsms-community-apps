@@ -43,10 +43,11 @@ msgstr "village does not exist"
 
 #: app.py:185
 msgid "first-login"
-msgstr "Merci d'avon rejoint la communauté '%(village)s' - bienvennue!"
+msgstr "Merci d'avoir rejoint la communaute '%(village)s' - bienvennue!"
+#msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvennue!"
 
 msgid "name-register-success %(name)s"
-msgstr "Bonjour %(name)s. Merci d'avon enregistre votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
+msgstr "Bonjour %(name)s. Merci d'avon enregistre votre nom! Il apparaitra dorenavant sur tous les messages que vous envoyez"
 #msgstr "Bonjour %(name)s. Merci d'avon enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
@@ -55,7 +56,8 @@ msgstr "Desole, ce message ait plus de %(max_chars)d caracteres. Merci de le rec
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
+msgstr "SVP, rejoignez une communaute avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
+#msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
 
 #: app.py:214
 #, python-format
@@ -65,7 +67,7 @@ msgstr "%(txt)s - de %(sender)s"
 #: app.py:225 app.py:226
 #, python-format
 msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "Felicitations! Votre message a ete envoye à la communaute '%(villes)s'"
+msgstr "Felicitations! Votre message a ete envoye a la communaute '%(villes)s'"
 #msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
 
 #: app.py:231
@@ -75,7 +77,8 @@ msgstr "Desole, il y a eu un probleme. Merci d'enayer a nouveau plus tard"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
+msgstr "Vous venez de quitter la communaute '%(village)s' Au revoir!"
+#msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 #: app.py:250
 msgid "nothing to leave"

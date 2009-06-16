@@ -167,8 +167,7 @@ class App(rapidsms.app.App):
     def join(self, msg, village=DEFAULT_VILLAGE):
         try:
             # parse the name, and create a contact
-            print "REPORTER:JOIN"
-            ville = self.__best_match( Village,village )
+            ville = self.__best_match( village )
             if ville is None:
                 # TODO: when this scales up, show 3 most similar village names
                 all_villes = Village.objects.all()[:3]
@@ -185,19 +184,23 @@ class App(rapidsms.app.App):
             msg.respond( _("first-login") % {"village": ville.name } )
             return msg.sender
         except:
+            traceback.print_exc()
             print( _("register-fail") )
             msg.respond( _("register-fail") )
             
     #TODO: do this properly somewhere else
-    def __best_match(self, Village, village_name):
+    def __best_match(self, village_name):
         villages = Village.objects.all()
+        ret=None
         for v in villages:
             if len(village_name) <= 4:
                 if v.name.lower() == village_name.lower(): 
-                    return v
+                    ret=v
+                    break
             elif v.name.lower().startswith(village_name.lower()): 
-                return v
-        return None
+                ret=v
+                break
+        return ret
     
     def blast(self, msg, txt):
         txt = txt.strip()
