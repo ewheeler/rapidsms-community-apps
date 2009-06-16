@@ -30,14 +30,13 @@ class App(rapidsms.app.App):
             ("leave",  ["\s*[#\*\.]leave.*"]),
             ("lang",  ["\s*[#\*\.]lang (slug)", "[#\*\.]?language (slug)\s*"]),
             ("help",  ["[ ]*[#\*\.]help.*"]),
-            ("createvillage",  ["\s*#[##]?create (whatever)\s*"]),
+            ("createvillage",  ["\s*[#]{1,3}?create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
             ("join",  ["\s*[#\*\.]entrer (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]nom (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]quitter.*"]),
             ("aide",  ["[ ]*[#\*\.]help.*"]),
-            ("createvillage",  ["\s*#[##]?cr[ée]er (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
             ("join",  ["\s*[#\*\.]naatde (whatever)\s*"]), # optionally: join village name m/f age
