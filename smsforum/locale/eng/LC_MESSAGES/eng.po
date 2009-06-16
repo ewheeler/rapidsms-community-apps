@@ -24,63 +24,63 @@ msgstr "leave"
 
 #: app.py:158
 msgid "village %s created"
-msgstr "village %s created"
+msgstr "The %s community has been created"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "Sorry, I couldn't register you."
+msgstr "Sorry, there has been an error. Please try again later"
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "village does not exist"
+msgstr "Sorry, I don't recognize that place. Please type #join and then type [village name]"
 
 #: app.py:185
 msgid "first-login"
-msgstr "Thank you for joining the village %(village)s"
+msgstr "Thank you for joining the %(village)s community - welcome!"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "Sorry this message is more than %(max_chars)d characters. Please make is shorter and send again." 
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "You must join a village before sending messages"
+msgstr "Please join a community before sending a message: send me #join villagename "
 
 #: app.py:214
 #, python-format
 msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
-msgstr "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr "%(txt)s - %(sender)s"
 
 #: app.py:225 app.py:226
 #, python-format
 msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "success! %(villes)s recvd msg: %(txt)s"
+msgstr "Congratulations - your message sent to the %(villes)s community"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Sorry, I couldn't send that message."
+msgstr "Sorry, there has been an error - please try again later"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "Good-bye from village %(village)s"
+msgstr "You have left the %(village)s community - good-bye!"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "You have already left all villages"
+msgstr "You do not belong to any communities. To join, please type #join village_name"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "'Leave' failed."
-
-#: app.py:267
-msgid "denied"
-msgstr "Please join a village by texting: join villagename"
+msgstr "Sorry, there has been an error - please try again later"
 
 #: app.py:275
 msgid "lang-set"
-msgstr "I will now speak to you in English, where possible."
+msgstr "Your language is now set to English"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "That language code is not recognized"
+msgstr "That language code is not recognized - please try again"
+
+#: app.py:279
+msgid "name-register-success %(name)s"
+msgstr "Hello %(name)s!"
 
 
