@@ -39,7 +39,7 @@ msgstr "Desole, il y a eu un probleme. Merci d'enayer a nouveau plus tard"
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "Desole, je ne reconnais pas cet endroit. SVP, ecrivez #entrer puis 'noms de villages'"
+msgstr "Desole, je ne reconnais pas cet endroit. SVP, ecrivez #entrer puis 'noms de villages'. Par example, %(village_names)s"
 #msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'"
 
 #: app.py:185
