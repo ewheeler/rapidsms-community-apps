@@ -130,15 +130,15 @@ class App(rapidsms.app.App):
                     self.__setLocale(lang)
                     getattr(self, method)(msg, *matcher.groups)
                     return True
-        method = "blast"
-        patterns = ["(whatever)"]
-        if matcher(*patterns) and hasattr(self, method):
-            getattr(self, method)(msg, *matcher.groups)
-            return True
-
-        # no matches, so this message is not
-        # for us; allow processing to continue
-        return False
+                
+        text = msg.text.strip()
+        if text[0] == '.' or text[0] == '#' or text[0] == '*':
+            #user tried to send some sort of command
+            msg.respond(_("Je comprends pas cet ordre"))
+            return False
+        #Most messages get blasted out
+        self.blast(msg,msg.text)
+        return True
       
     # admin utility!
     def createvillage(self, msg, village=DEFAULT_VILLAGE):
