@@ -299,10 +299,6 @@ class App(rapidsms.app.App):
         # TODO: make this a decorator to be used in all functions
         # so that users don't have to register in order to get going
         print "REPORTER:LANG"
-        err = None
-        if msg.sender is None:
-            err = _("denied")
-            msg.sender = self.join(msg)
         
         # if the language code was valid, save it
         # TODO: obviously, this is not cross-app
@@ -320,8 +316,6 @@ class App(rapidsms.app.App):
         # always send *some*
         # kind of response
         
-        if err is not None:
-            resp = ("%s %s.") % (resp,err)       
         msg.respond( resp )
     
     def __loadFixtures(self):
