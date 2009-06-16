@@ -18,6 +18,16 @@ DEFAULT_VILLAGE="Keur Samba Laube"
 DEFAULT_LANGUAGE="fre"
 MAX_BLAST_CHARS=130
 
+def safe_print(s):
+    try:
+        print s
+    except:
+        try:
+            print s.encode('latin-1')
+        except:
+            print "SAFE_PRINT: failed, but continuing"
+
+
 class App(rapidsms.app.App):
     SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu','deb']
     
@@ -161,7 +171,7 @@ class App(rapidsms.app.App):
             rsp=( _("name-register-success %(name)s") % {'name':family_name} )
             msg.respond(rsp)
         except:
-            print( _("register-fail") )
+            safe_print( _("register-fail") )
             msg.respond( _("register-fail") )
 
     def join(self, msg, village=DEFAULT_VILLAGE):
@@ -180,12 +190,12 @@ class App(rapidsms.app.App):
                 return msg.sender
             #create new membership
             msg.sender.add_to_group(ville)
-            print( _("first-login") % {"village": ville.name } )
+            safe_print( _("first-login") % {"village": ville.name } )
             msg.respond( _("first-login") % {"village": ville.name } )
             return msg.sender
         except:
             traceback.print_exc()
-            print( _("register-fail") )
+            safe_print( _("register-fail") )
             msg.respond( _("register-fail") )
             
     #TODO: do this properly somewhere else
@@ -233,7 +243,8 @@ class App(rapidsms.app.App):
                 # (minutes, 10s of minutes) to send all.
                 # SO to keep people from thinking it didn't work and resending, 
                 # send there response first
-                msg.respond( _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} ) 
+                rsp= _("success! %(villes)s recvd msg: %(txt)s" % {'villes':village_names,'txt':txt} )
+                msg.respond(rsp)
                 
                 # now iterate every member of the group we are broadcasting
                 # to, and queue up the same message to each of them
@@ -251,7 +262,7 @@ class App(rapidsms.app.App):
                             be.message(conn.user_identifier, anouncement).send()
                         
             village_names = village_names.strip()
-            print( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt} ) 
+            safe_print( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt} ) 
             return sender
         except:
             traceback.print_exc()
@@ -322,11 +333,13 @@ class App(rapidsms.app.App):
         for lang in self.SUPPORTED_LANGUAGES:
             trans = gettext.translation(lang,path,[lang])
             self.translators.update( {lang:trans} )
-        self.translators[DEFAULT_LANGUAGE].install()
+        self.__setLocale(DEFAULT_LANGUAGE)
 
     def __setLocale(self, locale):
         if locale is not None:
-            self.translators[locale].install()
+            self.translators[locale].install(unicode=1)
         else: 
-            self.translators[DEFAULT_LANGUAGE].install()
+            self.translators[DEFAULT_LANGUAGE].install(unicode=1)
+
+    
 
