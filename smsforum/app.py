@@ -25,28 +25,28 @@ class App(rapidsms.app.App):
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
         (SUPPORTED_LANGUAGES[0], [ #english
-            ("join",  ["\s*[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]leave.*"]),
-            ("lang",  ["\s*[#\*\.]lang (slug)", "[#\*\.]?language (slug)\s*"]),
-            ("help",  ["[ ]*[#\*\.]help.*"]),
-            ("createvillage",  ["\s*[#]{1,3}?create (whatever)\s*"]),
+            ("join",  ["\s*[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*leave.*"]),
+            ("lang",  ["\s*[#\*\.]\s*lang (slug)", "[#\*\.]?language (slug)\s*"]),
+            ("help",  ["[ ]*[#\*\.]\s*help.*"]),
+            ("createvillage",  ["\s*[#]{1,3}?\s*create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
-            ("join",  ["\s*[#\*\.]entrer (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]nom (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]quitter.*"]),
-            ("aide",  ["[ ]*[#\*\.]help.*"]),
+            ("join",  ["\s*[#\*\.]\s*entrer (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*nom (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*quitter.*"]),
+            ("aide",  ["[ ]*[#\*\.]\s*help.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["\s*[#\*\.]naatde (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]innde (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]ummade.*"]),
+            ("join",  ["\s*[#\*\.]\s*naatde (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*innde (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*ummade.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
-            ("join",  ["\s*dy[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*dy[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*dy[#\*\.]leave.*"]),
+            ("join",  ["\s*dy[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*dy[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*dy[#\*\.]\s*leave.*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #english
             ("join",  ["\s*[#\*\.]djoin (whatever)\s*"]), # optionally: join village name m/f age
