@@ -156,8 +156,8 @@ class App(rapidsms.app.App):
         try:
             msg.sender.family_name = family_name
             msg.sender.save()
-            print( _("Hello %s!") % family_name )
-            msg.respond( _("Hello %s!") % family_name )
+            rsp=( _("name-register-success %(name)s") % {'name':family_name} )
+            msg.respond(rsp)
         except:
             print( _("register-fail") )
             msg.respond( _("register-fail") )
@@ -286,7 +286,7 @@ class App(rapidsms.app.App):
             msg.sender.save()
             self.__setLocale(code)
             print _("lang-set")
-            resp = _("lang-set")
+            resp = _("lang-set %(lang_code)s") % { 'lang_code':code }
         
         # invalid language code. don't do
         # anything, just send an error message
