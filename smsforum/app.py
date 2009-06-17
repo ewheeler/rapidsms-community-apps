@@ -21,31 +21,24 @@ MAX_BLAST_CHARS=130
 
 
 class App(rapidsms.app.App):
-    SUPPORTED_LANGUAGES = ['eng','fre','pul','wol','deb']
+    SUPPORTED_LANGUAGES = ['fre','pul','wol','eng','deb']
     
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
-        (SUPPORTED_LANGUAGES[0], [ #english
-            ("join",  ["\s*[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]\s*leave.*"]),
-            ("lang",  ["\s*[#\*\.]\s*lang (slug)", "[#\*\.]?language (slug)\s*"]),
-            ("help",  ["\s*[#\*\.]\s*help\s*"]),
-            ("createvillage",  ["\s*[#\*\.]{1,3}?\s*create (whatever)\s*"]),
-        ]),
-        (SUPPORTED_LANGUAGES[1], [ #french
+        (SUPPORTED_LANGUAGES[0], [ #french
             ("join",  ["\s*[#\*\.]\s*entrer (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*nom (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*quitter.*"]),
             ("help",  ["\s*[#\*\.]\s*aide.*"]),
         ]),
-        (SUPPORTED_LANGUAGES[2], [ #pular
+        (SUPPORTED_LANGUAGES[1], [ #pular
+                                  
             ("join",  ["\s*[#\*\.]\s*naalde (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*yettoode (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*yaltude.*"]),
             ("help",  ["\s*[#\*\.]\s*help pulaar.*"]),
         ]),
-        (SUPPORTED_LANGUAGES[3], [ #wolof
+        (SUPPORTED_LANGUAGES[2], [ #wolof
             ("join",  ["\s*[#\*\.]\s*boole (whatever)\s*", \
                        "\s*[#\*\.]\s*yokk (whatever)\s*", \
                        "\s*[#\*\.]\s*duggu (whatever)\s*"]), # optionally: join village name m/f age
@@ -53,6 +46,15 @@ class App(rapidsms.app.App):
                                 "\s*[#\*\.]\s*maa ngi tudd (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*genn.*"]),
             ("help",  ["\s*[#\*\.]\s*help wolof.*"]),
+        ]),
+        (SUPPORTED_LANGUAGES[3], [ #english
+            ("join",  ["\s*[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*leave.*"]),
+            ("lang",  ["\s*[#\*\.]\s*lang (slug)", "[#\*\.]?language (slug)\s*"]),
+            ("help",  ["\s*[#\*\.]\s*help\s*"]),
+            ("member",  ["\s*[#\*\.]\s*member.*"]),
+            ("createvillage",  ["\s*[#\*\.]{1,3}?\s*create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #debug
             ("join",  ["\s*[#\*\.]djoin (whatever)\s*"]), # optionally: join village name m/f age
@@ -63,6 +65,18 @@ class App(rapidsms.app.App):
         ])
      ]
     
+    def member(self, msg):
+        villages = VillagesForContact(msg.sender)
+        if len(villages) == 0:
+            msg.respond( _("nothing to leave") )
+            return msg.sender            
+        village_names = ''
+        for ville in villages:
+            village_names = ("%s %s") % (village_names, ville.name) 
+        msg.respond( _("Vous appartenez a: %(village_names)s") \
+            % {"village_names":village_names} )
+        return msg.sender
+
     def help(self, msg):
         msg.respond( _("help with commands") )
 
