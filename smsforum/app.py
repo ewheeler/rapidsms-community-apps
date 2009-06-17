@@ -128,17 +128,9 @@ class App(rapidsms.app.App):
                     msg.sender.set_locale(lang)
                     msg.sender.save()
                     self.__setLocale(lang)
-                    getattr(self, method)(msg, *matcher.groups)
-                    return True
-        method = "blast"
-        patterns = ["(whatever)"]
-        if matcher(*patterns) and hasattr(self, method):
-            getattr(self, method)(msg, *matcher.groups)
-            return True
-
-        # no matches, so this message is not
-        # for us; allow processing to continue
-        return False
+                    return getattr(self, method)(msg, *matcher.groups)
+        # If here, it's a blast
+        return self.blast(msg)
       
     # admin utility!
     def createvillage(self, msg, village=DEFAULT_VILLAGE):
@@ -173,7 +165,7 @@ class App(rapidsms.app.App):
             if ville is None:
                 # TODO: when this scales up, show 3 most similar village names
                 all_villes = Village.objects.all()[:3]
-                resp =  _( ("I do not recognize %s. Please txt: #join VILLAGE_NAME") % village ) 
+                resp =  _("I do not recognize %s. Please txt: #join VILLAGE_NAME") % village  
                 if all_villes is not None:
                     resp = ("%s %s") % (resp, _("where VILLAGE_NAME could be ") )
                     for i in all_villes:
@@ -206,14 +198,15 @@ class App(rapidsms.app.App):
                 break
         return ret
     
-    def blast(self, msg, txt):
-        txt = txt.strip()
+    def blast(self, msg):
+        txt = msg.text
         try:
             sender = msg.sender
 
             # check for message length, and bounce messages that are too long
             if len(txt) > MAX_BLAST_CHARS:
-                msg.respond( _("Message was not delivered. Please send less than %(max_chars)d characters." % {'max_chars': MAX_BLAST_CHARS} ))
+                rsp= _("Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
+                msg.respond(rsp)
                 return
 
             #if sender is None:
@@ -238,23 +231,24 @@ class App(rapidsms.app.App):
                 # (minutes, 10s of minutes) to send all.
                 # SO to keep people from thinking it didn't work and resending, 
                 # send there response first
-                rsp= _("success! %(villes)s recvd msg: %(txt)s" % {'villes':village_names,'txt':txt} )
+                rsp= _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
+                self.debug('REPSONSE TO BLASTER: %s' % rsp)
                 msg.respond(rsp)
-                
+                rsp_template= _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+                    { 'txt':txt, 'ville':ville.name, 'sender':'{sig}'}
                 # now iterate every member of the group we are broadcasting
                 # to, and queue up the same message to each of them
                 for recipient in recipients:
                     if int(recipient.id) != int(sender.id):
                         #add signature
-                        anouncement = _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
-                                 { 'txt':txt, 'ville':ville.name, 'sender':sender.signature() }
+                        announcement = rsp_template.format(sig=sender.signature())
                         #todo: limit chars to 1 txt message?
                         conns = ChannelConnection.objects.all().filter(contact=recipient)
                         for conn in conns:
                             # todo: what is BE is gone? Use different one?
                             self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
                             be = self.router.get_backend(conn.communication_channel.slug)
-                            be.message(conn.user_identifier, anouncement).send()
+                            be.message(conn.user_identifier, announcement).send()
                         
             village_names = village_names.strip()
             self.debug( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
@@ -328,7 +322,8 @@ class App(rapidsms.app.App):
         if locale is not None:
             self.translators[locale].install(unicode=1)
         else: 
-            self.translators[DEFAULT_LANGUAGE].install(unicode=1)
+            self.__setLocale(DEFAULT_LANGUAGE)
+
 
     
 
