@@ -236,6 +236,10 @@ class App(rapidsms.app.App):
             village_names = ''
             for ville in villages:
                 village_names = ("%s %s") % (village_names, ville.name) 
+            rsp= _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
+            self.debug('REPSONSE TO BLASTER: %s' % rsp)
+            msg.respond(rsp)
+            for ville in villages:
                 recipients = ville.flatten()
 
                 # because the group can be _long_ and messages are delivered
@@ -243,9 +247,6 @@ class App(rapidsms.app.App):
                 # (minutes, 10s of minutes) to send all.
                 # SO to keep people from thinking it didn't work and resending, 
                 # send there response first
-                rsp= _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
-                self.debug('REPSONSE TO BLASTER: %s' % rsp)
-                msg.respond(rsp)
                 rsp_template= _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
                     { 'txt':txt, 'ville':ville.name, 'sender':'{sig}'}
                 # now iterate every member of the group we are broadcasting
@@ -281,7 +282,7 @@ class App(rapidsms.app.App):
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
                     for ville in villages:
-                        msg.sender.delete()
+                        msg.sender.remove_from_group(ville)
                         msg.respond(
                             _("leave-success") % { "village": ville.name })
                     return
