@@ -139,10 +139,13 @@ class App(rapidsms.app.App):
                     return True
         
         text = msg.text.strip()
+        if len(text) == 0:
+            msg.respond(_("Vous avez envoyer une message vide. SVP essay encore"))
+            return True
         if text[0] == '.' or text[0] == '#' or text[0] == '*':
             #user tried to send some sort of command
             msg.respond(_("Je comprends pas cet ordre"))
-            return False
+            return True
         #Most messages get blasted out
         self.blast(msg)
         return True
