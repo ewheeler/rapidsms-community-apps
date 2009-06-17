@@ -29,19 +29,20 @@ class App(rapidsms.app.App):
             ("register_name",  ["\s*[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*leave.*"]),
             ("lang",  ["\s*[#\*\.]\s*lang (slug)", "[#\*\.]?language (slug)\s*"]),
-            ("help",  ["\s*[#\*\.]\s*help.*"]),
+            ("help",  ["\s*[#\*\.]\s*help\s*"]),
             ("createvillage",  ["\s*[#\*\.]{1,3}?\s*create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
             ("join",  ["\s*[#\*\.]\s*entrer (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*nom (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*quitter.*"]),
-            ("aide",  ["\s*[#\*\.]\s*help.*"]),
+            ("help",  ["\s*[#\*\.]\s*aide.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
             ("join",  ["\s*[#\*\.]\s*naatde (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*innde (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*ummaade.*"]),
+            ("help",  ["\s*[#\*\.]\s*help pulaar.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #wolof
             ("join",  ["\s*[#\*\.]\s*boole (whatever)\s*", \
@@ -50,8 +51,9 @@ class App(rapidsms.app.App):
             ("register_name",  ["\s*[#\*\.]\s*tur aksant (whatever)\s*", \
                                 "\s*[#\*\.]\s*maa ngi tudd (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*guene.*"]),
+            ("help",  ["\s*[#\*\.]\s*help wolof.*"]),
         ]),
-        (SUPPORTED_LANGUAGES[4], [ #english
+        (SUPPORTED_LANGUAGES[4], [ #debug
             ("join",  ["\s*[#\*\.]djoin (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]rname (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]dleave.*"]),

@@ -18,7 +18,7 @@ msgid "Je comprends pas cet ordre"
 msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide wolof' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #dugg VILLAGE - #leave - #name NAME - #lang LANG"
+msgstr "Vous pouvez texter: #dugg VILLAGE - #guene - #tur aksant NAME - #lang LANG"
 
 #: app.py:158
 msgid "join"
@@ -98,7 +98,7 @@ msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:275
-msgid "lang-set"
+msgid "lang-set %(lang_code)s"
 msgstr "fi mu nekk lakk binga doon jefandi koo sopi nanu ko wolof."
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 

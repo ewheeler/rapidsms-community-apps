@@ -68,7 +68,7 @@ msgid "denied"
 msgstr "denied"
 
 #: app.py:275
-msgid "lang-set"
+msgid "lang-set %(lang_code)s"
 msgstr "lang-set"
 
 #: app.py:279
