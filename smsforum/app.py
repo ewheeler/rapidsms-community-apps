@@ -20,7 +20,7 @@ MAX_BLAST_CHARS=130
 
 
 class App(rapidsms.app.App):
-    SUPPORTED_LANGUAGES = ['eng','fre','pul','dyu','deb']
+    SUPPORTED_LANGUAGES = ['eng','fre','pul','wol','deb']
     
     # TODO: move to db
     MULTILINGUAL_MAP = [ # should be ordered: hence the tuples
@@ -43,10 +43,13 @@ class App(rapidsms.app.App):
             ("register_name",  ["\s*[#\*\.]\s*innde (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*ummaade.*"]),
         ]),
-        (SUPPORTED_LANGUAGES[3], [ #dyula
-            ("join",  ["\s*dy[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*dy[#\*\.]\s*name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*dy[#\*\.]\s*leave.*"]),
+        (SUPPORTED_LANGUAGES[3], [ #wolof
+            ("join",  ["\s*[#\*\.]\s*boole (whatever)\s*", \
+                       "\s*[#\*\.]\s*yokk (whatever)\s*", \
+                       "\s*[#\*\.]\s*dugg (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*tur aksant (whatever)\s*", \
+                                "\s*[#\*\.]\s*maa ngi tudd (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*guene.*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #english
             ("join",  ["\s*[#\*\.]djoin (whatever)\s*"]), # optionally: join village name m/f age
@@ -239,30 +242,31 @@ class App(rapidsms.app.App):
             rsp= _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
             self.debug('REPSONSE TO BLASTER: %s' % rsp)
             msg.respond(rsp)
+            recipients=set()
             for ville in villages:
-                recipients = ville.flatten()
+                recipients.update(ville.flatten())
 
-                # because the group can be _long_ and messages are delivered
-                # serially on a single modem install, it can take a long time
-                # (minutes, 10s of minutes) to send all.
-                # SO to keep people from thinking it didn't work and resending, 
-                # send there response first
-                rsp_template= _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
-                    { 'txt':txt, 'ville':ville.name, 'sender':'{sig}'}
-                # now iterate every member of the group we are broadcasting
-                # to, and queue up the same message to each of them
-                for recipient in recipients:
-                    if int(recipient.id) != int(sender.id):
-                        #add signature
-                        announcement = rsp_template.format(sig=sender.signature())
-                        #todo: limit chars to 1 txt message?
-                        conns = ChannelConnection.objects.all().filter(contact=recipient)
-                        for conn in conns:
-                            # todo: what is BE is gone? Use different one?
-                            self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
-                            be = self.router.get_backend(conn.communication_channel.slug)
-                            be.message(conn.user_identifier, announcement).send()
-                        
+            # because the group can be _long_ and messages are delivered
+            # serially on a single modem install, it can take a long time
+            # (minutes, 10s of minutes) to send all.
+            # SO to keep people from thinking it didn't work and resending, 
+            # send there response first
+            rsp_template= _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+                { 'txt':txt, 'ville':ville.name, 'sender':'{sig}'}
+            # now iterate every member of the group we are broadcasting
+            # to, and queue up the same message to each of them
+            for recipient in recipients:
+                if int(recipient.id) != int(sender.id):
+                    #add signature
+                    announcement = rsp_template.format(sig=sender.signature())
+                    #todo: limit chars to 1 txt message?
+                    conns = ChannelConnection.objects.all().filter(contact=recipient)
+                    for conn in conns:
+                        # todo: what is BE is gone? Use different one?
+                        self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
+                        be = self.router.get_backend(conn.communication_channel.slug)
+                        be.message(conn.user_identifier, announcement).send()
+                    
             village_names = village_names.strip()
             self.debug( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return sender
