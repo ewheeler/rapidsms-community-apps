@@ -41,7 +41,7 @@ class App(rapidsms.app.App):
         (SUPPORTED_LANGUAGES[2], [ #pular
             ("join",  ["\s*[#\*\.]\s*naatde (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*innde (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]\s*ummade.*"]),
+            ("leave",  ["\s*[#\*\.]\s*ummaade.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
             ("join",  ["\s*dy[#\*\.]\s*join (whatever)\s*"]), # optionally: join village name m/f age
