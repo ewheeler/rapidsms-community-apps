@@ -281,7 +281,7 @@ class App(rapidsms.app.App):
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
                     for ville in villages:
-                        msg.sender.delete()
+                        msg.sender.remove_from_group(ville)
                         msg.respond(
                             _("leave-success") % { "village": ville.name })
                     return
