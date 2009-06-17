@@ -40,18 +40,18 @@ class App(rapidsms.app.App):
             ("help",  ["\s*[#\*\.]\s*aide.*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["\s*[#\*\.]\s*naatde (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]\s*innde (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]\s*ummaade.*"]),
+            ("join",  ["\s*[#\*\.]\s*naalde (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*yettoode (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]\s*yaltude.*"]),
             ("help",  ["\s*[#\*\.]\s*help pulaar.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #wolof
             ("join",  ["\s*[#\*\.]\s*boole (whatever)\s*", \
                        "\s*[#\*\.]\s*yokk (whatever)\s*", \
-                       "\s*[#\*\.]\s*dugg (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*[#\*\.]\s*tur aksant (whatever)\s*", \
+                       "\s*[#\*\.]\s*duggu (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]\s*sant (whatever)\s*", \
                                 "\s*[#\*\.]\s*maa ngi tudd (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*[#\*\.]\s*guene.*"]),
+            ("leave",  ["\s*[#\*\.]\s*genn.*"]),
             ("help",  ["\s*[#\*\.]\s*help wolof.*"]),
         ]),
         (SUPPORTED_LANGUAGES[4], [ #debug
@@ -289,10 +289,12 @@ class App(rapidsms.app.App):
                 if len(villages)>0:
                     #default to deleting all persistent connections with the same identity
                     #we can always come back later and make sure we are deleting the right backend
+                    names=list()
                     for ville in villages:
                         msg.sender.remove_from_group(ville)
-                        msg.respond(
-                            _("leave-success") % { "village": ville.name })
+                        names.append(ville.name)
+                    msg.respond(
+                        _("leave-success") % { "village": ','.join(names)})
                     return
             msg.respond( _("nothing to leave") )
             return

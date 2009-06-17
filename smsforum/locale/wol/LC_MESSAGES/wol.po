@@ -18,7 +18,7 @@ msgid "Je comprends pas cet ordre"
 msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide wolof' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #dugg VILLAGE - #guene - #tur aksant NAME - #lang LANG"
+msgstr "Vous pouvez texter: #duggu VILLAGE - #genn - #sant NAME - #lang LANG"
 
 #: app.py:158
 msgid "join"
