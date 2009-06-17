@@ -18,7 +18,7 @@ msgid "Je comprends pas cet ordre"
 msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #join VILLAGE - #leave - #name NAME - #lang LANG"
+msgstr "Vous pouvez texter: #entrer VILLAGE - #quitter - #nom NAME - #lang LANG"
 
 #: app.py:158
 msgid "join"
@@ -98,7 +98,7 @@ msgstr "Desole, il y a eu un probleme. Merci d'envoyer a nouveau plus tard"
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:275
-msgid "lang-set"
+msgid "lang-set %(lang_code)s"
 msgstr "La langue que vous avez selectionnee est '%(lang_code)s'"
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
