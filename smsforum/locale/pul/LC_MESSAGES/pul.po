@@ -1,4 +1,4 @@
-# Language eng translations for PACKAGE package.
+# Language pul translations for SMSFORUM package.
 # Copyright (C) 2009 ORGANIZATION
 # Rowena <rowena@rowena-vm>, 2009.
 #
@@ -8,79 +8,102 @@ msgstr ""
 "POT-Creation-Date: 2009-06-15 04:09+GMT\n"
 "PO-Revision-Date: 2009-06-15 04:21+0000\n"
 "Last-Translator: Rowena <rowena@rowena-vm>\n"
-"Language-Team: Language eng\n"
+"Language-Team: Language fre\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
+msgid "help with commands"
+msgstr "Vous pouvez texter: #join VILLAGE - #leave - #name NAME - #lang LANG"
+
 #: app.py:158
 msgid "join"
-msgstr "join"
+msgstr "naatde"
 
 #: app.py:158
 msgid "leave"
-msgstr "leave"
+msgstr "ummaade"
+
+msgid "create"
+msgstr "fewjude"
+
+msgid "name"
+msgstr "Innde"
+
+msgid "I am"
+msgstr "Miin woni."
 
 #: app.py:158
 msgid "village %s created"
-msgstr "village %s created"
+msgstr "Sahre nde sinica koe %s"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "Sorry, I couldn't register you."
+msgstr "Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
+#msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "village does not exist"
+msgstr "yaafo mi heptinaani nokku o yaafo seeda, mbinnde # naatde, e %(village_names)s"
 
 #: app.py:185
 msgid "first-login"
-msgstr "Thank you for joining the village %(village)s"
+msgstr "a Jaaraama nde njukku - da e Sahre nde '%(village)s' - bienvenue!"
+#msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
+
+msgid "name-register-success %(name)s"
+msgstr "No pinda x A jaaraama nde mbinndu - da innde. Maafeenoy e Kala sahaa mbo nuldudon eewnaango."
+#msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "Yaafo _ eewnaango ngo na wadi. Teemedere e cappande nay %(max_chars)d alkule e limooje. A jaaraana nde ndabindin Taa nuldaa Kadi."
+#msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "You must join a village before sending messages"
+msgstr "yaafo - njokkondir e sahre nde gila a nuldaani message. Mbinnde #naatde [le nom]"
+#msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
 
 #: app.py:214
 #, python-format
 msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
-msgstr "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr "%(txt)s - %(sender)s"
 
 #: app.py:225 app.py:226
 #, python-format
 msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "success! %(villes)s recvd msg: %(txt)s"
+msgstr "Miu njettiima, mesaaj ma nawaama to sahre to '%(villes)s'"
+#msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Sorry, I couldn't send that message."
+msgstr "Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
+#msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "Good-bye from village %(village)s"
+msgstr "On ngummiima to sahre '%(village)s' haa nalnde wodnde"
+#msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "You have already left all villages"
+msgstr "O woodaaka hay sahre e oo dumunna So a yidii heptaademin mbinndee # naatde e [nom de village]"
+#msgstr "Vous n'appartenez à aucune communauté pour le moment. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "'Leave' failed."
-
-#: app.py:267
-msgid "denied"
-msgstr "Please join a village by texting: join villagename"
+msgstr "Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
+#msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:275
 msgid "lang-set"
-msgstr "I will now speak to you in English, where possible."
+msgstr "Demngal ngal cubiola ko pulaar."
+#msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "That language code is not recognized"
+msgstr "Kod O ngam waylude demngal heptinaaka. A Jaaraama nde ngeto_daa Kadi."
+#msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
 
 

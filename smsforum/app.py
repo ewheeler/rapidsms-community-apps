@@ -36,12 +36,13 @@ class App(rapidsms.app.App):
             ("join",  ["\s*[#\*\.]entrer (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]nom (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]quitter.*"]),
+            ("aide",  ["[ ]*[#\*\.]help.*"]),
             ("createvillage",  ["\s*#[##]?cr[ée]er (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[2], [ #pular
-            ("join",  ["\s*pu[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
-            ("register_name",  ["\s*pu[#\*\.]name (whatever)\s*"]), # optionally: join village name m/f age
-            ("leave",  ["\s*pu[#\*\.]leave.*"]),
+            ("join",  ["\s*[#\*\.]naatde (whatever)\s*"]), # optionally: join village name m/f age
+            ("register_name",  ["\s*[#\*\.]innde (whatever)\s*"]), # optionally: join village name m/f age
+            ("leave",  ["\s*[#\*\.]ummade.*"]),
         ]),
         (SUPPORTED_LANGUAGES[3], [ #dyula
             ("join",  ["\s*dy[#\*\.]join (whatever)\s*"]), # optionally: join village name m/f age
@@ -58,7 +59,7 @@ class App(rapidsms.app.App):
      ]
     
     def help(self, msg):
-        msg.respond("Available Commands: #join VILLAGE - #name YOURNAME - #leave - #lang ENG")
+        msg.respond( _("help with commands") )
 
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
@@ -143,6 +144,7 @@ class App(rapidsms.app.App):
             return
             # TODO: remove this for production
         except:
+            traceback.print_exc()
             msg.respond(
                 _("register-fail") 
             )
@@ -154,6 +156,7 @@ class App(rapidsms.app.App):
             rsp=( _("name-register-success %(name)s") % {'name':family_name} )
             msg.respond(rsp)
         except:
+            traceback.print_exc()
             rsp= _("register-fail")
             self.debug(rsp)
             msg.respond(rsp)
@@ -164,12 +167,14 @@ class App(rapidsms.app.App):
             ville = self.__best_match( village )
             if ville is None:
                 # TODO: when this scales up, show 3 most similar village names
-                all_villes = Village.objects.all()[:3]
-                resp =  _("I do not recognize %s. Please txt: #join VILLAGE_NAME") % village  
-                if all_villes is not None:
-                    resp = ("%s %s") % (resp, _("where VILLAGE_NAME could be ") )
-                    for i in all_villes:
-                        resp = resp + ", " + i.name
+                all_villages = Village.objects.all()[:3]
+                village_names = ""
+                if len(all_villages) == 0:
+                    village_names = "village name"
+                else: 
+                    for i in all_villages:
+                        village_names = village_names + " " + i.name
+                resp =  _("village does not exist") % {"village_names": village_names} 
                 msg.respond(resp)
                 return msg.sender
             #create new membership
@@ -278,6 +283,7 @@ class App(rapidsms.app.App):
         # something went wrong - at the
         # moment, we don't care what
         except:
+            traceback.print_exc()
             msg.respond(
                 _("leave-fail") 
             )

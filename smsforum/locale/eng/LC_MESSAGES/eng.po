@@ -14,6 +14,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
+msgid "help with commands"
+msgstr "Available Commands: #join VILLAGE - #leave - #name NAME - #lang LANG"
+
 #: app.py:158
 msgid "join"
 msgstr "join"
@@ -32,7 +35,7 @@ msgstr "Sorry, there has been an error. Please try again later"
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "Sorry, I don't recognize that place. Please type #join and then type [village name]"
+msgstr "Sorry, I don't know that place. Please type '#join villagename'. Existing villages include: %(village_names)s"
 
 #: app.py:185
 msgid "first-login"
