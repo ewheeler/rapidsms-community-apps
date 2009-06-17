@@ -15,7 +15,7 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 msgid "Je comprends pas cet ordre"
-msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide' pour voir une liste des ordres acceptables"
+msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help pulaar' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
 msgstr "Vous pouvez texter: #naatde VILLAGE - #ummaade - #innde NAME - #lang LANG"
