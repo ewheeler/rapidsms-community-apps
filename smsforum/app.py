@@ -30,7 +30,7 @@ class App(rapidsms.app.App):
             ("leave",  ["\s*[#\*\.]\s*leave.*"]),
             ("lang",  ["\s*[#\*\.]\s*lang (slug)", "[#\*\.]?language (slug)\s*"]),
             ("help",  ["[ ]*[#\*\.]\s*help.*"]),
-            ("createvillage",  ["\s*[#]{1,3}?\s*create (whatever)\s*"]),
+            ("createvillage",  ["\s*[#\*\.]{1,3}?\s*create (whatever)\s*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #french
             ("join",  ["\s*[#\*\.]\s*entrer (whatever)\s*"]), # optionally: join village name m/f age
@@ -137,7 +137,7 @@ class App(rapidsms.app.App):
             msg.respond(_("Je comprends pas cet ordre"))
             return False
         #Most messages get blasted out
-        self.blast(msg,msg.text)
+        self.blast(msg)
         return True
       
     # admin utility!
