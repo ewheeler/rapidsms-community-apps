@@ -10,6 +10,7 @@ from models import *
 from apps.locations.models import *
 import gettext
 import traceback
+import string
 
 from apps.smsforum.models import *
 from apps.contacts.models import *
@@ -117,7 +118,8 @@ class App(rapidsms.app.App):
         else:            self.info("Unidentified: %s" % (msg.persistant_connection.user_identifier))
     
     def handle(self, msg):
-        self.debug("REPORTER:HANDLE")
+        self.debug("REPORTER:HANDLE: %s" % msg.text)
+
         matcher = Matcher(msg)
         
         # TODO: this is sort of a lightweight implementation
@@ -135,7 +137,7 @@ class App(rapidsms.app.App):
                     self.__setLocale(lang)
                     getattr(self, method)(msg, *matcher.groups)
                     return True
-                
+        
         text = msg.text.strip()
         if text[0] == '.' or text[0] == '#' or text[0] == '*':
             #user tried to send some sort of command
@@ -253,14 +255,14 @@ class App(rapidsms.app.App):
             # (minutes, 10s of minutes) to send all.
             # SO to keep people from thinking it didn't work and resending, 
             # send there response first
-            rsp_template= _("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
-                { 'txt':txt, 'ville':ville.name, 'sender':'{sig}'}
+            rsp_template=string.Template(_("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+                { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
             # now iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
             for recipient in recipients:
                 if int(recipient.id) != int(sender.id):
                     #add signature
-                    announcement = rsp_template.format(sig=sender.signature())
+                    announcement = rsp_template.substitute(sig=sender.signature().replace('$','$$'))
                     #todo: limit chars to 1 txt message?
                     conns = ChannelConnection.objects.all().filter(contact=recipient)
                     for conn in conns:
@@ -268,7 +270,7 @@ class App(rapidsms.app.App):
                         self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
                         be = self.router.get_backend(conn.communication_channel.slug)
                         be.message(conn.user_identifier, announcement).send()
-                    
+
             village_names = village_names.strip()
             self.debug( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return sender
