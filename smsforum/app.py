@@ -32,7 +32,6 @@ class App(rapidsms.app.App):
             ("help",  ["\s*[#\*\.]\s*aide.*"]),
         ]),
         (SUPPORTED_LANGUAGES[1], [ #pular
-                                  
             ("join",  ["\s*[#\*\.]\s*naalde (whatever)\s*"]), # optionally: join village name m/f age
             ("register_name",  ["\s*[#\*\.]\s*yettoode (whatever)\s*"]), # optionally: join village name m/f age
             ("leave",  ["\s*[#\*\.]\s*yaltude.*"]),
@@ -65,21 +64,6 @@ class App(rapidsms.app.App):
         ])
      ]
     
-    def member(self, msg):
-        villages = VillagesForContact(msg.sender)
-        if len(villages) == 0:
-            msg.respond( _("nothing to leave") )
-            return msg.sender            
-        village_names = ''
-        for ville in villages:
-            village_names = ("%s %s") % (village_names, ville.name) 
-        msg.respond( _("Vous appartenez a: %(village_names)s") \
-            % {"village_names":village_names} )
-        return msg.sender
-
-    def help(self, msg):
-        msg.respond( _("help with commands") )
-
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
     
@@ -180,6 +164,27 @@ class App(rapidsms.app.App):
                 _("register-fail") 
             )
              
+    def member(self, msg):
+        try:
+            villages = VillagesForContact(msg.sender)
+            if len(villages) == 0:
+                msg.respond( _("nothing to leave") )
+                return msg.sender            
+            village_names = ''
+            for ville in villages:
+                village_names = ("%s %s") % (village_names, ville.name) 
+            msg.respond( _("Vous appartenez a: %(village_names)s") \
+                % {"village_names":village_names} )
+            return msg.sender
+        except:
+            traceback.print_exc()
+            rsp= _("register-fail")
+            self.debug(rsp)
+            msg.respond(rsp)
+
+    def help(self, msg):
+        msg.respond( _("help with commands") )
+
     def register_name(self, msg, family_name):
         try:
             msg.sender.family_name = family_name
@@ -199,10 +204,10 @@ class App(rapidsms.app.App):
             if ville is None:
                 # TODO: when this scales up, show 3 most similar village names
                 all_villages = Village.objects.all()[:3]
-                village_names = ""
                 if len(all_villages) == 0:
                     village_names = "village name"
                 else: 
+                    village_names = ""
                     for i in all_villages:
                         village_names = village_names + " " + i.name
                 resp =  _("village does not exist") % {"village_names": village_names} 
@@ -360,6 +365,9 @@ class App(rapidsms.app.App):
         self.__setLocale(DEFAULT_LANGUAGE)
 
     def __setLocale(self, locale):
+        """ Note that this function is NOT threadsafe
+            since it sets '_' within the module namespace
+        """
         if locale is not None:
             self.translators[locale].install(unicode=1)
         else: 
