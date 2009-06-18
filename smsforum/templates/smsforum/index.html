@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load pagination %}
+{% block title %}Villages{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>{% trans "Villages" %}</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">{% trans "Name" %}</th>
+				<th scope="col">{% trans "Members" %}</th>
+				<th scope="col">{% trans "Messages Sent This Week" %}</th>
+			</tr>
+		</thead>
+		<tbody>{% if villages.object_list %}{% for village in villages.object_list %}
+			<tr>
+				<td><a href="/villages/{{ village.pk }}"{% if village.name %}>{{ village.name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+				<td>{% if village.member_count %}{{ village.member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if village.message_count %}{{ village.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+			</tr>{% endfor %}{% else %}
+			<tr class="no-data">
+				<td colspan="3">
+					{% trans "No villages yet" %}
+					<a href="/reporters/add" class="add">
+						{% trans "Add a Village" %}
+					</a>
+				</td>
+			</tr>{% endif %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					{% paginator villages %}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+	<div class="toolbar">
+		<a href="/villages/add" class="add">{% trans "Add a Village" %}</a>
+	</div>
+</div>
+{% endblock %}
+

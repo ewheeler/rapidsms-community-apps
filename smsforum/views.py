@@ -9,27 +9,44 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 
 from rapidsms.webui.utils import *
-from apps.reporters.models import *
-from apps.reporters.utils import *
+from apps.smsforum.models import *
+from apps.smsforum.utils import *
+from apps.logger.models import *
+from apps.contacts.models import *
 
+@require_GET
+def index(req, template="smsforum/index.html"):
+    context = {}
+    villages = Village.objects.all()
+    
+    num_members = []
+    num_messages = []
+    for village in villages:
+        # once this site bears more load, we can replace flatten() with village.subnodes
+        # and stop reporting num_messages
+        village.member_count = len( village.flatten() )
+        village.message_count = ForumMessage.objects.filter(domain=village).count()
+        """for member in members:
+            conns = ChannelConnection.objects.filter(contact=member)
+            num_messages_per_conn = 0
+            for conn in conns:
+                #we only count incoming messages for now
+                #TODO: change to count()
+                messages = IncomingMessage.objects.filter(identity=conn.user_identifier)
+                num_messages_per_conn = num_messages_per_conn + len(messages)
+            village.message_count = village.message_count + num_messages_per_conn
+        """
+    context['villages'] = paginated(req, villages)
+    #messages sent this week
+    return render_to_response(req, template, context)
 
+"""
 def message(req, msg, link=None):
-    return render_to_response(req,
+    return render_to_response(req,u
         "message.html", {
             "message": msg,
             "link": link
     })
-
-
-@permission_required('reporters.can_view')
-@require_GET
-def index(req):
-    return render_to_response(req,
-        "reporters/index.html", {
-        "reporters": paginated(req, Contact.objects.all(), prefix="rep"),
-        "groups":    paginated(req, ReporterGroup.objects.flatten(), prefix="grp"),
-    })
-
 
 def check_reporter_form(req):
     
@@ -330,3 +347,4 @@ def edit_group(req, pk):
             return message(req,
                 "Group %d saved" % (grp.pk),
                 link="/reporters")
+"""

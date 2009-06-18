@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 
+""""
+DEPENDENCIES: 
+logger, contacts
+"""
+
 import re, os
 import rapidsms
 from rapidsms.parsers import Matcher
@@ -14,6 +19,7 @@ import string
 
 from apps.smsforum.models import *
 from apps.contacts.models import *
+from apps.logger.models import *
 
 DEFAULT_VILLAGE="Keur Samba Laube"
 DEFAULT_LANGUAGE="fre"
@@ -117,7 +123,9 @@ class App(rapidsms.app.App):
     
     def handle(self, msg):
         self.debug("REPORTER:HANDLE: %s" % msg.text)
-
+        
+        # for optimization later, we could do this in the logger class
+        # we use this approach now since it is more module
         matcher = Matcher(msg)
         
         # TODO: this is sort of a lightweight implementation
@@ -270,6 +278,7 @@ class App(rapidsms.app.App):
             msg.respond(rsp)
             recipients=set()
             for ville in villages:
+                self.__log_message(msg,ville)
                 recipients.update(ville.flatten())
 
             # because the group can be _long_ and messages are delivered
@@ -302,6 +311,9 @@ class App(rapidsms.app.App):
                 _("blast-fail") 
             )
         
+    def __log_message(self,msg, domain):
+        persistent_msg =  ForumMessage(message=msg.persistent_msg, domain=domain)
+        persistent_msg.save()
 
     def leave(self, msg):
         try:
