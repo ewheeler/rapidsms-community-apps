@@ -1,7 +1,8 @@
 from rapidsms.tests.scripted import TestScript
 from apps.reporters.models import *
 import apps.smsforum.app as smsforum_app
-import apps.location.app as location_app
+import apps.locations.app as location_app
+import apps.logger.app as logger_app
 import apps.contacts.app as contacts_app
 import apps.default.app as default_app
 from app import App
@@ -12,7 +13,7 @@ import os
 from datetime import datetime
  
 class TestApp (TestScript):
-    apps = (smsforum_app.App, location_app.App, contacts_app.App, App )
+    apps = (smsforum_app.App, location_app.App, contacts_app.App, logger_app.App, App )
  
     # the test_backend script does the loading of the dummy backend that allows reporters
     # to work properly in tests

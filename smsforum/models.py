@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 from apps.locations.models import *
 from apps.nodegraph.models import NodeSet
-from apps.logger.models import IncomingMessage, OutgoingMessage
+from apps.logger.models import IncomingMessage
 
 #
 # NEW STYLE COMMUNITIES/VILLAGES
@@ -22,11 +22,6 @@ class Village(NodeSet):
     location = models.ForeignKey(Location, null=True, blank=True)
     pass
 
-#these classes are required so we can track messages sent per domain
-class ForumMessage(models.Model):
-    message = models.ForeignKey(IncomingMessage)
-    domain = models.ForeignKey(Village)
-    
 #
 # 'Statics' as module level
 #

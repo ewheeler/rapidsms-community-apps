@@ -311,9 +311,9 @@ class App(rapidsms.app.App):
                 _("blast-fail") 
             )
         
-    def __log_message(self,msg, domain):
-        persistent_msg =  ForumMessage(message=msg.persistent_msg, domain=domain)
-        persistent_msg.save()
+    def __log_message(self,msg,domain):
+        msg.persistent_msg.domain = domain
+        msg.persistent_msg.save()
 
     def leave(self, msg):
         try:

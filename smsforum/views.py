@@ -14,6 +14,8 @@ from apps.smsforum.utils import *
 from apps.logger.models import *
 from apps.contacts.models import *
 
+from datetime import datetime, timedelta
+
 @require_GET
 def index(req, template="smsforum/index.html"):
     context = {}
@@ -25,17 +27,8 @@ def index(req, template="smsforum/index.html"):
         # once this site bears more load, we can replace flatten() with village.subnodes
         # and stop reporting num_messages
         village.member_count = len( village.flatten() )
-        village.message_count = ForumMessage.objects.filter(domain=village).count()
-        """for member in members:
-            conns = ChannelConnection.objects.filter(contact=member)
-            num_messages_per_conn = 0
-            for conn in conns:
-                #we only count incoming messages for now
-                #TODO: change to count()
-                messages = IncomingMessage.objects.filter(identity=conn.user_identifier)
-                num_messages_per_conn = num_messages_per_conn + len(messages)
-            village.message_count = village.message_count + num_messages_per_conn
-        """
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
     context['villages'] = paginated(req, villages)
     #messages sent this week
     return render_to_response(req, template, context)
