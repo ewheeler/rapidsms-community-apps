@@ -7,7 +7,7 @@ import re
 class App(rapidsms.app.App):
     prefix = re.compile(r'^echo\s+',re.I)
     def handle(self, message):
-        self.debug("got message %s", message.text)
+        self.debug("got message %r", message.text)
         if self.prefix.search(message.text):
             response = self.prefix.sub("",message.text)
             self.debug("responding with %s", response)
