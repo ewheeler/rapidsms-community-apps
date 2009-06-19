@@ -1,12 +1,8 @@
 {% extends "iavi/layout.html" %}
-{% block title %}Participant Summary{% endblock %}
+{% block title %}Delete Participant{% endblock %}
 {% block pagecontent %}
-<h2>Participant Summary Information</h2>
-{% if perms.iavi.can_write_users %}
-<br><a href="/iavi/participants/{{reporter.id}}/edit/">edit this information</a>
- | <a href="/iavi/participants/{{reporter.id}}/delete/">delete this participant</a>
-<br><br>
-{% endif %}
+{% if reporter %}
+<h2>Are you sure you want to delete this participant?</h2>
 <table>
     <tr>
         <td align="right">Participant #</td>
@@ -45,13 +41,13 @@
         <td><b>{{reporter.pin}}</b></td>
     </tr>
 </table>
-{% if perms.iavi.can_see_data %}
+<h4>{{ num_reports }} reports will also be deleted.  This cannot be undone!</h4>
+<form method="POST">
+    <input type="submit" value="Yes, delete" />
+</form>
 <br>
-<br>
-{% include "iavi/partials/kenya_data.html" %} 
-<br><br>
-{% include "iavi/partials/uganda_data.html" %} 
-<br>
-{% endif %}
+{% else %}
+<h4>There's nobody here anymore...</h4>
 <a href="/iavi/participants">back to participant list</a>
+{% endif %}
 {% endblock %}

@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AdminPasswordChangeForm
 
+
 def index(req):
     template_name="iavi/index.html"
     return render_to_response(req, template_name, {})
@@ -285,6 +286,23 @@ def participant_edit(req, id):
 
     template_name="iavi/participant_edit.html"
     return render_to_response(req, template_name, {"form" : form, "reporter" : reporter})
+
+
+@login_required
+@permission_required("iavi.can_write_participants")
+def participant_delete(req, id):
+    template_name="iavi/participant_delete.html"
+    num_reports = 0
+    try:
+        reporter = IaviReporter.objects.get(pk=id)
+        num_reports = len(Report.objects.filter(reporter=reporter))
+    except IaviReporter.DoesNotExist:
+        reporter = None
+    if req.method == 'POST': 
+        if reporter:
+            reporter.delete()
+        reporter = None
+    return render_to_response(req, template_name, {"reporter" : reporter, "num_reports" : num_reports})
 
 def _get_flag(ratio):
     if ratio <= .5:
