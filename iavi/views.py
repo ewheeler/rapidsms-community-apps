@@ -41,13 +41,23 @@ def compliance(req):
         
         reporter.all_reports = len(all_reports)
         reporter.all_compliant = len(all_reports.filter(status="F"))
+        if reporter.all_reports != 0:
+            reporter.all_ratio = float(reporter.all_compliant) / float(reporter.all_reports)
+            reporter.all_flag = _get_flag(reporter.all_ratio)
+                
         
         reporter.past_7_reports = len(last_7)
         reporter.past_7_compliant = len(last_7.filter(status="F"))
-        
+        if reporter.past_7_reports != 0:
+            reporter.past_7_ratio = float(reporter.past_7_compliant) /float(reporter.past_7_reports)  
+            reporter.past_7_flag = _get_flag(reporter.past_7_ratio)
+            
         reporter.past_30_reports = len(last_30)
         reporter.past_30_compliant = len(last_30.filter(status="F"))
-        
+        if reporter.past_30_reports != 0:
+            reporter.past_30_ratio = float(reporter.past_30_compliant) /float(reporter.past_30_reports)  
+            reporter.past_30_flag = _get_flag(reporter.past_30_ratio)
+            
     return render_to_response(req, template_name, {"reporters":reporters })
 
 @login_required
@@ -275,3 +285,11 @@ def participant_edit(req, id):
 
     template_name="iavi/participant_edit.html"
     return render_to_response(req, template_name, {"form" : form, "reporter" : reporter})
+
+def _get_flag(ratio):
+    if ratio <= .5:
+        return "severe"
+    elif ratio <= .75:
+        return "warning"
+    return "good"
+            

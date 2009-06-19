@@ -1,5 +1,11 @@
 {% extends "iavi/layout.html" %}
 {% block title %}IAVI Summary{% endblock %}
+{% block stylesheets %}
+<style>
+td.severe-compliance { background-color: #F2503A; }
+td.warn-compliance { background-color: #FCE63B; }
+</style>
+{% endblock %}
 {% block pagecontent %}
 <h2>Participants and their compliance.  All sites.</h2>
 <table width="100%"> 
