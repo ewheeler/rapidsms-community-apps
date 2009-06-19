@@ -17,23 +17,61 @@ from apps.smsforum.models import *
 from apps.contacts.models import *
 
 DEFAULT_VILLAGE="Keur Samba Laube"
-DEFAULT_LANGUAGE="fre"
-MAX_BLAST_CHARS=130
+MAX_BLAST_CHARS=140
 CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
 
-class App(rapidsms.app.App):
-    # tuple of 'name,language_code'
-    SUPPORTED_LANGUAGES = [
-        (u'English', 'eng'),
-        (u'Français', 'fre'),
-        (u'Pulaar','pul'),
-        (u'Wolof', 'wol'),
-        (u'Debug', 'deb')
-        ]
+         
+#
+# Module level translation calls so we don't have to prefix everything 
+# so we don't have to prefix _t() with 'self'!!
+#
 
+# Mutable globals hack 'cause Python module globals are WHACK
+_G= { 'SUPPORTED_LANGS': {
+        'eng':u'English',
+        'fre':u'Français',
+        'pul':u'Pulaar',
+        'wol':u'Wolof',
+        'deb':u'Debug'
+    },
+      'DEFAULT_LANG':'fre',
+      'TRANSLATORS':dict()
+}
+
+def _initTranslators():
+    path = os.path.join(os.path.dirname(__file__),"locale")
+    for lang,name in _G['SUPPORTED_LANGS'].items():
+        trans = gettext.translation('messages',path,[lang,_G['DEFAULT_LANG']])
+        _G['TRANSLATORS'].update( {lang:trans} )
+
+def _t(text, locale=None):
+    """translate text with default language"""
+    translator=_G['TRANSLATORS'][_G['DEFAULT_LANG']]
+    if locale in _G['TRANSLATORS']:
+        translator=_G['TRANSLATORS'][locale]
+    return translator.gettext(text)
+
+def _st(sender,text):
+    """translate a message for the given sender"""
+    # TODO: handle fall back from say eng_US to eng
+    # AND mappings from old-stylie two letter ('en') to 
+    # new hotness 3-letter codes 'eng'
+
+    # AND, move this all into Contact?
+    return _t(text,locale=sender.locale)
+
+# init them translators!    
+_initTranslators()
+
+
+#
+# App class
+#
+
+class App(rapidsms.app.App):
     def help(self, msg,args):
         # TODO: grab senders language and translate based on that
-        msg.respond( _("help with commands") )
+        msg.respond( _st(msg.sender, "help with commands") )
 
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
@@ -81,16 +119,14 @@ class App(rapidsms.app.App):
         self.cmd_matcher=BestMatch(self.cmd_targets)
         villes=[v.name for v in Village.objects.all()]
         self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
-        self.lang_matcher=BestMatch(self.SUPPORTED_LANGUAGES)
-        print self.lang_matcher.targets
+        self.lang_matcher=BestMatch(_G['SUPPORTED_LANGS'].values())
 
     def start(self):
         # since the functionality of this app depends on a default group
         # make sure that this group is created explicitly in this app 
         # (instead of depending on a fixture)
         self.__loadFixtures()
-        self.__initTranslators()
-        
+                
         # fetch a list of all the backends
         # that we already have objects for
         known_backends = CommunicationChannel.objects.values_list("slug", flat=True)
@@ -149,7 +185,7 @@ class App(rapidsms.app.App):
         # Command processing
         if cmd is None:
             #user tried to send some sort of command (a message with .,#, or *, but nothing after)
-            msg.respond(_("Je comprends pas cet ordre"))
+            msg.respond(_st(msg.sender, "command-not-understood"))
             return True
 
         # Now match the possible command to ones we know
@@ -157,26 +193,31 @@ class App(rapidsms.app.App):
 
         if len(cmd_match)==0:
             # no command match
-            msg.respond(_("Je comprends pas cet ordre"))
+            msg.respond(_st(msg.sender, "command-not-understood"))
             return True
 
         if len(cmd_match)>1:
             # too many matches!
-            msg.respond(_('Command not understood. Did you mean one of: %(firsts)s or %(last)s?' %\
+            msg.respond(_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?' %\
                               { 'firsts':', '.join([t[0] for t in cmd_match[:-1]]),
                                 'last':cmd_match[-1:][0][0]}))
             return True
-
+        #
         # Ok! We got a real command
-        
-        # strip command from the
+        #
+        cmd,data=cmd_match[0]
+        # strip command from the string to get args
         args=msg_text[msg_match.end():]
-        print cmd_match
-        return cmd_match[0][1]['func'](msg,args)
+
+        # set the senders default language, if not sent
+        if msg.sender.locale is None:
+            msg.sender.locale=data['lang']
+            msg.sender.save()
+        return data['func'](msg,args)
         
       
     # admin utility!
-    def createvillage(self, msg, village=DEFAULT_VILLAGE):
+    def createvillage(self, msg, village):
         village = village.strip()
 
         try:
@@ -184,12 +225,12 @@ class App(rapidsms.app.App):
             self.debug("REPORTER:CREATEVILLAGE")
             ville = Village.objects.get_or_create(name=village)
             self.village_matcher.add_target(village)
-            msg.respond( _("village %s created") % (village) )
+            msg.respond( _st(msg.sender, "village %s created") % (village) )
             # TODO: remove this for production
         except:
             traceback.print_exc()
             msg.respond(
-                _("register-fail") 
+                _st(msg.sender, "register-fail") 
                 )
 
         return True
@@ -198,11 +239,11 @@ class App(rapidsms.app.App):
         try:
             msg.sender.family_name = family_name
             msg.sender.save()
-            rsp=( _("name-register-success %(name)s") % {'name':family_name} )
+            rsp=( _st(msg.sender, "name-register-success %(name)s") % {'name':family_name} )
             msg.respond(rsp)
         except:
             traceback.print_exc()
-            rsp= _("register-fail")
+            rsp= _st(msg.sender, "register-fail")
             self.debug(rsp)
             msg.respond(rsp)
 
@@ -225,7 +266,7 @@ class App(rapidsms.app.App):
                 else:
                     # use all hit targets
                     village_names=', '.join(matched_villes)
-                resp =  _("village does not exist") % {"village_names": village_names} 
+                resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names} 
                 msg.respond(resp)
                 return True
 
@@ -237,12 +278,12 @@ class App(rapidsms.app.App):
 
             ville=rs[0]
             msg.sender.add_to_group(ville)
-            rsp=_("first-login") % {"village": ville.name } 
+            rsp=_st(msg.sender, "first-login") % {"village": ville.name } 
             self.debug(rsp)
             msg.respond(rsp)
         except:
             traceback.print_exc()
-            rsp=_("register-fail")
+            rsp=_st(msg.sender, "register-fail")
             self.debug(rsp)
             msg.respond(rsp)
 
@@ -255,7 +296,7 @@ class App(rapidsms.app.App):
 
             # check for message length, and bounce messages that are too long
             if len(txt) > MAX_BLAST_CHARS:
-                rsp= _("Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
+                rsp= _st(msg.sender, "Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
                 msg.respond(rsp)
                 return True
 
@@ -267,14 +308,14 @@ class App(rapidsms.app.App):
             #find all reporters from the same location
             villages = VillagesForContact(sender)
             if len(villages)==0:
-                rsp=_("You must join a village before sending messages")
+                rsp=_st(msg.sender, "You must join a village before sending messages")
                 self.debug(rsp)
                 msg.respond(rsp)
                 return True
             village_names = ''
             for ville in villages:
                 village_names = ("%s %s") % (village_names, ville.name) 
-            rsp= _("success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
+            rsp= _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
             self.debug('REPSONSE TO BLASTER: %s' % rsp)
             msg.respond(rsp)
             recipients=set()
@@ -286,7 +327,7 @@ class App(rapidsms.app.App):
             # (minutes, 10s of minutes) to send all.
             # SO to keep people from thinking it didn't work and resending, 
             # send there response first
-            rsp_template=string.Template(_("%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+            rsp_template=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
                 { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
             # now iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
@@ -303,12 +344,12 @@ class App(rapidsms.app.App):
                         be.message(conn.user_identifier, announcement).send()
 
             village_names = village_names.strip()
-            self.debug( _("success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
+            self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return True
         except:
             traceback.print_exc()
             msg.respond(
-                _("blast-fail") 
+                _st(msg.sender, "blast-fail") 
             )
         
         return True
@@ -326,16 +367,16 @@ class App(rapidsms.app.App):
                         msg.sender.remove_from_group(ville)
                         names.append(ville.name)
                     msg.respond(
-                        _("leave-success") % { "village": ','.join(names)})
+                        _st(msg.sender, "leave-success") % { "village": ','.join(names)})
                     return True
-            msg.respond( _("nothing to leave") )
+            msg.respond( _st(msg.sender, "nothing to leave") )
             return True
         # something went wrong - at the
         # moment, we don't care what
         except:
             traceback.print_exc()
             msg.respond(
-                _("leave-fail") 
+                _st(msg.sender, "leave-fail") 
             )
 
         return True
@@ -344,21 +385,29 @@ class App(rapidsms.app.App):
         # TODO: make this a decorator to be used in all functions
         # so that users don't have to register in order to get going
         self.debug("REPORTER:LANG")
+        if name=='':
+            # return current lang
+            lang=msg.sender.locale
+            if lang is None:
+                lang=_G['DEFAULT_LANG']
+            resp=_st(msg.sender, "current-lang %(lang)s" % \
+                           { 'lang':_G['SUPPORTED_LANGS'][lang]})
+            msg.respond(resp)
+            return True
         
         # see if we have that language
         langs=self.lang_matcher.match(name.strip(),with_data=True)
         if len(langs)==1:
             name,code=langs[0]
-            msg.sender.set_locale(code)
+            msg.sender.locale=code
             msg.sender.save()
-            self.__setLocale(code)
-            resp = _("lang-set %(lang_code)s") % { 'lang_code': name }
+            resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
             self.debug(resp)
         
         # invalid language code. don't do
         # anything, just send an error message
         else: 
-            resp = _("bad-lang")
+            resp = _st(msg.sender, "bad-lang")
         
         msg.respond( resp )
         return True
@@ -366,21 +415,3 @@ class App(rapidsms.app.App):
     def __loadFixtures(self):
         # Village.objects.get_or_create(name=DEFAULT_VILLAGE)
         pass
-         
-    def __initTranslators(self):
-        self.translators = {}
-        path = os.path.join(os.path.dirname(__file__),"locale")
-        for name,lang in self.SUPPORTED_LANGUAGES:
-            trans = gettext.translation(lang,path,[lang])
-            self.translators.update( {lang:trans} )
-        self.__setLocale(DEFAULT_LANGUAGE)
-
-    def __setLocale(self, locale):
-        if locale is not None:
-            self.translators[locale].install(unicode=1)
-        else: 
-            self.__setLocale(DEFAULT_LANGUAGE)
-
-
-    
-

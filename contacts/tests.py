@@ -82,23 +82,15 @@ class TestApp (TestScript):
         p1=self.m_nodes[0]
         p2=self.w_nodes[1]
 
-        print p1.locales
         print p1.locale
         p1.locale=fr
-        print p1.locales
-        print p1.locale
+        p1.save()
+        self.assertTrue(p1.locale==fr)
         p1.locale=en
-        print p1.locales
-        print p1.locale
-        p1.add_locale(wo,1)
-        p1.add_locale(fr,2)
-        p1.add_locale(en,3)
-        p1.add_locale(fr,4)
-        print p1.locales
-        print p1.locale
+        self.assertTrue(p1.locale==en)
         p2.locale=wo
-        print 'p2 %s' % p2.locales
-        print 'p1 %s' % p1.locales
+        p2.save()
+        self.assertTrue(p1.locale==en and p2.locale==wo)
 
     def testDowncast(self):
         v=Village(name='v1')
