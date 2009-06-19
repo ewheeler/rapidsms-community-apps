@@ -193,11 +193,11 @@ class App(rapidsms.app.App):
     def help(self, msg):
         msg.respond( _("help with commands") )
 
-    def register_name(self, msg, family_name):
+    def register_name(self, msg, given_name):
         try:
-            msg.sender.family_name = family_name
+            msg.sender.given_name = given_name
             msg.sender.save()
-            rsp=( _("name-register-success %(name)s") % {'name':family_name} )
+            rsp=( _("name-register-success %(name)s") % {'name':given_name} )
             msg.respond(rsp)
         except:
             traceback.print_exc()
@@ -278,7 +278,7 @@ class App(rapidsms.app.App):
             msg.respond(rsp)
             recipients=set()
             for ville in villages:
-                self.__log_message(msg,ville)
+                self.__log_incoming_message(msg,ville)
                 recipients.update(ville.flatten())
 
             # because the group can be _long_ and messages are delivered
@@ -311,7 +311,7 @@ class App(rapidsms.app.App):
                 _("blast-fail") 
             )
         
-    def __log_message(self,msg,domain):
+    def __log_incoming_message(self,msg,domain):
         msg.persistent_msg.domain = domain
         msg.persistent_msg.save()
 
@@ -384,7 +384,13 @@ class App(rapidsms.app.App):
             self.translators[locale].install(unicode=1)
         else: 
             self.__setLocale(DEFAULT_LANGUAGE)
-
-
+            
+    def outgoing(self, msg):
+        # TODO
+        # create a ForumMessage class
+        # log messages with associated domain
+        # report on dashboard
+        pass
+        
     
 

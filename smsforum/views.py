@@ -29,11 +29,117 @@ def index(req, template="smsforum/index.html"):
         village.member_count = len( village.flatten() )
         last_week = ( datetime.now()-timedelta(weeks=1) )
         village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
+        village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
     #messages sent this week
     return render_to_response(req, template, context)
 
+def edit_village(req, pk, template="smsforum/members.html"):
+    context = {}
+    village = Village.objects.get(id=pk)
+    members = village.flatten(klass=Contact)
+    for member in members:
+        connections = ChannelConnection.objects.filter(contact=member)
+        if len(connections) > 0:
+            # we can always click on the user to see a list of all their connections
+            member.phone_number = connections[0].user_identifier
+            last_week = ( datetime.now()-timedelta(weeks=1) )
+            member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
+    context['village_name'] = village.name
+    context['members'] = paginated(req, members)
+    return render_to_response(req, template, context)
+
+def edit_member(req, pk, template="smsforum/member.html"):
+    context = {}
+    contact = Contact.objects.get(id=pk)
+    """ TEMP fix later """
+    connections = ChannelConnection.objects.filter(contact=contact)
+    if len(connections) <= 0:
+        return render_to_response(req, template, context)        
+    contact.phone_number = connections[0].user_identifier
+    last_week = ( datetime.now()-timedelta(weeks=1) )
+    messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week)
+    contact.message_count = len(messages)
+    context['member'] = contact
+    context['edit_link'] = "http://127.0.0.1:8000/admin/contacts/contact/"
+    context['messages'] = paginated(req, messages)
+    return render_to_response(req, template, context)
 """
+@require_http_methods(["GET", "POST"])  
+def edit_reporter(req, pk):
+    rep = get_object_or_404(Contact, pk=pk)
+    
+    def get(req):
+        return render_to_response(req,
+            "reporters/reporter.html", {
+                
+                # display paginated reporters in the left panel
+                "reporters": paginated(req, Contact.objects.all()),
+                
+                # list all groups + backends in the edit form
+                "all_groups": ReporterGroup.objects.flatten(),
+                "all_backends": PersistantBackend.objects.all(),
+                
+                # split objects linked to the editing reporter into
+                # their own vars, to avoid coding in the template
+                "connections": rep.connections.all(),
+                "groups":      rep.groups.all(),
+                "reporter":    rep })
+    
+    @transaction.commit_manually
+    def post(req):
+        
+        # if DELETE was clicked... delete
+        # the object, then and redirect
+        if req.POST.get("delete", ""):
+            pk = rep.pk
+            rep.delete()
+            
+            transaction.commit()
+            return message(req,
+                "Contact %d deleted" % (pk),
+                link="/reporters")
+                
+        else:
+            # check the form for errors (just
+            # missing fields, for the time being)
+            errors = check_reporter_form(req)
+            
+            # if any fields were missing, abort. this is
+            # the only server-side check we're doing, for
+            # now, since we're not using django forms here
+            if errors["missing"]:
+                transaction.rollback()
+                return message(req,
+                    "Missing Field(s): %s" %
+                        ", ".join(errors["missing"]),
+                    link="/reporters/%s" % (rep.pk))
+            
+            try:
+                # automagically update the fields of the
+                # reporter object, from the form
+                update_via_querydict(rep, req.POST).save()
+                update_reporter(req, rep)
+                
+                # no exceptions, so no problems
+                # commit everything to the db
+                transaction.commit()
+                
+                # full-page notification
+                return message(req,
+                    "Contact %d updated" % (rep.pk),
+                    link="/reporters")
+            
+            except Exception, err:
+                transaction.rollback()
+                raise
+        
+    # invoke the correct function...
+    # this should be abstracted away
+    if   req.method == "GET":  return get(req)
+    elif req.method == "POST": return post(req)
+
+
 def message(req, msg, link=None):
     return render_to_response(req,u
         "message.html", {
@@ -188,79 +294,6 @@ def add_reporter(req):
     elif req.method == "POST": return post(req)
 
 
-@require_http_methods(["GET", "POST"])  
-def edit_reporter(req, pk):
-    rep = get_object_or_404(Contact, pk=pk)
-    
-    def get(req):
-        return render_to_response(req,
-            "reporters/reporter.html", {
-                
-                # display paginated reporters in the left panel
-                "reporters": paginated(req, Contact.objects.all()),
-                
-                # list all groups + backends in the edit form
-                "all_groups": ReporterGroup.objects.flatten(),
-                "all_backends": PersistantBackend.objects.all(),
-                
-                # split objects linked to the editing reporter into
-                # their own vars, to avoid coding in the template
-                "connections": rep.connections.all(),
-                "groups":      rep.groups.all(),
-                "reporter":    rep })
-    
-    @transaction.commit_manually
-    def post(req):
-        
-        # if DELETE was clicked... delete
-        # the object, then and redirect
-        if req.POST.get("delete", ""):
-            pk = rep.pk
-            rep.delete()
-            
-            transaction.commit()
-            return message(req,
-                "Contact %d deleted" % (pk),
-                link="/reporters")
-                
-        else:
-            # check the form for errors (just
-            # missing fields, for the time being)
-            errors = check_reporter_form(req)
-            
-            # if any fields were missing, abort. this is
-            # the only server-side check we're doing, for
-            # now, since we're not using django forms here
-            if errors["missing"]:
-                transaction.rollback()
-                return message(req,
-                    "Missing Field(s): %s" %
-                        ", ".join(errors["missing"]),
-                    link="/reporters/%s" % (rep.pk))
-            
-            try:
-                # automagically update the fields of the
-                # reporter object, from the form
-                update_via_querydict(rep, req.POST).save()
-                update_reporter(req, rep)
-                
-                # no exceptions, so no problems
-                # commit everything to the db
-                transaction.commit()
-                
-                # full-page notification
-                return message(req,
-                    "Contact %d updated" % (rep.pk),
-                    link="/reporters")
-            
-            except Exception, err:
-                transaction.rollback()
-                raise
-        
-    # invoke the correct function...
-    # this should be abstracted away
-    if   req.method == "GET":  return get(req)
-    elif req.method == "POST": return post(req)
 
 
 @require_http_methods(["GET", "POST"])

@@ -7,9 +7,8 @@ import apps.smsforum.views as views
 
 
 urlpatterns = patterns('',
-    url(r'^villages$',             views.index),
+    url(r'^villages$',                      views.index),
+    url(r'^villages/(?P<pk>\d+)$',          views.edit_village),
+    url(r'^villages/member/(?P<pk>\d+)$',   views.edit_member),
 )
 
-""" url(r'^villages/add$',         views.add_village,  name="add-reporter"),
-    url(r'^villages/(?P<pk>\d+)$', views.edit_village, name="view-reporter"),
-"""
