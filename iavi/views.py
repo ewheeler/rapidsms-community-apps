@@ -29,7 +29,7 @@ def compliance(req):
         else:
             return render_to_response(req, "iavi/no_profile.html", {})
     
-    reporters = IaviReporter.objects.filter(location__in=locations)
+    reporters = IaviReporter.objects.filter(location__in=locations).order_by('alias')
     seven_days = timedelta(days=7)
     thirty_days = timedelta(days=30)
     tomorrow = datetime.today() + timedelta(days=1)
@@ -202,7 +202,7 @@ def participants(req):
         else:
             return render_to_response(req, "iavi/no_profile.html", {})
     
-    reporters = IaviReporter.objects.filter(location__in=locations)
+    reporters = IaviReporter.objects.filter(location__in=locations).order_by('alias')
     return render_to_response(req, template_name, {"reporters" : reporters })
 
 
