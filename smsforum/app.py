@@ -15,10 +15,8 @@ import string
 from apps.smsforum.models import *
 from apps.contacts.models import *
 
-DEFAULT_VILLAGE="Keur Samba Laube"
 MAX_BLAST_CHARS=140
 CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
-
          
 #
 # Module level translation calls so we don't have to prefix everything 
@@ -369,7 +367,6 @@ class App(rapidsms.app.App):
 
 
     def __loadFixtures(self):
-        # Village.objects.get_or_create(name=DEFAULT_VILLAGE)
         pass
 
 
