@@ -72,7 +72,7 @@ class Contact(Node):
             ("can_view", "Can view"),
         )
     """
-    
+
     def __unicode__(self):
         return unicode(self.signature())
 
@@ -153,9 +153,10 @@ class Contact(Node):
                 else:
                     return ( "%s" % rs[0].user_identifier )
             return ( "%s" % self.family_name )
-        return (("%s %s") % (self.given_name + self.family_name))
+        if len(self.family_name)>0:
+            return (("%s %s") % (self.given_name + self.family_name))
+        return (("%s") % (self.given_name))
     
-
 class LocalePreference(models.Model):
     """
     Preference order for a Contact's locales (languages).
