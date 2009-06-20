@@ -485,15 +485,16 @@ class Contact(Node):
 
     @property
     def signature(self):
-        if len(self.given_name)==0:
-            if len(self.family_name)==0:
-                rs = ChannelConnection.objects.filter(contact=self)
-                if len(rs)==0:
-                    return self.id
-                else:
-                    return ( "%s" % rs[0].user_identifier )
-            return ( "%s" % self.family_name )
-        return (("%s %s") % (self.given_name + self.family_name))
+        sig=self.common_name
+        if len(sig.strip())==0:
+            sig=u' '.join([self.given_name,self.family_name])
+        if len(sig.strip())==0:
+            rs = ChannelConnection.objects.filter(contact=self)
+            if len(rs)==0:
+                sig=str(self.id)
+            else:
+                sig=rs[0].user_identifier
+        return sig
     
 
 #basically a PersistentBackend

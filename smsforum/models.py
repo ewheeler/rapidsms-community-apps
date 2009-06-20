@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 
 from apps.locations.models import *
 from apps.nodegraph.models import NodeSet
+from apps.logger.models import IncomingMessage
 
 #
 # NEW STYLE COMMUNITIES/VILLAGES

@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4
 
+""""
+DEPENDENCIES: 
+logger, contacts
+"""
+
 import re, os
 import rapidsms
 from rapidsms.parsers import Matcher
@@ -14,6 +19,7 @@ import string
 
 from apps.smsforum.models import *
 from apps.contacts.models import *
+from apps.logger.models import *
 
 MAX_BLAST_CHARS=140
 CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
@@ -25,11 +31,11 @@ CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
 
 # Mutable globals hack 'cause Python module globals are WHACK
 _G= { 'SUPPORTED_LANGS': {
+        # 'deb':u'Debug',
         'eng':u'English',
         'fre':u'Français',
         'pul':u'Pulaar',
         'wol':u'Wolof',
-        'deb':u'Debug'
     },
       'DEFAULT_LANG':'fre',
       'TRANSLATORS':dict()
@@ -64,10 +70,6 @@ _initTranslators()
 #
 
 class App(rapidsms.app.App):
-    def help(self, msg,args):
-        # TODO: grab senders language and translate based on that
-        msg.sender.send_to(_st(msg.sender, "help with commands"))
-
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
 
@@ -82,11 +84,15 @@ class App(rapidsms.app.App):
             ('language', {'lang':'eng','func':self.lang}),
             ('help', {'lang':'eng','func':self.help}),
             ('create', {'lang':'eng','func':self.createvillage}),
+            ('member', {'lang':'eng','func':self.member}),
             # French
             ('entrer', {'lang':'fre','func':self.join}),
             ('nom', {'lang':'fre','func':self.register_name}),
             ('quitter', {'lang':'fre','func':self.leave}),
             ('aide', {'lang':'fre','func':self.help}),
+            # TODO: make best matcher smart about accents...
+            ('créer', {'lang':'fre','func':self.createvillage}),
+            ('creer', {'lang':'fre','func':self.createvillage}),
             # Pulaar
             ('naalde', {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
@@ -97,7 +103,8 @@ class App(rapidsms.app.App):
             ('yokk', {'lang':'wol','func':self.join}),
             ('duggu', {'lang':'wol','func':self.join}),
             ('sant', {'lang':'wol','func':self.register_name}),
-            ('maa ngi tudd', {'lang':'wol','func':self.register_name}),
+            # spaces are bad!! Keywords must be one word--so comel case this one
+            ('maaNgiTudd', {'lang':'wol','func':self.register_name}), 
             ('genn', {'lang':'wol','func':self.leave}),
             ('help', {'lang':'wol','func':self.help}),
             # Debug calls ('deb' language==debug)
@@ -109,9 +116,9 @@ class App(rapidsms.app.App):
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
-        villes=[v.name for v in Village.objects.all()]
+        villes=[(v.name,v) for v in Village.objects.all()]
         self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
-        # swap dict so that we send in (name,code) tuples rather than (code,name)
+        # swap dict so that we send in (name,code) tuples rather than (code,name
         self.lang_matcher=BestMatch([
                 (name,code) for code,name in _G['SUPPORTED_LANGS'].items()
                 ])
@@ -176,25 +183,32 @@ class App(rapidsms.app.App):
         # Ok! We got a real command
         #
         cmd,data=cmd_match[0]
-        # strip command from the string to get args
-        args=msg_text[msg_match.end():]
+        arg=msg_text[msg_match.end():]
 
         # set the senders default language, if not sent
         if msg.sender.locale is None:
             msg.sender.locale=data['lang']
             msg.sender.save()
-        return data['func'](msg,args)
+        return data['func'](msg,arg=arg)
         
-      
-    # admin utility!
-    def createvillage(self, msg, village):
-        village = village.strip()
+    def help(self, msg,arg=None):
+        # TODO: grab senders language and translate based on that
+        msg.sender.send_to(_st(msg.sender, "help with commands"))
+        return True
+
+    def createvillage(self, msg, arg=None):
+        self.debug("SMSFORUM:CREATEVILLAGE")        
+        if arg is None or len(arg)<1:
+            msg.sender.send_to(_st(msg.sender, "Please send a village name: #send 'village name'"))
+            return True
+        else:
+            village = arg
 
         try:
             # TODO: add administrator authentication
-            self.debug("SMSFORUM:CREATEVILLAGE")
+
             ville = Village.objects.get_or_create(name=village)
-            self.village_matcher.add_target(village)
+            self.village_matcher.add_target((village,ville))
             msg.sender.send_to(_st(msg.sender, "village %s created") % village)
             # TODO: remove this for production
         except:
@@ -203,11 +217,36 @@ class App(rapidsms.app.App):
 
         return True
              
-    def register_name(self, msg, family_name):
+    def member(self,msg,arg=None):
+        # TODO: process argument to say if you
+        # are a member of _that_ village only
         try:
-            msg.sender.family_name = family_name
+            villages=VillagesForContact(msg.sender)
+            if len(villages)==0:
+                msg.sender.send_to( _st(msg.sender, "nothing to leave"))
+            else:
+                village_names = ', '.join([v.name for v in villages])
+                msg.sender.send_to(_st(msg.sender, "member-of %(village_names)s") \
+                                       % {"village_names":village_names})
+        except:
+            traceback.print_exc()
+            rsp= _st(msg.sender,"register-fail")
+            self.debug(rsp)
+            msg.sender.send_to(rsp)
+        return True
+            
+    def register_name(self,msg,arg=None):
+        print arg
+        if arg is None or len(arg)==0:
+            msg.sender.send_to(_st(msg.sender,
+                "name-register-success %(name)s") % {'name':msg.sender.signature})
+            return True
+
+        name=arg
+        try:
+            msg.sender.common_name = name
             msg.sender.save()
-            rsp=( _st(msg.sender, "name-register-success %(name)s") % {'name':family_name})
+            rsp=_st(msg.sender, "name-register-success %(name)s") % {'name':msg.sender.common_name}
             msg.sender.send_to(rsp)
         except:
             traceback.print_exc()
@@ -217,35 +256,45 @@ class App(rapidsms.app.App):
 
         return True
 
-    def join(self, msg, village):
+    def __suggest_villages(self,msg):
+        """helper to send informative messages"""
+        # pick some names from the DB
+        village_names = [v.name for v in Village.objects.all()[:3]]
+        if len(village_names) == 0:
+            village_names = _st(msg.sender,"village name")
+        else: 
+            village_names=', '.join(village_names)
+        resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names}
+        msg.sender.send_to(resp)
+        return True
+
+    def join(self,msg,arg=None):
+        suggest=False
+        if arg is None or len(arg)==0:
+            return self.__suggest_villages(msg)
+        else:
+            village=arg
+
         try:
-            matched_villes=self.village_matcher.match(village)
+            matched_villes=self.village_matcher.match(village,with_data=True)
             # send helpful message if 0 or more than 1 found
             num_villes=len(matched_villes)
+            # unzip data from names if can
+            if num_villes>0:
+                village_names,villages=zip(*matched_villes)
             if num_villes==0 or num_villes>1:
                 if num_villes==0:
-                    # pick some names from the DB
-                    village_names = [v.name for v in Village.objects.all()[:3]]
-                    if len(village_names) == 0:
-                        village_names = _st(msg.sender,"village name")
-                    else: 
-                        village_names=', '.join(village_names)
+                    return self.__suggest_villages(msg)
                 else:
                     # use all hit targets
-                    village_names=', '.join(matched_villes)
-                resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names}
-                msg.sender.send_to(resp)
-                return True
+                    resp=_st(msg.sender, "village does not exist") % \
+                        {"village_names": ', '.join(village_names)}
+                    msg.sender.send_to(resp)
+                    return True
 
             # ok, here we got just one
-            rs=Village.objects.filter(name=matched_villes[0])
-            if len(rs) != 1:
-                # huh? that's supposed to be Unique
-                raise Exception('Multiple entries for village: %s' % matched_villes[0])
-
-            ville=rs[0]
-            msg.sender.add_to_group(ville)
-            rsp=_st(msg.sender, "first-login") % {"village": ville.name } 
+            msg.sender.add_to_group(villages[0])
+            rsp=_st(msg.sender, "first-login") % {"village": village_names[0]}
             self.debug(rsp)
             msg.sender.send_to(rsp)
         except:
@@ -305,47 +354,54 @@ class App(rapidsms.app.App):
         except:
             traceback.print_exc()
             msg.sender.send_to(_st(msg.sender, "blast-fail"))
-        
         return True
 
-    def leave(self, msg,arg):
+    def __log_incoming_message(self,msg,domain):
+        msg.persistent_msg.domain = domain
+        msg.persistent_msg.save()
+
+    def leave(self,msg,arg=None):
+        self.debug("SMSFORUM:LEAVE: %s" % arg)
         try:
-            self.debug("SMSFORUM:LEAVE")
-            if msg.sender is not None:
+            villages=[]
+            if arg is not None and len(arg)>0:
+                village_tupes=self.village_matcher.match(arg,with_data=True)
+                if len(village_tupes)>0:
+                    villages=zip(*village_tupes)[1] # the objects
+            else:
                 villages=VillagesForContact(msg.sender)
-                if len(villages)>0:
-                    #default to deleting all persistent connections with the same identity
-                    #we can always come back later and make sure we are deleting the right backend
-                    names=list()
-                    for ville in villages:
-                        msg.sender.remove_from_group(ville)
-                        names.append(ville.name)
-                    msg.sender.send_to(_st(msg.sender, "leave-success") % \
-                                           { "village": ','.join(names)})
-                    return True
-            msg.sender.send_to( _st(msg.sender, "nothing to leave"))
-            return True
-        # something went wrong - at the
-        # moment, we don't care what
+            if len(villages)>0:
+                names=list()
+                for ville in villages:
+                    msg.sender.remove_from_group(ville)
+                    names.append(ville.name)
+                msg.sender.send_to(_st(msg.sender, "leave-success") % \
+                                       { "village": ','.join(names)})
+            else:
+                msg.sender.send_to( _st(msg.sender, "nothing to leave"))
         except:
+            # something went wrong - at the
+            # moment, we don't care what
             traceback.print_exc()
             msg.sender.send_to(_st(msg.sender, "leave-fail"))
 
         return True
 
-    def lang(self, msg, name):
-        # TODO: make this a decorator to be used in all functions
-        # so that users don't have to register in order to get going
+    def lang(self,msg,arg=None):
+        name=arg
         self.debug("SMSFORUM:LANG:Current locale: %s" % msg.sender.locale)
-        if name=='':
-            # return current lang
-            lang=msg.sender.locale
-            if lang is None:
-                lang=_G['DEFAULT_LANG']
-            resp=_st(msg.sender, "current-lang %(lang)s") % \
-                           { 'lang':_G['SUPPORTED_LANGS'][lang]}
+        
+        def _return_all_langs():
+            # return available langs
+            langs_sorted=_G['SUPPORTED_LANGS'].values()
+            langs_sorted.sort()
+            resp=_st(msg.sender, "supported-langs: %(langs)s") % \
+                { 'langs':', '.join(langs_sorted)}
             msg.sender.send_to(resp)
             return True
+
+        if len(name)==0:
+            return _return_all_langs()
         
         # see if we have that language
         langs=self.lang_matcher.match(name.strip(),with_data=True)
@@ -354,21 +410,20 @@ class App(rapidsms.app.App):
             msg.sender.locale=code
             msg.sender.save()
             resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
-                   
-        # invalid language code. don't do
-        # anything, just send an error message
+            msg.sender.send_to(resp)
+            return True       
         else: 
-            resp = _st(msg.sender, "bad-lang")
-        
-        self.debug(resp)        
-        msg.sender.send_to(resp)
-
-        return True
-
+            # invalid lang code, send them a list
+            return _return_all_langs()
 
     def __loadFixtures(self):
         pass
 
-
-
+    def outgoing(self, msg):
+        # TODO
+        # create a ForumMessage class
+        # log messages with associated domain
+        # report on dashboard
+        pass
+        
                         

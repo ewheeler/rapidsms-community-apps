@@ -3,15 +3,12 @@
 
 
 from django.conf.urls.defaults import *
-import apps.reporters.views as views
+import apps.smsforum.views as views
 
 
 urlpatterns = patterns('',
-    url(r'^contacts$',             views.index),
-    url(r'^contacts/add$',         views.add_reporter,  name="add-reporter"),
-    url(r'^contacts/(?P<pk>\d+)$', views.edit_reporter, name="view-reporter"),
-    
-    url(r'^groups/$',            views.index),
-    url(r'^groups/add$',         views.add_group),
-    url(r'^groups/(?P<pk>\d+)$', views.edit_group),
+    url(r'^villages$',                      views.index),
+    url(r'^villages/(?P<pk>\d+)$',          views.edit_village),
+    url(r'^villages/member/(?P<pk>\d+)$',   views.edit_member),
 )
+
