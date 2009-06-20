@@ -79,7 +79,7 @@ msgstr "Sorry, there has been an error - please try again later"
 
 #: app.py:275
 msgid "lang-set %(lang_code)s"
-msgstr "Your language is now set to English"
+msgstr "Your language is now set to %(lang_code)"
 
 #: app.py:279
 msgid "bad-lang"

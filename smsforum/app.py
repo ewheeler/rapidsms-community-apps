@@ -8,7 +8,6 @@ from rapidsms.parsers import Matcher
 from rapidsms.message import Message
 from rapidsms.parsers.bestmatch import BestMatch
 from models import *
-from apps.locations.models import *
 import gettext
 import traceback
 import string
@@ -56,8 +55,6 @@ def _st(sender,text):
     # TODO: handle fall back from say eng_US to eng
     # AND mappings from old-stylie two letter ('en') to 
     # new hotness 3-letter codes 'eng'
-
-    # AND, move this all into Contact?
     return _t(text,locale=sender.locale)
 
 # init them translators!    
@@ -71,7 +68,7 @@ _initTranslators()
 class App(rapidsms.app.App):
     def help(self, msg,args):
         # TODO: grab senders language and translate based on that
-        msg.respond( _st(msg.sender, "help with commands") )
+        msg.sender.respond(msg,_st(msg.sender, "help with commands"))
 
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
@@ -84,7 +81,7 @@ class App(rapidsms.app.App):
             ('join', {'lang':'eng','func':self.join}),
             ('name', {'lang':'eng','func':self.register_name}),
             ('leave', {'lang':'eng','func':self.leave}),
-            ('lang', {'lang':'eng','func':self.lang}),
+            ('language', {'lang':'eng','func':self.lang}),
             ('help', {'lang':'eng','func':self.help}),
             ('create', {'lang':'eng','func':self.createvillage}),
             # French
@@ -113,63 +110,38 @@ class App(rapidsms.app.App):
             ('dcreate', {'lang':'eng','func':self.createvillage})
             ]
         
-
-
-
         self.cmd_matcher=BestMatch(self.cmd_targets)
         villes=[v.name for v in Village.objects.all()]
         self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
-        self.lang_matcher=BestMatch(_G['SUPPORTED_LANGS'].values())
+        # swap dict so that we send in (name,code) tuples rather than (code,name)
+        self.lang_matcher=BestMatch([
+                (name,code) for code,name in _G['SUPPORTED_LANGS'].items()
+                ])
 
     def start(self):
-        # since the functionality of this app depends on a default group
-        # make sure that this group is created explicitly in this app 
-        # (instead of depending on a fixture)
         self.__loadFixtures()
-                
-        # fetch a list of all the backends
-        # that we already have objects for
-        known_backends = CommunicationChannel.objects.values_list("slug", flat=True)
-        
-        # find any running backends which currently
-        # don't have objects, and fill in the gaps
-        for be in self.router.backends:
-            if not be.slug in known_backends:
-                self.info("Creating PersistantBackenD object for %s (%s)" % (be.slug, be.title))
-                CommunicationChannel(slug=be.slug, title=be.title).save()    
     
     def parse(self, msg):
-        self.debug("REPORTER:PARSE")
-        # fetch the persistantconnection object
-        # for this message's sender (or create
-        # one if this is the first time we've
-        # seen the sender), and stuff the meta-
-        # dta into the message for other apps
-        msg.persistent_channel= CommunicationChannelFromMessage(msg)
-        msg.persistant_connection = ChannelConnectionFromMessage(msg)
-        msg.sender = ContactFromMessage(msg)
-        
-        # store a handy dictionary, containing the most useful persistance
-        # information that we have. this is useful when creating an object
-        # linked to _something_, like so:
-        # 
-        #   class SomeObject(models.Model):
-        #     reporter   = models.ForeignKey(Reporter, null=True)
-        #     connection = models.ForeignKey(PersistantConnection, null=True)
-        #     stuff      = models.CharField()
-        #
-        #   # this object will be linked to a reporter,
-        #   # if one exists - otherwise, a connection
-        #   SomeObject(stuff="hello", **msg.persistance_dict)
-        if msg.sender: msg.persistance_dict = { "reporter": msg.sender }
-        else:            msg.persistance_dict = { "connection": msg.persistant_connection }
-        
-        # log, whether we know who the sender is or not
-        if msg.sender: self.info("Identified: %s as %r" % (msg.persistant_connection.user_identifier, msg.sender))
-        else:            self.info("Unidentified: %s" % (msg.persistant_connection.user_identifier))
+        self.debug("SMSFORUM:PARSE")
+
+        msg.sender = ContactFromMessage(msg,self.router)
+        self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
+                      ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
     def handle(self, msg):
-        self.debug("REPORTER:HANDLE: %s" % msg.text)
+        self.debug("SMSFORUM:HANDLE: %s" % msg.text)
+
+        # check permissions
+        if msg.sender.perm_ignore:
+            self.debug('Ignoring sender: %s' % sender.signature)
+            return False
+
+        if not msg.sender.can_send:
+            self.debug('Sender: %s does no have receive perms' % sender.signature)
+            msg.sender.respond(msg,_st(msg.sender, 'Message rejected. User does not have send perms'))
+        
+        # Ok, we're all good, start processing
+        msg.sender.sent_message_accepted(msg)
         msg_text=msg.text.strip()
 
         #see if it is a command
@@ -185,7 +157,7 @@ class App(rapidsms.app.App):
         # Command processing
         if cmd is None:
             #user tried to send some sort of command (a message with .,#, or *, but nothing after)
-            msg.respond(_st(msg.sender, "command-not-understood"))
+            msg.sender.respond(msg,_st(msg.sender, "command-not-understood"))
             return True
 
         # Now match the possible command to ones we know
@@ -193,14 +165,14 @@ class App(rapidsms.app.App):
 
         if len(cmd_match)==0:
             # no command match
-            msg.respond(_st(msg.sender, "command-not-understood"))
+            msg.sender.respond(msg,_st(msg.sender, "command-not-understood"))
             return True
 
         if len(cmd_match)>1:
             # too many matches!
-            msg.respond(_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?' %\
+            msg.sender.respond(msg,_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?') %\
                               { 'firsts':', '.join([t[0] for t in cmd_match[:-1]]),
-                                'last':cmd_match[-1:][0][0]}))
+                                'last':cmd_match[-1:][0][0]})
             return True
         #
         # Ok! We got a real command
@@ -222,16 +194,14 @@ class App(rapidsms.app.App):
 
         try:
             # TODO: add administrator authentication
-            self.debug("REPORTER:CREATEVILLAGE")
+            self.debug("SMSFORUM:CREATEVILLAGE")
             ville = Village.objects.get_or_create(name=village)
             self.village_matcher.add_target(village)
-            msg.respond( _st(msg.sender, "village %s created") % (village) )
+            msg.sender.respond(msg,_st(msg.sender, "village %s created") % village)
             # TODO: remove this for production
         except:
             traceback.print_exc()
-            msg.respond(
-                _st(msg.sender, "register-fail") 
-                )
+            msg.sender.respond(msg,_st(msg.sender, "register-fail"))
 
         return True
              
@@ -239,13 +209,13 @@ class App(rapidsms.app.App):
         try:
             msg.sender.family_name = family_name
             msg.sender.save()
-            rsp=( _st(msg.sender, "name-register-success %(name)s") % {'name':family_name} )
-            msg.respond(rsp)
+            rsp=( _st(msg.sender, "name-register-success %(name)s") % {'name':family_name})
+            msg.sender.respond(msg,rsp)
         except:
             traceback.print_exc()
             rsp= _st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.respond(rsp)
+            msg.sender.respond(msg,rsp)
 
         return True
 
@@ -266,8 +236,8 @@ class App(rapidsms.app.App):
                 else:
                     # use all hit targets
                     village_names=', '.join(matched_villes)
-                resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names} 
-                msg.respond(resp)
+                resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names}
+                msg.sender.respond(msg,resp)
                 return True
 
             # ok, here we got just one
@@ -280,12 +250,12 @@ class App(rapidsms.app.App):
             msg.sender.add_to_group(ville)
             rsp=_st(msg.sender, "first-login") % {"village": ville.name } 
             self.debug(rsp)
-            msg.respond(rsp)
+            msg.sender.respond(msg,rsp)
         except:
             traceback.print_exc()
             rsp=_st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.respond(rsp)
+            msg.sender.respond(msg,rsp)
 
         return True
             
@@ -297,66 +267,54 @@ class App(rapidsms.app.App):
             # check for message length, and bounce messages that are too long
             if len(txt) > MAX_BLAST_CHARS:
                 rsp= _st(msg.sender, "Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
-                msg.respond(rsp)
+                msg.sender.respond(msg,rsp)
                 return True
 
-            #if sender is None:
-            #    #join default village and send to default village
-            #    sender = self.join(msg)
-
-            self.debug("REPORTER:BLAST")
+            self.debug("SMSFORUM:BLAST")
             #find all reporters from the same location
             villages = VillagesForContact(sender)
             if len(villages)==0:
                 rsp=_st(msg.sender, "You must join a village before sending messages")
                 self.debug(rsp)
-                msg.respond(rsp)
+                msg.sender.respond(msg,rsp)
                 return True
+
+            recipients=set()
             village_names = ''
             for ville in villages:
                 village_names = ("%s %s") % (village_names, ville.name) 
+                recipients.update(ville.flatten(klass=Contact))
+
+            # respond to sender first because the delay between now and the last recipient
+            # can be long
             rsp= _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
             self.debug('REPSONSE TO BLASTER: %s' % rsp)
-            msg.respond(rsp)
-            recipients=set()
-            for ville in villages:
-                recipients.update(ville.flatten())
-
-            # because the group can be _long_ and messages are delivered
-            # serially on a single modem install, it can take a long time
-            # (minutes, 10s of minutes) to send all.
-            # SO to keep people from thinking it didn't work and resending, 
-            # send there response first
+            msg.sender.respond(msg,rsp)
+            
+            # make message template for outbound
             rsp_template=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
                 { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
             # now iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
-            for recipient in recipients:
-                if int(recipient.id) != int(sender.id):
-                    #add signature
-                    announcement = rsp_template.substitute(sig=sender.signature().replace('$','$$'))
-                    #todo: limit chars to 1 txt message?
-                    conns = ChannelConnection.objects.all().filter(contact=recipient)
-                    for conn in conns:
-                        # todo: what is BE is gone? Use different one?
-                        self.debug( "SENDING ANNOUNCEMENT TO: %s VIA: %s" % (conn.user_identifier,conn.communication_channel.slug))
-                        be = self.router.get_backend(conn.communication_channel.slug)
-                        be.message(conn.user_identifier, announcement).send()
 
+            for recipient in recipients:
+                if recipient.id != sender and recipient.can_receive:
+                    #add signature
+                    announcement = rsp_template.substitute(sig=sender.signature.replace('$','$$'))
+                    #todo: limit chars to 1 txt message?
+                    contact.send(announcement,self) 
             village_names = village_names.strip()
             self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return True
         except:
             traceback.print_exc()
-            msg.respond(
-                _st(msg.sender, "blast-fail") 
-            )
+            msg.sender.respond(msg,_st(msg.sender, "blast-fail"))
         
         return True
 
     def leave(self, msg,arg):
         try:
-            self.debug("REPORTER:LEAVE")
+            self.debug("SMSFORUM:LEAVE")
             if msg.sender is not None:
                 villages=VillagesForContact(msg.sender)
                 if len(villages)>0:
@@ -366,33 +324,31 @@ class App(rapidsms.app.App):
                     for ville in villages:
                         msg.sender.remove_from_group(ville)
                         names.append(ville.name)
-                    msg.respond(
-                        _st(msg.sender, "leave-success") % { "village": ','.join(names)})
+                    msg.sender.respond(msg,_st(msg.sender, "leave-success") % \
+                                           { "village": ','.join(names)})
                     return True
-            msg.respond( _st(msg.sender, "nothing to leave") )
+            msg.sender.respond(msg, _st(msg.sender, "nothing to leave"))
             return True
         # something went wrong - at the
         # moment, we don't care what
         except:
             traceback.print_exc()
-            msg.respond(
-                _st(msg.sender, "leave-fail") 
-            )
+            msg.sender.respond(msg,_st(msg.sender, "leave-fail"))
 
         return True
 
     def lang(self, msg, name):
         # TODO: make this a decorator to be used in all functions
         # so that users don't have to register in order to get going
-        self.debug("REPORTER:LANG")
+        self.debug("SMSFORUM:LANG:Current locale: %s" % msg.sender.locale)
         if name=='':
             # return current lang
             lang=msg.sender.locale
             if lang is None:
                 lang=_G['DEFAULT_LANG']
-            resp=_st(msg.sender, "current-lang %(lang)s" % \
-                           { 'lang':_G['SUPPORTED_LANGS'][lang]})
-            msg.respond(resp)
+            resp=_st(msg.sender, "current-lang %(lang)s") % \
+                           { 'lang':_G['SUPPORTED_LANGS'][lang]}
+            msg.sender.respond(msg,resp)
             return True
         
         # see if we have that language
@@ -402,16 +358,22 @@ class App(rapidsms.app.App):
             msg.sender.locale=code
             msg.sender.save()
             resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
-            self.debug(resp)
-        
+                   
         # invalid language code. don't do
         # anything, just send an error message
         else: 
             resp = _st(msg.sender, "bad-lang")
         
-        msg.respond( resp )
+        self.debug(resp)        
+        msg.sender.respond(msg,resp)
+
         return True
-    
+
+
     def __loadFixtures(self):
         # Village.objects.get_or_create(name=DEFAULT_VILLAGE)
         pass
+
+
+
+                        
