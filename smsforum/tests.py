@@ -1,7 +1,5 @@
 from rapidsms.tests.scripted import TestScript
-from apps.reporters.models import *
-import apps.smsforum.app as reporter_app
-import apps.default.app as default_app
+import apps.smsforum.app as smsforum_app
 from app import App
 from django.core.management.commands.dumpdata import Command
 import time
@@ -10,7 +8,7 @@ import os
 from datetime import datetime
 
 class TestApp (TestScript):
-    apps = (reporter_app.App, App )
+    apps = (smsforum_app.App, App )
 
     # the test_backend script does the loading of the dummy backend that allows reporters
     # to work properly in tests

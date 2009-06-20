@@ -68,7 +68,7 @@ _initTranslators()
 class App(rapidsms.app.App):
     def help(self, msg,args):
         # TODO: grab senders language and translate based on that
-        msg.sender.respond(msg,_st(msg.sender, "help with commands"))
+        msg.sender.send_to(_st(msg.sender, "help with commands"))
 
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
@@ -138,7 +138,7 @@ class App(rapidsms.app.App):
 
         if not msg.sender.can_send:
             self.debug('Sender: %s does no have receive perms' % sender.signature)
-            msg.sender.respond(msg,_st(msg.sender, 'Message rejected. User does not have send perms'))
+            msg.sender.send_to(_st(msg.sender, 'Message rejected. User does not have send perms'))
         
         # Ok, we're all good, start processing
         msg.sender.sent_message_accepted(msg)
@@ -157,7 +157,7 @@ class App(rapidsms.app.App):
         # Command processing
         if cmd is None:
             #user tried to send some sort of command (a message with .,#, or *, but nothing after)
-            msg.sender.respond(msg,_st(msg.sender, "command-not-understood"))
+            msg.sender.send_to(_st(msg.sender, "command-not-understood"))
             return True
 
         # Now match the possible command to ones we know
@@ -165,12 +165,12 @@ class App(rapidsms.app.App):
 
         if len(cmd_match)==0:
             # no command match
-            msg.sender.respond(msg,_st(msg.sender, "command-not-understood"))
+            msg.sender.send_to(_st(msg.sender, "command-not-understood"))
             return True
 
         if len(cmd_match)>1:
             # too many matches!
-            msg.sender.respond(msg,_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?') %\
+            msg.sender.send_to(_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?') %\
                               { 'firsts':', '.join([t[0] for t in cmd_match[:-1]]),
                                 'last':cmd_match[-1:][0][0]})
             return True
@@ -197,11 +197,11 @@ class App(rapidsms.app.App):
             self.debug("SMSFORUM:CREATEVILLAGE")
             ville = Village.objects.get_or_create(name=village)
             self.village_matcher.add_target(village)
-            msg.sender.respond(msg,_st(msg.sender, "village %s created") % village)
+            msg.sender.send_to(_st(msg.sender, "village %s created") % village)
             # TODO: remove this for production
         except:
             traceback.print_exc()
-            msg.sender.respond(msg,_st(msg.sender, "register-fail"))
+            msg.sender.send_to(_st(msg.sender, "register-fail"))
 
         return True
              
@@ -210,12 +210,12 @@ class App(rapidsms.app.App):
             msg.sender.family_name = family_name
             msg.sender.save()
             rsp=( _st(msg.sender, "name-register-success %(name)s") % {'name':family_name})
-            msg.sender.respond(msg,rsp)
+            msg.sender.send_to(rsp)
         except:
             traceback.print_exc()
             rsp= _st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.sender.respond(msg,rsp)
+            msg.sender.send_to(rsp)
 
         return True
 
@@ -227,17 +227,16 @@ class App(rapidsms.app.App):
             if num_villes==0 or num_villes>1:
                 if num_villes==0:
                     # pick some names from the DB
-                    all_villages = Village.objects.all()[:3]
-                    village_names = ""
-                    if len(all_villages) == 0:
-                        village_names = "village name"
+                    village_names = [v.name for v in Village.objects.all()[:3]]
+                    if len(village_names) == 0:
+                        village_names = _st(msg.sender,"village name")
                     else: 
                         village_names=', '.join(village_names)
                 else:
                     # use all hit targets
                     village_names=', '.join(matched_villes)
                 resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names}
-                msg.sender.respond(msg,resp)
+                msg.sender.send_to(resp)
                 return True
 
             # ok, here we got just one
@@ -250,13 +249,12 @@ class App(rapidsms.app.App):
             msg.sender.add_to_group(ville)
             rsp=_st(msg.sender, "first-login") % {"village": ville.name } 
             self.debug(rsp)
-            msg.sender.respond(msg,rsp)
+            msg.sender.send_to(rsp)
         except:
             traceback.print_exc()
             rsp=_st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.sender.respond(msg,rsp)
-
+            msg.sender.send_to(rsp)
         return True
             
     def blast(self, msg):
@@ -267,7 +265,7 @@ class App(rapidsms.app.App):
             # check for message length, and bounce messages that are too long
             if len(txt) > MAX_BLAST_CHARS:
                 rsp= _st(msg.sender, "Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
-                msg.sender.respond(msg,rsp)
+                msg.sender.send_to(rsp)
                 return True
 
             self.debug("SMSFORUM:BLAST")
@@ -276,7 +274,7 @@ class App(rapidsms.app.App):
             if len(villages)==0:
                 rsp=_st(msg.sender, "You must join a village before sending messages")
                 self.debug(rsp)
-                msg.sender.respond(msg,rsp)
+                msg.sender.send_to(rsp)
                 return True
 
             recipients=set()
@@ -289,7 +287,7 @@ class App(rapidsms.app.App):
             # can be long
             rsp= _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
             self.debug('REPSONSE TO BLASTER: %s' % rsp)
-            msg.sender.respond(msg,rsp)
+            msg.sender.send_to(rsp)
             
             # make message template for outbound
             rsp_template=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
@@ -298,17 +296,17 @@ class App(rapidsms.app.App):
             # to, and queue up the same message to each of them
 
             for recipient in recipients:
-                if recipient.id != sender and recipient.can_receive:
+                if recipient != msg.sender and recipient.can_receive:
                     #add signature
                     announcement = rsp_template.substitute(sig=sender.signature.replace('$','$$'))
                     #todo: limit chars to 1 txt message?
-                    contact.send(announcement,self) 
+                    recipient.send_to(announcement) 
             village_names = village_names.strip()
             self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return True
         except:
             traceback.print_exc()
-            msg.sender.respond(msg,_st(msg.sender, "blast-fail"))
+            msg.sender.send_to(_st(msg.sender, "blast-fail"))
         
         return True
 
@@ -324,16 +322,16 @@ class App(rapidsms.app.App):
                     for ville in villages:
                         msg.sender.remove_from_group(ville)
                         names.append(ville.name)
-                    msg.sender.respond(msg,_st(msg.sender, "leave-success") % \
+                    msg.sender.send_to(_st(msg.sender, "leave-success") % \
                                            { "village": ','.join(names)})
                     return True
-            msg.sender.respond(msg, _st(msg.sender, "nothing to leave"))
+            msg.sender.send_to( _st(msg.sender, "nothing to leave"))
             return True
         # something went wrong - at the
         # moment, we don't care what
         except:
             traceback.print_exc()
-            msg.sender.respond(msg,_st(msg.sender, "leave-fail"))
+            msg.sender.send_to(_st(msg.sender, "leave-fail"))
 
         return True
 
@@ -348,7 +346,7 @@ class App(rapidsms.app.App):
                 lang=_G['DEFAULT_LANG']
             resp=_st(msg.sender, "current-lang %(lang)s") % \
                            { 'lang':_G['SUPPORTED_LANGS'][lang]}
-            msg.sender.respond(msg,resp)
+            msg.sender.send_to(resp)
             return True
         
         # see if we have that language
@@ -365,7 +363,7 @@ class App(rapidsms.app.App):
             resp = _st(msg.sender, "bad-lang")
         
         self.debug(resp)        
-        msg.sender.respond(msg,resp)
+        msg.sender.send_to(resp)
 
         return True
 

@@ -155,22 +155,19 @@ class TestApp (TestScript):
         uid1='6175551212'
         print "Can't run this until I figure out how to get an 'app' object set up properly in the test harness"
 
-#        con1=connection.Connection(self.backend,uid0)
-#        msg=message.Message(con1, 'test message')
-#        channel_con0=contacts_models.ChannelConnectionFromMessage(msg,self.apps[1]._router)
+        con1=connection.Connection(self.backend,uid0)
+        msg=message.Message(con1, 'test message')
+        channel_con0=contacts_models.ChannelConnectionFromMessage(msg)
 
-        # assert that the ChannelConnection's contact has the correct ID
-#        self.assertTrue(channel_con0.contact.debug_id==uid0)
+        "assert that the ChannelConnection's contact has the correct ID"
+        self.assertTrue(channel_con0.contact.debug_id==uid0)
 
         # create a _different_ message on the same connection
-#        msg = message.Message(con1, 'Another Message')
-#        channel_con1=contacts_models.ChannelConnectionFromMessage(msg)
+        msg = message.Message(con1, 'Another Message')
+        channel_con1=contacts_models.ChannelConnectionFromMessage(msg)
 
         # assert channel_connections are the SAME
-#        self.assertTrue(channel_con0==channel_con1)
-
-        
-        pass
+        self.assertTrue(channel_con0==channel_con1)
         
     def testSimulation(self):
         pass

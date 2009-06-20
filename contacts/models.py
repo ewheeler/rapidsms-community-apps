@@ -4,7 +4,8 @@
 from datetime import datetime,timedelta
 
 from django.db import models
-from rapidsms import message,connection,router
+from rapidsms.message import Message
+from rapidsms.connection import Connection
 from apps.nodegraph.models import *
 
 # 
@@ -209,7 +210,7 @@ class Contact(Node):
     #
     # Use the following to make sure quotas are enforced!!
     #
-    def send(self,msg,com_channel=None):
+    def send_to(self,text,com_channel=None):
         """
         Send a message to the Contact.
 
@@ -230,18 +231,17 @@ class Contact(Node):
             # e.g. we can have 1 quota for SMS and another for Email
             raise QuotaException('User over send quota',quota_type.SEND)
 
+        connections=[]
         if com_channel is not None:
-            connects=[com_channel]
+            connections.append(com_channel)
         else:
-            connections=self.channel_connections
+            connections=self.channel_connections.all()
 
         try:
-            for conn in self.channel_connections:
+            for conn in connections:
                 comm_chan=conn.communication_channel
-                backend=comm_chan.backend
-                self.debug( "SENDING MESSAGE TO: %s VIA: %s" % (conn.user_identifier,backend.slug))
                 self._quota_receive_seen+=1
-                backend.message(conn.user_identifier, announcement).send()
+                Message(conn.connection, text).send()
         finally:
             self.save()
 
@@ -256,20 +256,6 @@ class Contact(Node):
 
         self._quota_send_seen+=1
         self.save()
-
-    def respond(self,msg,text):
-        """
-        Reply to a message for the contact and set send quota_type.
-
-        Raises QuotaException if user is over send quota.
-
-        """
-        if not self.under_quota_receive:
-            raise QuotaException('User over receive quota',quota_type.RECEIVE)
-
-        self._quota_receive_seen+=1
-        self.save()
-        msg.respond(text)
 
     @property
     def age_years(self):
@@ -308,19 +294,6 @@ class Contact(Node):
         return self.perm_send and self.under_quota_send
 
 
-    @property
-    def can_receive(self):
-        """
-        Returns a _SINGLE_ 'True/False' representing
-        
-        Both permissions and quota_type. 
-
-        E.g. True if-and-only-if user has both receive
-        permission and quota_type.
-
-        """
-        pass
-        
     @property
     def perm_receive(self):
         return bool(self._permissions & self.__PERM_RECEIVE)
@@ -537,34 +510,6 @@ class CommunicationChannel(models.Model):
     backend_slug = models.CharField(max_length=30,primary_key=True)
     title = models.CharField(max_length=255,blank=True)
 
-    # override init to set backend property which is not stored in db
-    def __init__(self, *args, **kwargs):
-        super(CommunicationChannel, self).__init__(*args, **kwargs)
-        self.__router=None
-        self.__backend=None
-
-    @property
-    def backend(self):
-        if self.backend is None and self.router is None:
-            raise Exception(\
-                'You must set the "router" property to a valid router before getting a backend.')
-        if self.backend is None:
-            self.backend=router.get_backend(self.backend_slug)
-        if self.backend is None:
-            raise Exception("Can't find backend: %s, did you disable it and not clear the DB?" %\
-                                self.backend_slug)
-        return self.backend
-
-    @property
-    def router(self):
-        return self.__router
-
-    @router.setter
-    def router(self,val):
-        if not issubclass(val.__class__, router.Router):
-            raise Exception('Router must be a rapidsms.router.Router subclass')
-        self.__router=val
-
     class Meta:
         unique_together = ('backend_slug','title')
             
@@ -590,6 +535,11 @@ class ChannelConnection(models.Model):
         return 'ChannelConnection(%s,%s)' % \
             (self.user_identifier, self.communication_channel.backend_slug)
 
+    @property
+    def connection(self):
+        return Connection(self.communication_channel.backend_slug, \
+                              self.user_identifier)
+
     class Meta:
         unique_together = ('user_identifier', 'communication_channel')
 
@@ -598,7 +548,7 @@ class ChannelConnection(models.Model):
 # Read online that this is a cleaner way to do this thatn @classmethod
 # or @staticmethod which can have weird calling behavior
 #
-def CommunicationChannelFromMessage(msg, router, save=True):
+def CommunicationChannelFromMessage(msg, save=True):
     """
     Create a ChannelConnection object from a Message.
 
@@ -618,17 +568,14 @@ def CommunicationChannelFromMessage(msg, router, save=True):
     else:
         cc=rs[0]
         
-    # always set the router. Would like to make this part of 'init', but that
-    # would mean a custom manager or wrapping the data object. This is easier for now
-    cc.router=router
     return cc
 
 
-def ContactFromMessage(msg,router,save=True):
-    return ChannelConnectionFromMessage(msg,router,save).contact
+def ContactFromMessage(msg,save=True):
+    return ChannelConnectionFromMessage(msg,save).contact
 
 
-def ChannelConnectionFromMessage(msg,router,save=True):
+def ChannelConnectionFromMessage(msg,save=True):
     """
     Create, or retrieve, a ChannelConnection from
     a message.
@@ -637,7 +584,7 @@ def ChannelConnectionFromMessage(msg,router,save=True):
 
     """
     # Get the comm channel
-    comm_c=CommunicationChannelFromMessage(msg,router)
+    comm_c=CommunicationChannelFromMessage(msg)
     u_id=msg.connection.identity
 
     # try to get an existing ChannelConnection
