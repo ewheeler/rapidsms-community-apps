@@ -52,14 +52,20 @@ class Contact(Node):
     It is not required but useful for storing things that a national id (e.g. SocSec number)
 
     """
-    # channel_connections[] -- is available via ForeignKey in ChannelConnection
+
+    # permission masks
+    __CAN_RECEIVE=0x01
+    __CAN_SEND=0x02
+    __IGNORE=0x04
+
     given_name = models.CharField(max_length=255,blank=True)
     family_name =  models.CharField(max_length=255,blank=True)
     national_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
     gender = models.CharField(max_length=1,choices=GENDER_CHOICES,blank=True) 
     age_months = models.IntegerField(null=True,blank=True)
     locale = models.CharField(max_length=10,null=True,blank=True)
-    # LocalePresences are available via ForeignKey in LocalePreference
+    permissions = models.PositiveSmallIntegerField(default=__CAN_RECEIVE | __CAN_SEND)
+    # channel_connections[] -- is available via ForeignKey in ChannelConnection
     
     """ Permissions for the webUI
     class Meta:
@@ -97,6 +103,39 @@ class Contact(Node):
     def age_years(self,value):
         self.age_months=value*12
 
+    @property
+    def can_receive(self):
+        return bool(self.permissions & self.__CAN_RECEIVE)
+
+    @can_receive.setter
+    def can_receive(self,val):
+        if bool(val):
+            self.permissions|=self.__CAN_RECEIVE
+        else:
+            self.permissions&=~self.__CAN_RECEIVE
+
+    @property
+    def can_send(self):
+        return bool(self.permissions & self.__CAN_SEND)
+
+    @can_send.setter
+    def can_send(self,val):
+        if bool(val):
+            self.permissions|=self.__CAN_SEND
+        else:
+            self.permissions&=~self.__CAN_SEND
+
+    @property
+    def ignore(self):
+        return bool(self.permissions & self.__IGNORE)
+
+    @ignore.setter
+    def ignore(self,val):
+        if bool(val):
+            self.permissions|=self.__IGNORE
+        else:
+            self.permissions&=~self.__IGNORE
+        
     def signature(self):
         if len(self.given_name)==0:
             if len(self.family_name)==0:

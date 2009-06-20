@@ -10,7 +10,7 @@ from apps.smsforum.models import Village,Community
 import time
 
 # helpers
-def _user(name, *grps):
+def _contact(name, *grps):
     u=Contact(debug_id=name)
     u.save()
     for grp in grps:
@@ -60,8 +60,8 @@ class TestApp (TestScript):
         
         # make some nodes and graphs
         # imagine this is users and groups for clarity
-        self.m_nodes = [_user(n) for n in self.m_names]
-        self.w_nodes = [_user(n) for n in self.w_names]
+        self.m_nodes = [_contact(n) for n in self.m_names]
+        self.w_nodes = [_contact(n) for n in self.w_names]
         
         self.m_group = _group('men',*self.m_nodes)
         self.w_group = _group('women',*self.w_nodes)
@@ -70,6 +70,31 @@ class TestApp (TestScript):
         self.people_group_unicode=u'people(men(matt,larry,jim,joe,mohammed),women(jen,julie,mary,fatou,sue)'
 
         self.backend=test.Backend(None)
+
+    def testPerms(self):
+        def printPerms(c):
+            print "ALL: %d, S: %s, R: %s, I: %s" % (c.permissions, c.can_send, c.can_receive, c.ignore)
+            
+        print "Permission Test"
+        c0=_contact('default')
+        printPerms(c0)
+        self.assertTrue(c0.can_send and c0.can_receive and not c0.ignore)
+        c0.ignore=True
+        printPerms(c0)
+        c0.save()
+        self.assertTrue(c0.can_send and c0.can_receive and c0.ignore)
+        c0.can_send=False
+        self.assertFalse(c0.can_send)
+        c0.can_receive=False
+        self.assertFalse(c0.can_receive)
+        c0.can_send=True
+        self.assertTrue(c0.can_send)
+        c0.can_receive=True
+        self.assertTrue(c0.can_receive)
+        c0.ignore=False
+        self.assertFalse(c0.ignore)
+        c0.ignore=True
+        self.assertTrue(c0.ignore)
 
     def testLocales(self):
         print "\n\nLocale Test..."
