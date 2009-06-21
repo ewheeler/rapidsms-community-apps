@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% load i18n %}
 {% load pagination %}
-{% block title %}{% trans "Members of" %}{{ village_name }}{% endblock %}
+{% block title %}{{ member.signature }}{% endblock %}
 
 {% block content %}
 
 <div class="module">
-	<h2>{{ member.given_name }}</h2>
+	<h2>{{ member.signature }}</h2>
 	<table>
 		<thead>
 			<tr>
@@ -20,7 +20,8 @@
 		</thead>
 		<tbody>
 			<tr>
-                <td><a href="/members/{{ member.pk }}"{% if member.given_name %}>{{ member.given_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+                <!--  TODO: COME BACK AND FIX THIS -->
+                <td><a href="/member/edit/{{ member.pk }}"{% if member.given_name %}>{{ member.given_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
 				<td>{% if member.family_name %}{{ member.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.gender %}{{ member.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
@@ -31,35 +32,14 @@
 	</table>
 </div>
 <br/>
-<a href="{{ edit_link }}{{member.id}}">Edit Member</a>
-<div class="module">
-    <h2>{% trans "Messages" %}</h2>
-    <table>
-        <thead>
-            <tr>
-                <th scope="col">{% trans "Date" %}</th>
-                <th scope="col">{% trans "Message" %}</th>
-            </tr>
-        </thead>
-        <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
-            <tr>
-                <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-            </tr>{% endfor %}{% else %}
-            <tr class="no-data">
-                <td colspan="3">
-                    {% trans "No messages yet" %}
-                </td>
-            </tr>{% endif %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3">
-                    {% paginator messages %}
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+    <form id="send" method="post">
+    <h2>Send a message to {{ member.signature }}</h2>
+    <input type="text" id="message_body" name="message_body" />
+        <div id="submitbutton">
+        <input type="submit" value="Send" />
+        </div>
+    </form>
+    
+{% include 'smsforum/partials/messages.html' %}
 {% endblock %}
 

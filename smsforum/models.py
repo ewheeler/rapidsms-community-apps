@@ -8,19 +8,21 @@ from apps.locations.models import *
 from apps.nodegraph.models import NodeSet
 from apps.logger.models import IncomingMessage
 
-#
-# NEW STYLE COMMUNITIES/VILLAGES
-#
-
 class Community(NodeSet):
     name = models.CharField(max_length=255,unique=True, blank=False)
     pass
+
+    def __unicode__(self):
+        return unicode(self.name)
 
 
 class Village(NodeSet):
     name = models.CharField(max_length=255,unique=True, blank=False)
     location = models.ForeignKey(Location, null=True, blank=True)
     pass
+
+    def __unicode__(self):
+        return unicode(self.name)
 
 #
 # 'Statics' as module level

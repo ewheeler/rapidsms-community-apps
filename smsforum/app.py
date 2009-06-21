@@ -392,5 +392,8 @@ class App(rapidsms.app.App):
         # report on dashboard
         pass
         
+    def send_message(self, to, body):
+		pass
+
     
 

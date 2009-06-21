@@ -19,8 +19,8 @@
 		</thead>
 		<tbody>{% if villages.object_list %}{% for village in villages.object_list %}
 			<tr>
-				<td><a href="/villages/{{ village.pk }}"{% if village.name %}>{{ village.name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
-				<td>{% if village.member_count %}{{ village.member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+				<td><a href="/village/edit/{{ village.pk }}"{% if village.name %}>{{ village.name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+                <td><a href="/village/{{ village.pk }}"{% if village.member_count %}>{{ village.member_count }}{% else %} class="unknown">Unknown{% endif %}</a></td>
                 <td>{% if village.message_count %}{{ village.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <!--  FIX THIS
 				<td>{% if village.messages_sent_count %}{{ village.messages_sent_count }}{% else %}<span class="na">n/a</span>{% endif %}</td> -->
@@ -28,7 +28,7 @@
 			<tr class="no-data">
 				<td colspan="3">
 					{% trans "No villages yet" %}
-					<a href="/reporters/add" class="add">
+					<a href="/village/add" class="add">
 						{% trans "Add a Village" %}
 					</a>
 				</td>
@@ -46,5 +46,6 @@
 		<a href="/villages/add" class="add">{% trans "Add a Village" %}</a>
 	</div>
 </div>
+{% include 'smsforum/partials/messages.html' %}
 {% endblock %}
 

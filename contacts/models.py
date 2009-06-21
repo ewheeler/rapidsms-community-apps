@@ -143,7 +143,8 @@ class Contact(Node):
         rs=self.locale_prefs.filter(locale_string=locale_code,contact=self)
         for r in rs:
             r.delete()
-
+            
+    @property
     def signature(self):
         if len(self.given_name)==0:
             if len(self.family_name)==0:

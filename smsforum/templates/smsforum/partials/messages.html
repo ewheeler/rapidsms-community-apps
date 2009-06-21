@@ -1,0 +1,31 @@
+{% load i18n %}
+{% load pagination %}
+<div class="module">
+    <h2>{% trans "Messages" %}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Date" %}</th>
+                <th scope="col">{% trans "Message" %}</th>
+            </tr>
+        </thead>
+        <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
+            <tr>
+                <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+            </tr>{% endfor %}{% else %}
+            <tr class="no-data">
+                <td colspan="3">
+                    {% trans "No messages yet" %}
+                </td>
+            </tr>{% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">
+                    {% paginator messages %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

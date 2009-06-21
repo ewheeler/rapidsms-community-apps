@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
-
+from django.utils.translation import ugettext as _
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError
 from django.template import RequestContext
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
@@ -11,6 +11,7 @@ from django.db import transaction
 from rapidsms.webui.utils import *
 from apps.smsforum.models import *
 from apps.smsforum.utils import *
+from apps.smsforum.forms import *
 from apps.logger.models import *
 from apps.contacts.models import *
 
@@ -20,9 +21,6 @@ from datetime import datetime, timedelta
 def index(req, template="smsforum/index.html"):
     context = {}
     villages = Village.objects.all()
-    
-    num_members = []
-    num_messages = []
     for village in villages:
         # once this site bears more load, we can replace flatten() with village.subnodes
         # and stop reporting num_messages
@@ -31,10 +29,26 @@ def index(req, template="smsforum/index.html"):
         village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
         village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
+    messages = IncomingMessage.objects.all().order_by('-received')
+    context['messages'] = paginated(req, messages)
+    return render_to_response(req, template, context)
+    
+    #change this to a generic view!
+    """
+    communities = Community.objects.all()
+    for community in communities:
+        # once this site bears more load, we can replace flatten() with village.subnodes
+        # and stop reporting num_messages
+        community.member_count = len( village.flatten() )
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        community.message_count = IncomingMessage.objects.filter(domain=community,received__gte=last_week).count()
+        community.messages_sent_count = community.message_count * community.member_count    
+    context['communities'] = paginated(req, communities)
     #messages sent this week
     return render_to_response(req, template, context)
+    """
 
-def edit_village(req, pk, template="smsforum/members.html"):
+def members(req, pk, template="smsforum/members.html"):
     context = {}
     village = Village.objects.get(id=pk)
     members = village.flatten(klass=Contact)
@@ -47,23 +61,75 @@ def edit_village(req, pk, template="smsforum/members.html"):
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
     context['village_name'] = village.name
     context['members'] = paginated(req, members)
-    return render_to_response(req, template, context)
-
-def edit_member(req, pk, template="smsforum/member.html"):
-    context = {}
-    contact = Contact.objects.get(id=pk)
-    """ TEMP fix later """
-    connections = ChannelConnection.objects.filter(contact=contact)
-    if len(connections) <= 0:
-        return render_to_response(req, template, context)        
-    contact.phone_number = connections[0].user_identifier
-    last_week = ( datetime.now()-timedelta(weeks=1) )
-    messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week)
-    contact.message_count = len(messages)
-    context['member'] = contact
-    context['edit_link'] = "http://127.0.0.1:8000/admin/contacts/contact/"
+    messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
     context['messages'] = paginated(req, messages)
     return render_to_response(req, template, context)
+
+def member(req, pk, template="smsforum/member.html"):
+    context = {}
+    contact = Contact.objects.get(id=pk)
+    if req.method == "POST":
+        if req.POST["message_body"]:
+            pass
+            """
+            be = self.router.get_backend(pconn.backend.slug)
+            return be.message(pconn.identity, form["text"]).send()
+            
+            xformmanager = XFormManager()
+            xformmanager.remove_schema(form_id)
+            logging.debug("Schema %s deleted ", form_id)
+            #self.message_user(request, _('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})                    
+            return HttpResponseRedirect("../register")
+            """
+    try:
+        connections = ChannelConnection.objects.get(contact=contact)
+        contact.phone_number = connections.user_identifier
+    except ChannelConnection.DoesNotExist:
+        pass
+    last_week = ( datetime.now()-timedelta(weeks=1) )
+    messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
+    contact.message_count = len(messages)
+    context['member'] = contact
+    context['messages'] = paginated(req, messages)
+    return render_to_response(req, template, context)
+
+def edit_village(req, pk, template="smsforum/edit.html"):
+    context = {}
+    form = get_object_or_404(Village, id=pk)
+    if req.method == "POST":
+        f = VillageForm(req.POST, instance=form)
+        f.save()
+    context['form'] = VillageForm(instance=form)
+    context['title'] = _("Edit Village")
+    return render_to_response(req, template, context)
+    
+def edit_member(req, pk, template="smsforum/edit.html"):
+    context = {}
+    form = get_object_or_404(Contact, id=pk)
+    if req.method == "POST":
+        f = ContactForm(req.POST, instance=form)
+        f.save()
+    context['form'] = ContactForm(instance=form)
+    context['title'] = _("Edit Member")
+    return render_to_response(req, template, context)
+
+def add_community(req, template="smsforum/add.html"):
+    context = {}
+    if req.method == 'POST':        
+        form = AddCommunityForm(req.POST)        
+        if form.is_valid():
+            c = Community(name=form.cleaned_data['name'])
+            c.save()
+            print form.cleaned_data['members']
+            pass
+    context['form'] = AddCommunityForm()
+    context['title'] = _("Add Community")
+    return render_to_response(req, template, context)
+
+
+    
+
+
 """
 @require_http_methods(["GET", "POST"])  
 def edit_reporter(req, pk):
