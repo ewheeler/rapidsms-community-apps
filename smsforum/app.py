@@ -282,6 +282,7 @@ class App(rapidsms.app.App):
             # unzip data from names if can
             if num_villes>0:
                 village_names,villages=zip(*matched_villes)
+
             if num_villes==0 or num_villes>1:
                 if num_villes==0:
                     return self.__suggest_villages(msg)
@@ -291,8 +292,9 @@ class App(rapidsms.app.App):
                         {"village_names": ', '.join(village_names)}
                     msg.sender.send_to(resp)
                     return True
-
+            
             # ok, here we got just one
+            assert(len(villages)==1)
             msg.sender.add_to_group(villages[0])
             rsp=_st(msg.sender, "first-login") % {"village": village_names[0]}
             self.debug(rsp)
