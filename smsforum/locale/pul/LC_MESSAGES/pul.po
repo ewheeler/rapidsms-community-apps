@@ -20,13 +20,25 @@ msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help pulaar' pour v
 msgid "help with commands"
 msgstr "Vous pouvez texter: #naalde VILLAGE - #yaltude - #yettoode NAME - #lang LANG"
 
+msgid "member"
+msgstr "?"
+# as in "i am a member of this village"
+
+msgid "name"
+msgstr "yettoode"
+# as in 'the name with which i would like to be referred'
+
+msgid "help"
+msgstr "?"
+# as in 'help me use this sms system'
+
 #: app.py:158
 msgid "join"
-msgstr "naatde"
+msgstr "naalde"
 
 #: app.py:158
 msgid "leave"
-msgstr "ummaade"
+msgstr "yaltude"
 
 msgid "create"
 msgstr "fewjude"

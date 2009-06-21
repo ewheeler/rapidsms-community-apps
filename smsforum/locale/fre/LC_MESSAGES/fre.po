@@ -20,18 +20,32 @@ msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide' pour voir une
 msgid "help with commands"
 msgstr "Vous pouvez texter: #entrer VILLAGE - #quitter - #nom NAME - #lang LANG"
 
+msgid "member"
+msgstr ""
+# as in "i am a member of this village"
+
+msgid "name"
+msgstr "nom"
+# as in 'the name with which i would like to be referred'
+
+msgid "help"
+msgstr "aide"
+# as in 'help me use this sms system'
+
 #: app.py:158
 msgid "join"
 msgstr "entrer"
+# as in 'join community Ziguinchor'
 
 #: app.py:158
 msgid "leave"
 msgstr "quitter"
+# as in 'leave community Ziguinchor'
 
 msgid "create"
 msgstr "creer"
 #msgstr "créer"
-
+# as in 'create new community Ziguinchor'
 
 #: app.py:158
 msgid "village %s created"

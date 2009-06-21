@@ -20,16 +20,28 @@ msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help wolof' pour vo
 msgid "help with commands"
 msgstr "Vous pouvez texter: #duggu VILLAGE - #genn - #sant NAME - #lang LANG"
 
+msgid "member"
+msgstr "?"
+# as in "i am a member of this village"
+
+msgid "name"
+msgstr "sant"
+# as in 'the name with which i would like to be referred'
+
+msgid "help"
+msgstr "?"
+# as in 'help me use this sms system'
+
 #: app.py:158
 msgid "join"
-msgstr "dugg"
+msgstr "duggu"
 
 #: app.py:158
 msgid "leave"
-msgstr "guene"
+msgstr "genn"
 
 msgid "create"
-msgstr "creer"
+msgstr "?"
 #msgstr "créer"
 
 
