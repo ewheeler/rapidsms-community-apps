@@ -248,11 +248,11 @@ class App (rapidsms.app.App):
                 now_adjusted =  datetime.now() + timedelta(hours=2) 
                 self.debug("Adjusted time: %s, checking for participants to notify" % str(now_adjusted))
                 # ok, here's the rules for this study
-                # questions are asked every 10 days.
+                # questions are asked every 7 days.
                 # if they don't respond we ask again in 1 hour.
                 # if they don't respond to that we ask again in 1 day.
                 # if they don't respond to that we ask again in another day.
-                # if they don't respond to that we wait till the next 10-day 
+                # if they don't respond to that we wait till the next 7-day 
                 # cycle.
                 # so we need to know a few things to know if we should start
                 # a sequence:
@@ -297,7 +297,7 @@ class App (rapidsms.app.App):
         else:
             if participant.state == "0":
                 participant.next_start_time = participant.next_start_time +\
-                    timedelta(days=10)
+                    timedelta(days=7)
             delta = self.get_next_time_interval(participant.state)
             participant.next_question_time = participant.next_question_time + delta 
             participant.state = str(int(participant.state) + 1)
@@ -321,7 +321,7 @@ class App (rapidsms.app.App):
         elif (state == "2"):
             return timedelta(days=1)
         elif (state == "3"):
-            return timedelta(days=8)
+            return timedelta(days=5)
         raise Error("%s is not a valid state!" % state)
     
     def get_next_time_interval_testing(self, state):

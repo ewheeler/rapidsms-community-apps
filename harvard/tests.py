@@ -8,8 +8,6 @@ from datetime import datetime, timedelta
 
 class TestApp (TestScript): 
     apps = (reporters_app.App, App, tree_app.App )
-    # we need the iavi trees for the languages.
-    # it would be better to split these out
     fixtures = ["harvard_trees"]
     
     def testHarvard(self):
@@ -210,7 +208,7 @@ class TestApp (TestScript):
         participant = app.update_participant(participant)
         self.assertEqual("1", participant.state)
         date = now + timedelta(hours=1)
-        next_date = now + timedelta(days=10)
+        next_date = now + timedelta(days=7)
         self.assertEqual(date, participant.next_question_time)
         self.assertEqual(next_date, participant.next_start_time)
         
