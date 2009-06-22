@@ -13,6 +13,14 @@ class HarvardReporter(Reporter):
     
     def __unicode__(self):
         return self.alias
+    
+    class Meta:
+        # the permission required for this tab to display in the UI
+        permissions = (
+            ("can_view", "Can view harvard data"),
+        )
+
+
         
 class StudyParticipant(models.Model):
     """ This represents a participant in the Harvard study. """
