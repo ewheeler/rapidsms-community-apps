@@ -50,8 +50,8 @@ msgstr "oukaana"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158
-msgid "village %s created"
-msgstr "fou jojaf fou kankane %s"
+msgid "village %(village)s created"
+msgstr "fou jojaf fou kankane %(village)s"
 
 #: app.py:163 app.py:189
 msgid "register-fail"

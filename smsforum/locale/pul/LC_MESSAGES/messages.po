@@ -50,8 +50,8 @@ msgid "I am"
 msgstr "Miin woni."
 
 #: app.py:158
-msgid "village %s created"
-msgstr "Sahre nde sinica koe %s"
+msgid "village %(village)s created"
+msgstr "Sahre nde sinica koe %(village)s"
 
 #: app.py:163 app.py:189
 msgid "register-fail"

@@ -208,11 +208,9 @@ class App(rapidsms.app.App):
 
         try:
             # TODO: add administrator authentication
-
             ville = Village.objects.get_or_create(name=village)
             self.village_matcher.add_target((village,ville))
-            msg.sender.send_to(_st(msg.sender, "village %s created") % village)
-            # TODO: remove this for production
+            msg.sender.send_to(_st(msg.sender, "village %(village)s created") % {'village':village} )
         except:
             self.debug( traceback.format_exc() )
             traceback.print_exc()

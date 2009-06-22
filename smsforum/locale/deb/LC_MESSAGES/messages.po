@@ -18,8 +18,8 @@ msgid "command-not-understood"
 msgstr "command-not-understood"
 
 #: app.py:158
-msgid "village %s created"
-msgstr "village %s created"
+msgid "village %(village)s created"
+msgstr "village %(village)s created"
 
 #: app.py:163 app.py:189
 msgid "register-fail"

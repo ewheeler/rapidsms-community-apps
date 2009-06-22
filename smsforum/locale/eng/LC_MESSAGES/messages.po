@@ -29,8 +29,8 @@ msgid "leave"
 msgstr "leave"
 
 #: app.py:158
-msgid "village %s created"
-msgstr "The %s community has been created"
+msgid "village %(village)s created"
+msgstr "The %(village)s community has been created"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
