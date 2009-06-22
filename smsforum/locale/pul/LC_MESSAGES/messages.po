@@ -43,9 +43,6 @@ msgstr "yaltude"
 msgid "create"
 msgstr "fewjude"
 
-msgid "name"
-msgstr "Innde"
-
 msgid "I am"
 msgstr "Miin woni."
 
