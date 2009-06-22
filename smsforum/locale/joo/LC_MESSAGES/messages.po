@@ -8,7 +8,7 @@ msgstr ""
 "POT-Creation-Date: 2009-06-15 04:09+GMT\n"
 "PO-Revision-Date: 2009-06-15 04:21+0000\n"
 "Last-Translator: Rowena\n"
-"Language-Team: Language dyu\n"
+"Language-Team: Language joo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,7 +18,7 @@ msgid "Je comprends pas cet ordre"
 msgstr "ji bonket, i manjout wanou tchike. ou tchik '#karamben' manou golen rambenalou"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #ounoken VOTRE COMMUNAUTE - #oupour - #karess VOTRE NOM"
+msgstr "Vous pouvez texter: #unoken VOTRE COMMUNAUTE - #upur - #karess VOTRE NOM"
 
 #: app.py:158
 msgid "member"
@@ -37,16 +37,16 @@ msgstr "rambenom"
 
 #: app.py:158
 msgid "join"
-msgstr "ounoken"
+msgstr "unoken"
 # as in 'join community Ziguinchor'
 
 #: app.py:158
 msgid "leave"
-msgstr "oupour"
+msgstr "upur"
 # as in 'leave community Ziguinchor'
 
 msgid "create"
-msgstr "oukaana"
+msgstr "ukaana"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158

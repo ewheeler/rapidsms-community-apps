@@ -34,7 +34,7 @@ _G= { 'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
         'pul':u'Pulaar',
         'wol':u'Wolof',
-        'dyu':u'Dyuola',
+        'joo':u'Joola',
         'fre':u'Français',
         'eng':u'English',
     },
@@ -88,11 +88,12 @@ class App(rapidsms.app.App):
             ('yokk', {'lang':'wol','func':self.join}),
             ('duggu', {'lang':'wol','func':self.join}),
             ('sant', {'lang':'wol','func':self.register_name}),
-            # Dyuola
-            ('ounoken', {'lang':'dyu','func':self.join}),
-            ('karess', {'lang':'dyu','func':self.register_name}),
-            ('oupour', {'lang':'dyu','func':self.leave}),
-            ('rambenom', {'lang':'dyu','func':self.help}),
+            # Joola
+            ('unoken', {'lang':'joo','func':self.join}),
+            ('karess', {'lang':'joo','func':self.register_name}),
+            ('upur', {'lang':'joo','func':self.leave}),
+            ('rambenom', {'lang':'joo','func':self.help}),
+            ('ukaana', {'lang':'joo','func':self.createvillage}),
             # Debug calls ('deb' language==debug)
             ('djoin', {'lang':'deb','func':self.join}),
             ('rname', {'lang':'deb','func':self.register_name}),

@@ -77,7 +77,7 @@ class TestApp (TestScript):
         8005551212 > msg_to_blast
         8005551212 > #lang wol
         8005551212 > msg_to_blast
-        8005551212 > #lang dyu
+        8005551212 > #lang joo
         8005551212 > msg_to_blast
         8005551212 > #lang pul
         8005551212 > msg_to_blast
