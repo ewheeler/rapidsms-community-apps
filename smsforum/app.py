@@ -215,6 +215,7 @@ class App(rapidsms.app.App):
             # TODO: remove this for production
         except:
             self.debug( traceback.format_exc() )
+            traceback.print_exc()
             msg.sender.send_to(_st(msg.sender, "register-fail"))
 
         return True
@@ -231,6 +232,7 @@ class App(rapidsms.app.App):
                 msg.sender.send_to(_st(msg.sender, "member-of %(village_names)s") \
                                        % {"village_names":village_names})
         except:
+            traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp= _st(msg.sender,"register-fail")
             self.debug(rsp)
@@ -251,6 +253,7 @@ class App(rapidsms.app.App):
             rsp=_st(msg.sender, "name-register-success %(name)s") % {'name':msg.sender.common_name}
             msg.sender.send_to(rsp)
         except:
+            traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp= _st(msg.sender, "register-fail")
             self.debug(rsp)
@@ -302,6 +305,7 @@ class App(rapidsms.app.App):
             self.debug(rsp)
             msg.sender.send_to(rsp)
         except:
+            traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp=_st(msg.sender, "register-fail")
             self.debug(rsp)
@@ -356,6 +360,7 @@ class App(rapidsms.app.App):
             self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
             return True
         except:
+            traceback.print_exc()
             self.debug( traceback.format_exc() )
             msg.sender.send_to(_st(msg.sender, "blast-fail"))
         return True
@@ -386,6 +391,7 @@ class App(rapidsms.app.App):
         except:
             # something went wrong - at the
             # moment, we don't care what
+            traceback.print_exc()
             self.debug( traceback.format_exc() )
             msg.sender.send_to(_st(msg.sender, "leave-fail"))
 
