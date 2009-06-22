@@ -18,6 +18,9 @@ msgid "command-not-understood"
 msgstr "command-not-understood"
 
 #: app.py:158
+msgid "village %(village)s already exists"
+msgstr "La communaute %(village)s existe deja"
+#: app.py:158
 msgid "village %(village)s created"
 msgstr "village %(village)s created"
 

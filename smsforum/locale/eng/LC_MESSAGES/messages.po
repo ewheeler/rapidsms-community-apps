@@ -29,6 +29,10 @@ msgid "leave"
 msgstr "leave"
 
 #: app.py:158
+msgid "village %(village)s already exists"
+msgstr "The %(village)s community already exists"
+
+#: app.py:158
 msgid "village %(village)s created"
 msgstr "The %(village)s community has been created"
 

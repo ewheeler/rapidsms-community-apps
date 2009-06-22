@@ -50,6 +50,10 @@ msgstr "oukaana"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158
+msgid "village %(village)s already exists"
+msgstr "La communaute %(village)s existe deja"
+
+#: app.py:158
 msgid "village %(village)s created"
 msgstr "fou jojaf fou kankane %(village)s"
 

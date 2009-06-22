@@ -14,8 +14,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#msgid "command-not-understood"
-#msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help wolof' pour voir une liste des ordres acceptables"
+msgid "command-not-understood"
+msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help wolof' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
 msgstr "Vous pouvez texter: #naalde VILLAGE - #yaltude - #yettoode NAME - #lang LANG"
@@ -45,6 +45,10 @@ msgstr "fewjude"
 
 msgid "I am"
 msgstr "Miin woni."
+
+#: app.py:158
+msgid "village %(village)s already exists"
+msgstr "La communaute %(village)s existe deja"
 
 #: app.py:158
 msgid "village %(village)s created"

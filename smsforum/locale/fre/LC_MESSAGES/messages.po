@@ -48,6 +48,9 @@ msgstr "creer"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158
+msgid "village %(village)s already exists"
+msgstr "La communaute %(village)s existe deja"
+
 msgid "village %(village)s created"
 msgstr "La communaute %(village)s a ete creee"
 #msgstr "La communauté %s a été créée"
