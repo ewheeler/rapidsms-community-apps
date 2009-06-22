@@ -32,7 +32,7 @@ class UserForm(forms.ModelForm):
     
     class Meta:
         model = User
-        exclude = [ "email", "last_login", "date_joined", "is_staff", "is_active", "password", "user_permissions"]
+        exclude = [ "email", "last_login", "date_joined", "is_staff", "is_active", "is_superuser", "password", "user_permissions"]
     
 class IaviProfileForm(forms.ModelForm):
     

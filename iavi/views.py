@@ -139,6 +139,7 @@ def user_edit(req, id):
                 # make sure any super user is also staff so they
                 # can easily change passwords
                 user.is_staff = True;
+                
                 user.save()
             
             profile = profile_form.save(commit=False)

@@ -41,12 +41,14 @@ class IaviProfile(models.Model):
     
     class Meta:
         permissions = (
+            # the permission required for this tab to display in the UI
+            ("can_view", "Can view iavi data"),
             ("can_read_participants", "Can view participant data"),
             ("can_write_participants", "Can edit participant data"),
             ("can_see_data", "Can view study data"),
             ("is_admin", "Is an administrator for IAVI"),
         )
-
+    
     def __unicode__(self):
         return "%s --> %s" % (self.user, self.reporter)
     
