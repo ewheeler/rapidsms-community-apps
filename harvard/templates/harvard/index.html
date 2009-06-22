@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}Harvard Summary{% endblock %}
+{% block stylesheets %}
+<style>
+tr.totals { font-weight: bold; }
+</style>
+{% endblock %}
+{% block content %}
+<p>Welcome to the Harvard data and management page!</p>  
+<br>
+<h2>Survey Response Statistics</h2>
+<table width="100%"> 
+    <thead>
+        <tr>
+            <th>Participant</th>
+            <th>Active</th>
+            <th>Unresponded</th>
+            <th>Completed</th>
+            <th>Total</th>
+            <th>Average Tries Per Survey</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user, counts in status_counts.items %}
+        <tr>
+            <td>{{user}}</td>
+            <td>{{counts.A}}</td>
+            <td>{{counts.C}}</td>
+            <td>{{counts.F}}</td>
+            <td>{{counts.total}}</td>
+            <td>{{counts.avg_tries}}</td>
+        </tr>
+        {% endfor %}
+        <tr class="totals">
+            <td>Total</td>
+            <td>{{totals.A}}</td>
+            <td>{{totals.C}}</td>
+            <td>{{totals.F}}</td>
+            <td>{{totals.total}}</td>
+            <td>{{totals.avg_tries}}</td>
+        </tr>
+    </tbody>
+</table>
+<br><br>
+<h2>Individual Responses</h2>
+<table width="100%"> 
+    <thead>
+        <tr>
+            <th>Participant</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Child?</th>
+            <th>Question</th>
+            <th>Answer</th>
+            <th>Number of tries</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for survey in surveys %}
+        <tr>
+            <td>{{survey.reporter}}</td>
+            <td>{{survey.started|date:"d-M-Y"}}</td>
+            <td>{{survey.get_status_display}}</td>
+            <td>{% if survey.child %}Yes{% else %}No{% endif %}</td>
+            <td>{{survey.question}}</td>
+            <td>{{survey.answer}}</td>
+            <td>{{survey.num_tries}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
