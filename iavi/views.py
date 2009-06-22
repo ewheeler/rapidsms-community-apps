@@ -306,7 +306,7 @@ def participant_delete(req, id):
     return render_to_response(req, template_name, {"reporter" : reporter, "num_reports" : num_reports})
 
 def _get_flag(ratio):
-    if ratio <= .5:
+    if ratio <= .6:
         return "severe"
     elif ratio <= .75:
         return "warning"
