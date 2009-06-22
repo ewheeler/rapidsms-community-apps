@@ -9,11 +9,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import AdminPasswordChangeForm
 
 
+@login_required
+@permission_required("iavi.can_view")
 def index(req):
     template_name="iavi/index.html"
     return render_to_response(req, template_name, {})
 
 @login_required
+@permission_required("iavi.can_view")
 def compliance(req):
     template_name="iavi/compliance.html"
     
