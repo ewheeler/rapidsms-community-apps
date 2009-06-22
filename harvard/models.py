@@ -8,7 +8,7 @@ class HarvardReporter(Reporter):
        They are an extension of the basic reporters, 
        but also have years of birth"""  
        
-    year_of_birth = models.CharField(max_length=4, null=True, blank=True)
+    pin = models.CharField(max_length=4, null=True, blank=True)
     is_child = models.BooleanField(default=False)
     
     def __unicode__(self):

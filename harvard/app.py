@@ -72,7 +72,7 @@ class App (rapidsms.app.App):
     
     def validate_birth_year(self, msg):
         rep = HarvardReporter.objects.get(pk=msg.reporter.pk)
-        return msg.text == rep.year_of_birth
+        return msg.text == rep.pin
     
     def _initiate_tree_sequence(self, participant):
         user = participant.reporter

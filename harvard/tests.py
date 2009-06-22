@@ -232,10 +232,10 @@ class TestApp (TestScript):
         
         
         
-    def _register(self, phone="55555", alias="001", yob="1234", is_child=False,language="En"):
+    def _register(self, phone="55555", alias="001", pin="1234", is_child=False,language="En"):
         """Register a user"""
         # create the reporter object for this person 
-        reporter =  HarvardReporter(alias=alias, language=language, year_of_birth=yob)
+        reporter =  HarvardReporter(alias=alias, language=language, pin=pin)
         reporter.save()
         # running this script ensures the connection gets created by the reporters app
         self.runScript("%s > hello world" % phone)
