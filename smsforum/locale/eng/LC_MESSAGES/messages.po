@@ -14,7 +14,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-msgid "Je comprends pas cet ordre"
+msgid "command-not-understood"
 msgstr "Sorry, I do not understand that command. Type '#help' to see a list of available commands"
 
 msgid "help with commands"
@@ -79,7 +79,7 @@ msgstr "Sorry, there has been an error - please try again later"
 
 #: app.py:275
 msgid "lang-set %(lang_code)s"
-msgstr "Your language is now set to English"
+msgstr "Your language is now set to %(lang_code)s"
 
 #: app.py:279
 msgid "bad-lang"

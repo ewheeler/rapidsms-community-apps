@@ -2,7 +2,7 @@ from rapidsms.tests.scripted import TestScript
 from rapidsms import message,connection,person
 from rapidsms.backends import test
 from app import App
-import apps.nodegraph.app as nodegraph_app
+import apps.contacts.app as contacts_app
 from models import *
 import apps.contacts.models as contacts_models
 from apps.contacts.models import *
@@ -10,7 +10,7 @@ from apps.smsforum.models import Village,Community
 import time
 
 # helpers
-def _user(name, *grps):
+def _contact(name, *grps):
     u=Contact(debug_id=name)
     u.save()
     for grp in grps:
@@ -33,7 +33,7 @@ class StealWorker(Worker):
 
 
 class TestApp (TestScript):
-    apps = (App, nodegraph_app.App)
+    apps = (App, contacts_app.App)
  
 #    fixtures = ['test_backend', 'test_tree']
     
@@ -60,8 +60,8 @@ class TestApp (TestScript):
         
         # make some nodes and graphs
         # imagine this is users and groups for clarity
-        self.m_nodes = [_user(n) for n in self.m_names]
-        self.w_nodes = [_user(n) for n in self.w_names]
+        self.m_nodes = [_contact(n) for n in self.m_names]
+        self.w_nodes = [_contact(n) for n in self.w_names]
         
         self.m_group = _group('men',*self.m_nodes)
         self.w_group = _group('women',*self.w_nodes)
@@ -70,6 +70,31 @@ class TestApp (TestScript):
         self.people_group_unicode=u'people(men(matt,larry,jim,joe,mohammed),women(jen,julie,mary,fatou,sue)'
 
         self.backend=test.Backend(None)
+
+    def testPerms(self):
+        def printPerms(c):
+            print "S: %s, R: %s, I: %s" % (c.perm_send, c.perm_receive, c.perm_ignore)
+            
+        print "Permission Test"
+        c0=_contact('default')
+        printPerms(c0)
+        self.assertTrue(c0.perm_send and c0.perm_receive and not c0.perm_ignore)
+        c0.perm_ignore=True
+        printPerms(c0)
+        c0.save()
+        self.assertTrue(c0.perm_send and c0.perm_receive and c0.perm_ignore)
+        c0.perm_send=False
+        self.assertFalse(c0.perm_send)
+        c0.perm_receive=False
+        self.assertFalse(c0.perm_receive)
+        c0.perm_send=True
+        self.assertTrue(c0.perm_send)
+        c0.perm_receive=True
+        self.assertTrue(c0.perm_receive)
+        c0.perm_ignore=False
+        self.assertFalse(c0.perm_ignore)
+        c0.perm_ignore=True
+        self.assertTrue(c0.perm_ignore)
 
     def testLocales(self):
         print "\n\nLocale Test..."
@@ -82,23 +107,15 @@ class TestApp (TestScript):
         p1=self.m_nodes[0]
         p2=self.w_nodes[1]
 
-        print p1.locales
         print p1.locale
         p1.locale=fr
-        print p1.locales
-        print p1.locale
+        p1.save()
+        self.assertTrue(p1.locale==fr)
         p1.locale=en
-        print p1.locales
-        print p1.locale
-        p1.add_locale(wo,1)
-        p1.add_locale(fr,2)
-        p1.add_locale(en,3)
-        p1.add_locale(fr,4)
-        print p1.locales
-        print p1.locale
+        self.assertTrue(p1.locale==en)
         p2.locale=wo
-        print 'p2 %s' % p2.locales
-        print 'p1 %s' % p1.locales
+        p2.save()
+        self.assertTrue(p1.locale==en and p2.locale==wo)
 
     def testDowncast(self):
         v=Village(name='v1')
@@ -136,12 +153,13 @@ class TestApp (TestScript):
         print "\nPrint Channel Connection Test:"
         uid0='4156661212'
         uid1='6175551212'
+        print "Can't run this until I figure out how to get an 'app' object set up properly in the test harness"
 
         con1=connection.Connection(self.backend,uid0)
         msg=message.Message(con1, 'test message')
         channel_con0=contacts_models.ChannelConnectionFromMessage(msg)
 
-        # assert that the ChannelConnection's contact has the correct ID
+        "assert that the ChannelConnection's contact has the correct ID"
         self.assertTrue(channel_con0.contact.debug_id==uid0)
 
         # create a _different_ message on the same connection
@@ -150,9 +168,6 @@ class TestApp (TestScript):
 
         # assert channel_connections are the SAME
         self.assertTrue(channel_con0==channel_con1)
-
-        
-        pass
         
     def testSimulation(self):
         pass

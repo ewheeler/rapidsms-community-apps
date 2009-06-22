@@ -1,4 +1,4 @@
-# Language eng translations for PACKAGE package.
+# Language deb translations for PACKAGE package.
 # Copyright (C) 2009 ORGANIZATION
 # Rowena <rowena@rowena-vm>, 2009.
 #
@@ -6,27 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2009-06-15 04:09+GMT\n"
-"PO-Revision-Date: 2009-06-15 04:21+0000\n"
+"PO-Revision-Date: 2009-06-15 17:07+0000\n"
 "Last-Translator: Rowena <rowena@rowena-vm>\n"
-"Language-Team: Language eng\n"
+"Language-Team: Language deb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-msgid "Je comprends pas cet ordre"
-msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#aide' pour voir une liste des ordres acceptables"
-
-msgid "help with commands"
-msgstr "Vous pouvez texter: #join VILLAGE - #leave - #name NAME - #lang LANG"
-
-#: app.py:158
-msgid "join"
-msgstr "join"
-
-#: app.py:158
-msgid "leave"
-msgstr "leave"
+msgid "command-not-understood"
+msgstr "command-not-understood"
 
 #: app.py:158
 msgid "village %s created"
@@ -34,7 +23,7 @@ msgstr "village %s created"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "Sorry, I couldn't register you."
+msgstr "register-fail"
 
 #: app.py:176
 msgid "village does not exist"
@@ -42,14 +31,14 @@ msgstr "village does not exist"
 
 #: app.py:185
 msgid "first-login"
-msgstr "Thank you for joining the village %(village)s"
+msgstr "first-login %(village)s"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "message too long. Max len=%(max_chars)d"
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "You must join a village before sending messages"
+msgstr "join-first"
 
 #: app.py:214
 #, python-format
@@ -63,30 +52,28 @@ msgstr "success! %(villes)s recvd msg: %(txt)s"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Sorry, I couldn't send that message."
+msgstr "blast-fail"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "Good-bye from village %(village)s"
+msgstr "leave-success %(village)s"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "You have already left all villages"
+msgstr "nothing to leave"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "'Leave' failed."
+msgstr "leave-fail"
 
 #: app.py:267
 msgid "denied"
-msgstr "Please join a village by texting: join villagename"
+msgstr "denied"
 
 #: app.py:275
-msgid "lang-set"
-msgstr "I will now speak to you in English, where possible."
+msgid "lang-set %(lang_code)s"
+msgstr "lang-set"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "That language code is not recognized"
-
-
+msgstr "bad-lang"
