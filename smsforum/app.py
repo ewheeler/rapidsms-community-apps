@@ -32,10 +32,11 @@ CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
 # Mutable globals hack 'cause Python module globals are WHACK
 _G= { 'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
-        'eng':u'English',
-        'fre':u'Français',
         'pul':u'Pulaar',
         'wol':u'Wolof',
+        'dyu':u'Dyuola',
+        'fre':u'Français',
+        'eng':u'English',
     },
       'DEFAULT_LANG':'fre',
       'TRANSLATORS':dict()
@@ -77,22 +78,6 @@ class App(rapidsms.app.App):
         # needs to be here so that 'self' has meaning.
         # could also do the hasattr thing when calling instead
         self.cmd_targets = [ 
-            # English
-            ('join', {'lang':'eng','func':self.join}),
-            ('name', {'lang':'eng','func':self.register_name}),
-            ('leave', {'lang':'eng','func':self.leave}),
-            ('language', {'lang':'eng','func':self.lang}),
-            ('help', {'lang':'eng','func':self.help}),
-            ('create', {'lang':'eng','func':self.createvillage}),
-            ('member', {'lang':'eng','func':self.member}),
-            # French
-            ('entrer', {'lang':'fre','func':self.join}),
-            ('nom', {'lang':'fre','func':self.register_name}),
-            ('quitter', {'lang':'fre','func':self.leave}),
-            ('aide', {'lang':'fre','func':self.help}),
-            # TODO: make best matcher smart about accents...
-            ('créer', {'lang':'fre','func':self.createvillage}),
-            ('creer', {'lang':'fre','func':self.createvillage}),
             # Pulaar
             ('naalde', {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
@@ -103,16 +88,33 @@ class App(rapidsms.app.App):
             ('yokk', {'lang':'wol','func':self.join}),
             ('duggu', {'lang':'wol','func':self.join}),
             ('sant', {'lang':'wol','func':self.register_name}),
-            # spaces are bad!! Keywords must be one word--so comel case this one
-            ('maaNgiTudd', {'lang':'wol','func':self.register_name}), 
-            ('genn', {'lang':'wol','func':self.leave}),
-            ('help', {'lang':'wol','func':self.help}),
+            # Dyuola
+            ('ounoken', {'lang':'dyu','func':self.join}),
+            ('karess', {'lang':'dyu','func':self.register_name}),
+            ('oupour', {'lang':'dyu','func':self.leave}),
+            ('rambenom', {'lang':'dyu','func':self.help}),
             # Debug calls ('deb' language==debug)
             ('djoin', {'lang':'deb','func':self.join}),
             ('rname', {'lang':'deb','func':self.register_name}),
             ('dleave', {'lang':'deb','func':self.leave}),
             ('dlang', {'lang':'deb','func':self.lang}),
             ('dcreate', {'lang':'eng','func':self.createvillage})
+            # French
+            ('entrer', {'lang':'fre','func':self.join}),
+            ('nom', {'lang':'fre','func':self.register_name}),
+            ('quitter', {'lang':'fre','func':self.leave}),
+            ('aide', {'lang':'fre','func':self.help}),
+            # TODO: make best matcher smart about accents...
+            ('créer', {'lang':'fre','func':self.createvillage}),
+            ('creer', {'lang':'fre','func':self.createvillage}),
+            # English
+            ('join', {'lang':'eng','func':self.join}),
+            ('name', {'lang':'eng','func':self.register_name}),
+            ('leave', {'lang':'eng','func':self.leave}),
+            ('language', {'lang':'eng','func':self.lang}),
+            ('help', {'lang':'eng','func':self.help}),
+            ('create', {'lang':'eng','func':self.createvillage}),
+            ('member', {'lang':'eng','func':self.member}),
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
