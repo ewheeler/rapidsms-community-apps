@@ -3,8 +3,8 @@
     "pk": 7, 
     "model": "tree.question", 
     "fields": {
-      "text": "Hello. Send me the year of your birth.", 
-      "error_response": "That's not the year of birth I was expecting. Please send it again."
+      "text": "Hello. Send me your PIN.", 
+      "error_response": "That's not the PIN I was expecting. Please send it again."
     }
   }, 
   {
@@ -430,12 +430,28 @@
     }
   },
   {
+    "pk": 200, 
+    "model": "patterns.pattern", 
+    "fields": {
+      "regex": "(nyn)", 
+      "name": "nyn"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "i18n.language", 
+    "fields": {
+      "pattern": 200, 
+      "name": "Runyankole"
+    }
+  }, 
+  {
     "pk": 17, 
     "model": "i18n.translation", 
     "fields": {
       "translation": "Agandi, nyoherereza omwaka oguwazarirwemu.", 
       "original": "Hello. Send me the year of your birth.", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -444,7 +460,7 @@
     "fields": {
       "translation": "Ogwotigwomwaka oguwabiire ongambiire.Ninkushaba ogugarukemu.", 
       "original": "That's not the year of birth I was expecting. Please send it again.", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -453,7 +469,7 @@
     "fields": {
       "translation": "Nemirundi engahi omubiiro mushanju eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika \"n\".", 
       "original": "How many doses of your medicine did you miss in the past 7 days? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -462,7 +478,7 @@
     "fields": {
       "translation": "Nemirundi engahi omubiiro makumi ashatu eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika \"n\".", 
       "original": "How many doses of your medicine did you miss in the past 30 days? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -471,7 +487,7 @@
     "fields": {
       "translation": "Nemirundi engahi eyobuziire kumiira omubazi gwawe kuruga obwohererukiire kwiiha emibazi yaawe  omwirwariro rya Mbarara? Ku orabe otarikugyimanya, handiika \"n\".", 
       "original": "How many doses of medicine did you miss since the last time you picked up your medicine from the pharmacy? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
     }
   },
   {
@@ -480,7 +496,7 @@
     "fields": {
       "translation": "Webaare kungarukamu. Ogume nobusingye.", 
       "original": "Thank you for your response. Good-bye.", 
-      "language": 2
+      "language": 4
     }
   },
   {
@@ -489,7 +505,7 @@
     "fields": {
       "translation": "Nemirundi engahi omubiiro mushanju eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
       "original": "How many doses of medicine did your child miss in the past 7 days? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -498,7 +514,7 @@
     "fields": {
       "translation": "Nemirundi engahi omubiiro maku ashatu eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
       "original": "How many doses of medicine did your child miss in the past 30 days? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
     }
   }, 
   {
@@ -507,7 +523,34 @@
     "fields": {
       "translation": "Nemirundi engahi eyo mwaana waawe abuzire kumira omubazi gwe kuruga obwohererukire kwiha omubazi gwe omwirwariro Mbarara? Waba otarikugyimanya handiika \"n\".\r\n", 
       "original": "How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type \"n\".", 
-      "language": 2
+      "language": 4
+    }
+  },
+  {
+    "pk": 34, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Agandi, nyoherereza enamba yaawe.", 
+      "original": "Hello. Send me your PIN.", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 35, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Egyo tiiyo namba yaawe. Ninkushaba ogigarukyemu.", 
+      "original": "That's not the PIN I was expecting. Please send it again.", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 36, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Ekiwangarukamu tikyo nabaninyenda.", 
+      "original": "I'm sorry. That's not an answer I was expecting.", 
+      "language": 4
     }
   }
 ]
