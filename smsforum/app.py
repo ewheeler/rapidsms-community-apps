@@ -118,6 +118,8 @@ class App(rapidsms.app.App):
             ('help', {'lang':'eng','func':self.help}),
             ('create', {'lang':'eng','func':self.createvillage}),
             ('member', {'lang':'eng','func':self.member}),
+            ('citizens', {'lang':'eng','func':self.community_members}),
+            ('remove', {'lang':'eng','func':self.destroy_community}),
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
@@ -241,8 +243,6 @@ class App(rapidsms.app.App):
         return True
              
     def member(self,msg,arg=None):
-        # TODO: process argument to say if you
-        # are a member of _that_ village only
         try:
             villages=VillagesForContact(msg.sender)
             if len(villages)==0:
@@ -258,6 +258,42 @@ class App(rapidsms.app.App):
             self.debug(rsp)
             self.__reply(msg,rsp)
         return True
+
+    def community_members(self,msg,arg=None):
+        if arg is None or len(arg)==0:
+            self.__reply(msg, "Missing name. Please send #citizens 'village'")
+            return True
+
+        villes=self.village_matcher.match(arg,with_data=True)
+        if len(villes)==0:
+            self.__reply(msg,msg.sender, "village-not-known")
+            return True
+
+        for name,ville in villes:
+            members=[c.get_signature(max_len=10) for c in \
+                         ville.flatten(klass=Contact)]
+            self.__reply(msg, '%(name)s: %(citizens)s',
+                         {'name':name, 'citizens':','.join(members)})
+        return True
+
+    def destroy_community(self,msg,arg=None):
+         if arg is None or len(arg)==0:
+            self.__reply(msg, "Missing name. Please send #destroy 'village'")
+            return True
+
+         try:
+             # EXACT MATCH ONLY!
+             ville=Village.objects.get(name=arg)
+             ville.delete()
+             self.village_matcher.remove_target(arg)
+             self.__reply(msg, "The village '%(ville)s was removed.", {'ville': arg})
+             return True
+         except:
+             rsp= _st(msg.sender,"village-not-known")
+             self.debug(rsp)
+             self.__reply(msg,rsp)
+         return True
+
             
     def register_name(self,msg,arg=None):
         print arg
