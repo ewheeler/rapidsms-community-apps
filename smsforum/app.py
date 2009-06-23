@@ -224,9 +224,13 @@ class App(rapidsms.app.App):
         else:
             village = arg
 
+        if len(Village.objects.filter(name=village))!=0:
+            self.__reply(msg, "The village %(village)s already exists.", {'village':village})
+            return True
         try:
             # TODO: add administrator authentication
-            ville = Village.objects.get_or_create(name=village)
+            ville = Village(name=village)
+            ville.save()
             self.village_matcher.add_target((village,ville))
             self.__reply(msg, "village %(village)s created", {'village':village} )
         except:
