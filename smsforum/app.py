@@ -20,8 +20,11 @@ from apps.contacts.models import Contact
 from apps.logger.models import *
 from pygsm import gsmcodecs
 
-MAX_LATIN_BLAST_LEN = 140 # reserve 20 chars for info
+MAX_LATIN_SMS_LEN = 160 
+MAX_LATIN_BLAST_LEN = 140 # resere 20 chars for us
+MAX_UCS2_SMS_LEN = 70 
 MAX_UCS2_BLAST_LEN = 60 # reserve 10 chars for info
+
 CMD_MESSAGE_MATCHER = re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
          
 #
@@ -330,8 +333,9 @@ class App(rapidsms.app.App):
             if (gsm_enc and len(txt)>MAX_LATIN_BLAST_LEN) or \
                     (not gsm_enc and len(txt)>MAX_UCS2_BLAST_LEN):
                 rsp= _st(msg.sender, \
-                             "Too long. Latin script max: %(max_latin)d. Unicode max: %(max_uni)") % \
+                             "%(msg_len)d: too long. Latin script max: %(max_latin)d. Unicode max: %(max_uni)s") % \
                              {
+                    'msg_len': len(txt),
                     'max_latin': MAX_LATIN_BLAST_LEN,
                     'max_uni': MAX_UCS2_BLAST_LEN
                     } 
@@ -360,17 +364,17 @@ class App(rapidsms.app.App):
             self.__reply(msg,rsp)
             
             # make message template for outbound so I can count size _after_ translation
-            rsp_template=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
+            blast_tmpl=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
                 { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
 
             #add signature
-            tmpl_len=len(rsp.template)-4  # -4 accounts from sig placeholder ('$')
-            max_sig=MAX_LATIN_BLAST_LEN-tmpl_len
+            tmpl_len=len(blast_tmpl.template)-4  # -4 accounts from sig placeholder ('$')
+            max_sig=MAX_LATIN_SMS_LEN-tmpl_len
             if not gsm_enc:
-                max_sig=MAX_UCS2_BLAST_LEN-tmpl_len
+                max_sig=MAX_UCS2_SMS_LEN-tmpl_len
 
-            sig=sender.get_signature(max_len=max_sig,message=msg)
-            announcement = rsp_template.substitute(sig=sender.signature.replace('$','$$'))
+            sig=sender.get_signature(max_len=max_sig,for_message=msg)
+            announcement = blast_tmpl.substitute(sig=sig.replace('$','$$'))
 
             # now iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them

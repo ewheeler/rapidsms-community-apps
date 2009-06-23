@@ -225,10 +225,11 @@ class Contact(Node):
                  the original message.
 
         """
-        cc=CommunicationChannelFromMessage(in_reply_to)
+        cc=ChannelConnectionFromMessage(in_reply_to)
+        print cc
         self.send_to(text,cc)
 
-    def send_to(self,text,com_channel=None):
+    def send_to(self,text,channel_conn=None):
         """
         Send a message to the Contact.
 
@@ -250,14 +251,13 @@ class Contact(Node):
             raise QuotaException('User over Receive quota',quota_type.SEND)
 
         connections=[]
-        if com_channel is not None:
-            connections.append(com_channel)
+        if channel_conn is not None:
+            connections.append(channel_conn)
         else:
             connections=self.channel_connections.all()
 
         try:
             for conn in connections:
-                comm_chan=conn.communication_channel
                 self._quota_receive_seen+=1
                 Message(conn.connection, text).send()
         finally:
@@ -501,7 +501,7 @@ class Contact(Node):
     def period_remain_quota_receive(self):
         return self.get_quota_period_remain(self,quota_type.RECEIVE)
 
-    def get_signature(self, max_len=None,for_msg=None):
+    def get_signature(self, max_len=None,for_message=None):
         """
         Return a string suitable for signing an SMS.
         
@@ -509,7 +509,7 @@ class Contact(Node):
                      '' (blank str) if max_len is too small to write
                      anything meaningful
 
-        - for_msg -- if the sig is used on a response to a message,
+        - for_message -- if the sig is used on a response to a message,
                      or for a new one, pass that message in and the 
                      sig will include the associated id--e.g. if you
                      received a message on a pygsm backend talking to Orange
@@ -542,8 +542,8 @@ class Contact(Node):
         # default to DB id so you can at least look 'em up
         id_part=str(self.id) 
         # try to get phone number from a channel connection
-        if for_msg is not None:
-            cc=ChannelConnectionFromMessage(for_msg,False)
+        if for_message is not None:
+            cc=ChannelConnectionFromMessage(for_message,False)
         else:
             # take first one
             ccs=self.channel_connections.all()
@@ -552,7 +552,7 @@ class Contact(Node):
                 # never contacted system...
                 cc=None
             else:
-                cc=ccs[0].user_identifier
+                cc=ccs[0]
         if cc is not None:
             id_part=cc.user_identifier
         
@@ -564,8 +564,8 @@ class Contact(Node):
                 sig=id_part
             if len(sig)>max_len:
                 sig='...%s' % id_part[-4:]
-        if len(sig)>max_len:
-            sig=''
+            if len(sig)>max_len:
+                sig=''
         return sig
 
 
@@ -586,6 +586,10 @@ class CommunicationChannel(models.Model):
     """
     backend_slug = models.CharField(max_length=30,primary_key=True)
     title = models.CharField(max_length=255,blank=True)
+
+    def __repr__(self):
+        return 'CommunicationChannel(backend_slug=%s,title=%s' % \
+            (self.backend_slug, self.title)
 
     class Meta:
         unique_together = ('backend_slug','title')
@@ -672,7 +676,7 @@ def ChannelConnectionFromMessage(msg,save=True):
         # didn't find an existing connection, which means this specific
         # CommunicationChannel (e.g. service provider) and id (e.g. phone number)
         # combo aren't known, so we need a blank Contact for this combo.
-        contact=Contact(debug_id=u_id)
+        contact=Contact(debug_id=u_id[:16]) # debug id is only16 char
         contact.save()
         chan_con=ChannelConnection(user_identifier=u_id,\
                                        communication_channel=comm_c,\
