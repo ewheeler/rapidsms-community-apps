@@ -1,5 +1,4 @@
 from rapidsms.tests.scripted import TestScript
-from rapidsms import message,connection,person
 from rapidsms.backends import test
 from app import App
 import apps.contacts.app as contacts_app
@@ -7,7 +6,6 @@ from models import *
 import apps.contacts.models as contacts_models
 from apps.contacts.models import *
 from apps.smsforum.models import Village,Community
-import time
 
 # helpers
 def _contact(name, *grps):

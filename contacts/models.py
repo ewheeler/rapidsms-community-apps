@@ -6,7 +6,7 @@ from datetime import datetime,timedelta
 from django.db import models
 from rapidsms.message import Message
 from rapidsms.connection import Connection
-from apps.nodegraph.models import *
+from apps.nodegraph.models import Node
 
 # 
 # Definition of Contacts (people) and ChannelConnections (ways to contact 
@@ -210,6 +210,24 @@ class Contact(Node):
     #
     # Use the following to make sure quotas are enforced!!
     #
+    def send_response_to(self,in_reply_to,text):
+        """
+        Use to send a response to a received message.
+        
+        - in_reply_to -- the msg you are respoding to. This uses the
+                 associated CommunicationChannel to know
+                 how to send the reply. E.g. if the Contact
+                 has CommConnections to multiple cell phone
+                 companies or email acconts--that is they have
+                 multiple phone numbers or email addresses--
+                 this will make sure the response goes to the
+                 number/address that the user used to send in 
+                 the original message.
+
+        """
+        cc=CommunicationChannelFromMessage(in_reply_to)
+        self.send_to(text,cc)
+
     def send_to(self,text,com_channel=None):
         """
         Send a message to the Contact.
@@ -229,7 +247,7 @@ class Contact(Node):
             # When we need something more complicated than this,
             # quotas will need to move to CommunicationChannel so that
             # e.g. we can have 1 quota for SMS and another for Email
-            raise QuotaException('User over send quota',quota_type.SEND)
+            raise QuotaException('User over Receive quota',quota_type.SEND)
 
         connections=[]
         if com_channel is not None:
@@ -446,7 +464,7 @@ class Contact(Node):
         
         num_seen=getattr(self,'_quota_%s_seen' % type)
         period_begin=getattr(self,'_quota_%s_period_begin' % type)
-        period=gettattr(self,'_quota_%s_period' % type)
+        period=getattr(self,'_quota_%s_period' % type)
         return (datetime.utcnow()+period)-period_begin
         
     def get_quota_period_remain(self,type=quota_type.SEND):
@@ -457,7 +475,7 @@ class Contact(Node):
         """
         # check and reset time period if needed before doing anything
         self.__check_quota_period(type)
-        return __get_quota_period_remain(type)
+        return self.__get_quota_period_remain(type)
         
     @property
     def under_quota_send(self):
@@ -483,18 +501,77 @@ class Contact(Node):
     def period_remain_quota_receive(self):
         return self.get_quota_period_remain(self,quota_type.RECEIVE)
 
+    def get_signature(self, max_len=None,for_msg=None):
+        """
+        Return a string suitable for signing an SMS.
+        
+        - max_len -- max length in characters. Watch out! It may be
+                     '' (blank str) if max_len is too small to write
+                     anything meaningful
+
+        - for_msg -- if the sig is used on a response to a message,
+                     or for a new one, pass that message in and the 
+                     sig will include the associated id--e.g. if you
+                     received a message on a pygsm backend talking to Orange
+                     and you pass that message, you get the user's Orange number
+                     in the sig
+                     
+        """
+        
+        # First try to make a name portion in this order
+        # of what values are set:
+        #
+        # 1. common_name
+        # 2. given_name family_name
+        #
+        # Then see if name_part + user_identifier fit under 
+        # max.
+        #
+        # If not, see if identifier alone fits under and
+        # truncate name part.
+        #
+        # If identifier alone doesn't fit center ltruncate it
+        # so +14155551212 => ...1212
+        # If that doesn't fit, return ''
+
+        
+        name_part=self.common_name
+        if len(name_part.strip())==0:
+            name_part=u' '.join([self.given_name,self.family_name]).strip()
+
+        # default to DB id so you can at least look 'em up
+        id_part=str(self.id) 
+        # try to get phone number from a channel connection
+        if for_msg is not None:
+            cc=ChannelConnectionFromMessage(for_msg,False)
+        else:
+            # take first one
+            ccs=self.channel_connections.all()
+            if len(ccs)==0:
+                # hmmm, user exists only in DB. Has
+                # never contacted system...
+                cc=None
+            else:
+                cc=ccs[0].user_identifier
+        if cc is not None:
+            id_part=cc.user_identifier
+        
+        # make sig
+        sig='%s, %s' % (name_part, id_part)
+        if max_len is not None:
+            # adjust for max len
+            if len(sig)>max_len:
+                sig=id_part
+            if len(sig)>max_len:
+                sig='...%s' % id_part[-4:]
+        if len(sig)>max_len:
+            sig=''
+        return sig
+
+
     @property
     def signature(self):
-        sig=self.common_name
-        if len(sig.strip())==0:
-            sig=u' '.join([self.given_name,self.family_name]).strip()
-        if len(sig.strip())==0:
-            rs = ChannelConnection.objects.filter(contact=self)
-            if len(rs)==0:
-                sig=str(self.id)
-            else:
-                sig=rs[0].user_identifier
-        return sig
+        return self.get_signature()
     
 #basically a PersistentBackend
 class CommunicationChannel(models.Model):
