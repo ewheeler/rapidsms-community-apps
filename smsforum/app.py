@@ -10,14 +10,12 @@ logger, contacts
 import re, os
 import rapidsms
 from rapidsms.parsers.bestmatch import BestMatch
-from models import *
 import gettext
 import traceback
 import string
-from apps.smsforum.models import *
+from apps.smsforum.models import Village,VillagesForContact
 import apps.contacts.models as contacts_models
 from apps.contacts.models import Contact
-from apps.logger.models import *
 from pygsm import gsmcodecs
 
 MAX_LATIN_SMS_LEN = 160 
@@ -56,7 +54,7 @@ def _t(text, locale=None):
     translator=_G['TRANSLATORS'][_G['DEFAULT_LANG']]
     if locale in _G['TRANSLATORS']:
         translator=_G['TRANSLATORS'][locale]
-    return translator.gettext(text)
+    return translator.ugettext(text)
 
 def _st(sender,text):
     """translate a message for the given sender"""
@@ -344,7 +342,7 @@ class App(rapidsms.app.App):
             
             # ok, here we got just one
             assert(len(villages)==1)
-            msg.sender.add_to_group(villages[0])
+            msg.sender.add_to_parent(villages[0])
             rsp=_st(msg.sender, "first-login") % {"village": village_names[0]}
             self.debug(rsp)
             self.__reply(msg,rsp)
@@ -443,7 +441,7 @@ class App(rapidsms.app.App):
             if len(villages)>0:
                 names=list()
                 for ville in villages:
-                    msg.sender.remove_from_group(ville)
+                    msg.sender.remove_from_parent(ville)
                     names.append(ville.name)
                 self.__reply(msg, "leave-success",
                              { "village": ','.join(names)})
@@ -480,7 +478,7 @@ class App(rapidsms.app.App):
             name,code=langs[0]
             msg.sender.locale=code
             msg.sender.save()
-            resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
+            resp = _st(msg.sender, u'lang-set %(lang_code)s') % { 'lang_code': name }
             self.__reply(msg,resp)
             return True       
         else: 

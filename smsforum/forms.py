@@ -24,4 +24,4 @@ class ContactForm(ModelForm):
 class AddCommunityForm(forms.Form):
     name = forms.CharField(label=u'Name of Community')
     members = forms.ModelMultipleChoiceField(Village.objects, label=u'Add Villages')
-    
+

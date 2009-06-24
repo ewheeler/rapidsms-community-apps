@@ -2,9 +2,10 @@ from rapidsms.tests.scripted import TestScript
 from rapidsms.backends import test
 from app import App
 import apps.contacts.app as contacts_app
-from models import *
+#from models import *
 import apps.contacts.models as contacts_models
 from apps.contacts.models import *
+from apps.nodegraph.models import Node,NodeSet
 from apps.smsforum.models import Village,Community
 
 # helpers
@@ -12,14 +13,14 @@ def _contact(name, *grps):
     u=Contact(debug_id=name)
     u.save()
     for grp in grps:
-        u.add_to_group(grp)
+        u.add_to_parent(grp)
 
     return u
 
 def _group(name, *children):
     g=NodeSet(debug_id=name)
     g.save()
-    g._add_subnodes(*children)
+    g.add_children(*children)
     return g
 
 class Worker(Contact):
@@ -118,14 +119,14 @@ class TestApp (TestScript):
     def testDowncast(self):
         v=Village(name='v1')
         v.save()
-        v._add_subnodes(*self.m_nodes[0:2])
+        v.add_children(*self.m_nodes[0:2])
         print [o.__class__ for o in self.m_nodes[0].get_ancestors(klass=Village)]
 
         sw=StealWorker(debug_id='bob builder')
         sw.save()
         workers=NodeSet(debug_id='workers')
         workers.save()
-        sw.add_to_group(workers)
+        sw.add_to_parent(workers)
 
         print [o.__class__ for o in workers.flatten(klass=Worker)]
         print [o.__class__ for o in workers.flatten(klass=StealWorker)]
@@ -147,6 +148,7 @@ class TestApp (TestScript):
         self.assertTrue(out==self.people_group_unicode)
         print out
 
+    """
     def testChannelConnectionFromMessage(self):
         print "\nPrint Channel Connection Test:"
         uid0='4156661212'
@@ -166,9 +168,8 @@ class TestApp (TestScript):
 
         # assert channel_connections are the SAME
         self.assertTrue(channel_con0==channel_con1)
-        
-    def testSimulation(self):
-        pass
+    """ 
+
 
 
 

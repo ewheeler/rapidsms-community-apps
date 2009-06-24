@@ -2,11 +2,9 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.db import models
-from django.core.urlresolvers import reverse
-
-from apps.locations.models import *
+from apps.locations.models import Location
 from apps.nodegraph.models import NodeSet
-from apps.logger.models import IncomingMessage
+
 
 class Community(NodeSet):
     name = models.CharField(max_length=255,unique=True, blank=False)
@@ -28,6 +26,6 @@ class Village(NodeSet):
 # 'Statics' as module level
 #
 def VillagesForContact(contact):
-    return contact.get_immediate_ancestors(klass=Village)
+    return contact.get_ancestors(max_alt=1,klass=Village)
     
    

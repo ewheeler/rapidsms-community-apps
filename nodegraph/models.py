@@ -64,7 +64,7 @@ class AbstractNode(models.Model):
                 return
 
             seen.add(node)
-            for a in node.get_immediate_ancestors():
+            for a in node.get_parents():
                 _recurse(a,alt+1)
 
 
@@ -77,12 +77,15 @@ class AbstractNode(models.Model):
             ret = list(seen) # make a list so indexable, but order not guaranteed
         return ret
 
-    def get_immediate_ancestors(self,klass=None):
-        """The groups this node is a member of.
+    def get_parents(self,klass=None):
+        """
+        The parent NodeSets this node is a member of.
 
-           Downcasted to 'klass' if provided (see downcast() for more info)
+        Equivalent to 'get_ancestors(max_alt=1)'
 
-           """
+        Downcasted to 'klass' if provided (see downcast() for more info)
+
+        """
         rents=self.parents.all()
         if klass is not None:
             return [r._downcast(klass) for r in rents]
@@ -162,19 +165,19 @@ class Node(AbstractNode):
     """
 
     # helpers 'cause directionality can be confusing
-    def add_to_group(self,grp):
-        grp._add_subnodes(self)
+    def add_to_parent(self,rent):
+        rent.add_children(self)
 
-    def add_to_groups(self,*grps):
-        for grp in grps:
-            self.add_to_group(grp)
+    def add_to_parents(self,*rents):
+        for rent in rents:
+            self.add_to_parent(rent)
 
-    def remove_from_group(self,grp):
-        grp._remove_subnodes(self)
+    def remove_from_parent(self,rent):
+        rent.remove_children(self)
 
-    def remove_from_groups(self,*grps):
-        for grp in grps:
-            self.remove_from_group(self)
+    def remove_from_parents(self,*rents):
+        for rent in rents:
+            self.remove_from_parent(self)
 
 
 class NodeSet(AbstractNode):
@@ -188,8 +191,8 @@ class NodeSet(AbstractNode):
 
     """
 
-    _subgroups = models.ManyToManyField('self',related_name='parents',symmetrical=False)
-    _subleaves = models.ManyToManyField(Node,related_name='parents') 
+    _childsets = models.ManyToManyField('self',related_name='parents',symmetrical=False)
+    _childleaves = models.ManyToManyField(Node,related_name='parents') 
     
     def __unicode__(self):
         """
@@ -219,11 +222,11 @@ class NodeSet(AbstractNode):
             seen.add(node)
             buf.append(u'%s(' % node.debug_id)
             index=0
-            for sub in node.subgroups:
+            for sub in node.childsets:
                 _recurse(sub,index)
                 index+=1
 
-            leaves=u','.join([unicode(l) for l in node.subleaves])
+            leaves=u','.join([unicode(l) for l in node.childleaves])
             if len(leaves)>0:
                 if index>0:
                     buf.append(u',')
@@ -236,26 +239,26 @@ class NodeSet(AbstractNode):
     #
     # helpers because directionality is confusing
     #
-    def add_to_group(self,grp):
-        grp._add_subnodes(self)
+    def add_to_parent(self,rent):
+        rent.add_children(self)
 
-    def add_to_groups(self,*grps):
+    def add_to_parents(self,*rents):
         """
         Add this instance to the listed groups
 
         """
-        for grp in grps:
-            self.add_to_group(grp)
+        for rent in rents:
+            self.add_to_parent(rent)
 
-    def remove_from_group(self,grp):
-        grp._remove_subnodes(self)
+    def remove_from_parent(self,rent):
+        rent.remove_children(self)
 
-    def remove_from_groups(self,*grps):
-        for grp in grps:
-            self.remove_from_group(grp)
+    def remove_from_parents(self,*rents):
+        for rent in rents:
+            self.remove_from_parent(rent)
 
     # safe to use, but calls above should be sufficient
-    def _add_subnodes(self,*sub_nodes):
+    def add_children(self,*sub_nodes):
         """
         Add the passed nodes to this instance as 'subnodes'
         
@@ -265,35 +268,35 @@ class NodeSet(AbstractNode):
         for n in sub_nodes:
             # distinguish between Nodes and NodeSets
             if isinstance(n, Node):
-                self._subleaves.add(n)
+                self._childleaves.add(n)
             elif isinstance(n, NodeSet):
-                self._subgroups.add(n)
+                self._childsets.add(n)
 
-    def _remove_subnodes(self, *subnodes):
+    def remove_children(self, *subnodes):
         for n in subnodes:
 
             # distinguish between Nodes and NodeSets
             if isinstance(n, Node):
-                self._subleaves.remove(n)
+                self._childleaves.remove(n)
             elif isinstance(n, NodeSet):
-                self._subgroups.remove(n)
+                self._childsets.remove(n)
 
     # and some shortcut properties
-    @property
-    def subgroups(self):
+    def __getchildsets(self):
         """All the direct sub-NodeSets"""
-        return self._subgroups.all()
+        return self._childsets.all()
+    childsets=property(__getchildsets)
 
-    @property
-    def subleaves(self):
+    def __getchildleaves(self):
         """All the direct sub-Nodes"""
-        return self._subleaves.all()
+        return self._childleaves.all()
+    childleaves=property(__getchildleaves)
 
-    @property
-    def subnodes(self):
+    def __getchildren(self):
         """A list of both the sub-NodeSets and sub-Nodes"""
-        return self.subgroups+self.subleaves
-    
+        return self.childsets+self.childleaves
+    children=property(__getchildren)
+
     # full graph access methods
     def flatten(self, max_depth=None,klass=None):
         """
@@ -326,11 +329,11 @@ class NodeSet(AbstractNode):
             # ok, it's a valid nodeset, add to seen
             seen.add(nodeset)
             
-            # add its subleaves to 'leaves'
-            leaves.update(nodeset.subleaves)
+            # add its childleaves to 'leaves'
+            leaves.update(nodeset.childleaves)
 
-            # recurse to its subgroups
-            for ns in nodeset.subgroups:
+            # recurse to its childsets
+            for ns in nodeset.childsets:
                 _recurse(ns, depth+1)
                 
         # Now call recurse

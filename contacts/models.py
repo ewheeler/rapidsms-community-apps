@@ -97,7 +97,9 @@ class Contact(Node):
     # permission masks
     __PERM_RECEIVE=0x01
     __PERM_SEND=0x02
-    __PERM_IGNORE=0x04
+    __PERM_ADMIN=0x04
+    __PERM_IGNORE=0x08 # trumps the others
+
 
     #
     # Table columns
@@ -196,17 +198,6 @@ class Contact(Node):
         "str":        unicode(self) }
     """
 
-    @property
-    def locale(self):
-        return self._locale
-
-    @locale.setter
-    def locale(self,val):
-        if val is None:
-            raise("Locale can't be None!")
-        self._locale=val
-        self.save()
-
     #
     # Use the following to make sure quotas are enforced!!
     #
@@ -275,18 +266,29 @@ class Contact(Node):
         self._quota_send_seen+=1
         self.save()
 
-    @property
-    def age_years(self):
+    ##############
+    # Properties #
+    ##############
+    def __get_locale(self):
+        return self._locale
+
+    def __set_locale(self,val):
+        if val is None:
+            raise("Locale can't be None!")
+        self._locale=val
+        self.save()
+    locale=property(__get_locale,__set_locale)
+
+    def __get_age_years(self):
         if self.age_months is None:
             return None
         return self.age_months*12
 
-    @age_years.setter
-    def age_years(self,value):
+    def __set_age_years(self,value):
         self.age_months=value*12
+    age_years=property(__get_age_years,__set_age_years)
 
-    @property
-    def can_receive(self):
+    def __can_receive(self):
         """
         Returns a _SINGLE_ 'True/False' representing
         
@@ -297,9 +299,9 @@ class Contact(Node):
 
         """
         return self.perm_receive and self.under_quota_receive
+    can_receive=property(__can_receive)
 
-    @property
-    def can_send(self):
+    def __get_can_send(self):
         """
         Returns a _SINGLE_ 'True/False' representing
         
@@ -310,21 +312,19 @@ class Contact(Node):
 
         """
         return self.perm_send and self.under_quota_send
+    can_send=property(__get_can_send)
 
-
-    @property
-    def perm_receive(self):
+    def __get_perm_receive(self):
         return bool(self._permissions & self.__PERM_RECEIVE)
 
-    @perm_receive.setter
-    def perm_receive(self,val):
+    def __set_perm_receive(self,val):
         if bool(val):
             self._permissions|=self.__PERM_RECEIVE
         else:
             self._permissions&=~self.__PERM_RECEIVE
+    perm_receive=property(__get_perm_receive, __set_perm_receive)
 
-    @property
-    def perm_send(self):
+    def __get_perm_send(self):
         """
         Returns state of 'send' permission, regardless
         of quota_type.
@@ -332,23 +332,37 @@ class Contact(Node):
         """
         return bool(self._permissions & self.__PERM_SEND)
 
-    @perm_send.setter
-    def perm_send(self,val):
+    def __set_perm_send(self,val):
         if bool(val):
             self._permissions|=self.__PERM_SEND
         else:
             self._permissions&=~self.__PERM_SEND
+    perm_send=property(__get_perm_send,__set_perm_send)
 
-    @property
-    def perm_ignore(self):
+    def __get_perm_admin(self):
+        """
+        Returns state of 'send' permission, regardless
+        of quota_type.
+
+        """
+        return bool(self._permissions & self.__PERM_ADMIN)
+
+    def __set_perm_admin(self,val):
+        if bool(val):
+            self._permissions|=self.__PERM_ADMIN
+        else:
+            self._permissions&=~self.__PERM_ADMIN
+    perm_admin=property(__get_perm_admin,__set_perm_admin)
+
+    def __get_perm_ignore(self):
         return bool(self._permissions & self.__PERM_IGNORE)
 
-    @perm_ignore.setter
-    def perm_ignore(self,val):
+    def __set_perm_ignore(self,val):
         if bool(val):
             self._permissions|=self.__PERM_IGNORE
         else:
             self._permissions&=~self.__PERM_IGNORE
+    perm_ignore=property(__get_perm_ignore, __set_perm_ignore)        
 
     # quota manipulators
     def __check_quota_period(self, type=quota_type.SEND):
@@ -384,16 +398,14 @@ class Contact(Node):
         setattr(self,'_quota_%s_period_begin' % type, None)
         setattr(self,'_quota_%s_seen' % type, 0)
 
-    @property
-    def quota_send(self):
+    def __get_quota_send(self):
         """
         returns a tuple of (max, period)
 
         """
         return (self._quota_send_max,self._quota_send_priod)
 
-    @quota_send.setter
-    def quota_send(self,val):
+    def __set_quota_send(self,val):
         """
         Takes a tupe (int: max, timedelta: period)
         or None to turn off quota
@@ -403,35 +415,36 @@ class Contact(Node):
             self.set_quota_send(quota_type.SEND,period=0)
         else:
             self.set_quota(quota_type.SEND,val[0],val[1])
+    quota_send=property(__get_quota_send,__set_quota_send)
 
-    @property
-    def quota_receive(self):
+    def __get_quota_receive(self):
         """
         returns a tuple of (max, period)
 
         """
         return (self._quota_receive_max,self._quota_receive_period)
 
-    @quota_receive.setter
-    def quota_receive(self,val):
+    def __set_quota_receive(self,val):
         if val is None:
             self.set_quota_send(quota_type.RECEIVE,period=0)
         else:
             self.set_quota(quota_type.RECEIVE,val[0],val[1])
+    quota_receive=property(__get_quota_receive,__set_quota_receive)
 
-    def get_has_quota(self,type=quota_type.SEND):
+
+    def _get_has_quota(self,type=quota_type.SEND):
         period=getattr(self, '_quota_%s_period' % type)
         return period!=0
 
-    @property
-    def has_quota_send(self):
-        return self.get_has_quota(quota_type.SEND)
+    def __get_has_quota_send(self):
+        return self._get_has_quota(quota_type.SEND)
+    has_quota_send=property(__get_has_quota_send)
 
-    @property
-    def has_quota_receive(self):
-        return self.get_has_quota(quota_type.RECEIVE)
+    def __get_has_quota_receive(self):
+        return self._get_has_quota(quota_type.RECEIVE)
+    has_quota_receive=property(__get_has_quota_receive)
 
-    def get_quota_head_room(self,type=quota_type.SEND):
+    def _get_quota_head_room(self,type=quota_type.SEND):
         """
         how many more messages can go under current quota
         OR None if infinite quota.
@@ -453,6 +466,8 @@ class Contact(Node):
 
     def __get_quota_period_remain(self,type=quota_type.SEND):
         """
+        PRIVATE VERSION needed to avoid recursion
+
         Return a timedelta object of remaining time
         in current period or None if infinite (no quota)
 
@@ -467,7 +482,7 @@ class Contact(Node):
         period=getattr(self,'_quota_%s_period' % type)
         return (datetime.utcnow()+period)-period_begin
         
-    def get_quota_period_remain(self,type=quota_type.SEND):
+    def _get_quota_period_remain(self,type=quota_type.SEND):
         """
         Return a timedelta object of remaining time
         in current period or None if infinite (no quota)
@@ -477,29 +492,29 @@ class Contact(Node):
         self.__check_quota_period(type)
         return self.__get_quota_period_remain(type)
         
-    @property
-    def under_quota_send(self):
+    def __get_under_quota_send(self):
         """Return number of messages under quota or 0 if over"""
-        under=self.get_quota_head_room(type=quota_type.SEND)
+        under=self._get_quota_head_room(type=quota_type.SEND)
         if under is None:
             return True
         return bool(under)
+    under_quota_send=property(__get_under_quota_send)
 
-    @property
-    def under_quota_receive(self):
+    def __get_under_quota_receive(self):
         """Return number of messages under quota or 0 if over"""
-        under=self.get_quota_head_room(type=quota_type.RECEIVE)
+        under=self._get_quota_head_room(type=quota_type.RECEIVE)
         if under is None:
             return True
         return bool(under)
+    under_quota_receive=property(__get_under_quota_receive)
 
-    @property
-    def period_remain_quota_send(self):
-        return self.get_quota_period_remain(self,quota_type.SEND)
+    def __get_period_remain_quota_send(self):
+        return self._get_quota_period_remain(self,quota_type.SEND)
+    period_remain_quota_send=property(__get_period_remain_quota_send)
 
-    @property
-    def period_remain_quota_receive(self):
-        return self.get_quota_period_remain(self,quota_type.RECEIVE)
+    def __get_period_remain_quota_receive(self):
+        return self._get_quota_period_remain(self,quota_type.RECEIVE)
+    period_remain_quota_receive=property(__get_period_remain_quota_receive)
 
     def get_signature(self, max_len=None,for_message=None):
         """
@@ -557,7 +572,10 @@ class Contact(Node):
             id_part=cc.user_identifier
         
         # make sig
-        sig='%s, %s' % (name_part, id_part)
+        if len(name_part)>0:
+            sig=', '.join([name_part, id_part])
+        else:
+            sig=id_part
         if max_len is not None:
             # adjust for max len
             if len(sig)>max_len:
@@ -569,9 +587,9 @@ class Contact(Node):
         return sig
 
 
-    @property
-    def signature(self):
+    def __get_signature(self):
         return self.get_signature()
+    signature=property(__get_signature)
     
 #basically a PersistentBackend
 class CommunicationChannel(models.Model):
