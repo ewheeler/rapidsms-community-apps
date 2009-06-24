@@ -87,7 +87,9 @@ class App(rapidsms.app.App):
             ('boole', {'lang':'wol','func':self.join}),
             ('yokk', {'lang':'wol','func':self.join}),
             ('duggu', {'lang':'wol','func':self.join}),
+            ('genn', {'lang':'wol','func':self.leave}),
             ('sant', {'lang':'wol','func':self.register_name}),
+            ('tur', {'lang':'wol','func':self.register_name}),
             # Joola
             ('unoken', {'lang':'joo','func':self.join}),
             ('karess', {'lang':'joo','func':self.register_name}),
