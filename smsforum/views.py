@@ -14,12 +14,20 @@ from apps.smsforum.utils import *
 from apps.smsforum.forms import *
 from apps.logger.models import *
 from apps.contacts.models import *
+from apps.contacts.forms import *
 
 from datetime import datetime, timedelta
 
-@require_GET
 def index(req, template="smsforum/index.html"):
     context = {}
+    if req.method == 'POST':
+        annotations = req.POST.getlist('annotation')
+        annotation_ids = req.POST.getlist('annotation_id')
+        for i in range( 0, len(annotation_ids) ):
+            msg = IncomingMessage.objects.get( id=annotation_ids[i] )
+            if msg.annotation != annotations[i]:
+                msg.annotation = annotations[i]
+                msg.save()
     villages = Village.objects.all()
     for village in villages:
         # once this site bears more load, we can replace flatten() with village.subnodes
@@ -59,7 +67,7 @@ def members(req, pk, template="smsforum/members.html"):
             member.phone_number = connections[0].user_identifier
             last_week = ( datetime.now()-timedelta(weeks=1) )
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
-    context['village_name'] = village.name
+    context['village'] = village
     context['members'] = paginated(req, members)
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
     context['messages'] = paginated(req, messages)
@@ -105,11 +113,12 @@ def edit_village(req, pk, template="smsforum/edit.html"):
     
 def edit_member(req, pk, template="smsforum/edit.html"):
     context = {}
-    form = get_object_or_404(Contact, id=pk)
+    contact = get_object_or_404(Contact, id=pk)
     if req.method == "POST":
-        f = ContactForm(req.POST, instance=form)
-        f.save()
-    context['form'] = ContactForm(instance=form)
+        form = SetContactFromPost(req.POST, contact)
+    else:
+        form = GetContactForm(instance=contact)
+    context['form'] = form
     context['title'] = _("Edit Member")
     return render_to_response(req, template, context)
 

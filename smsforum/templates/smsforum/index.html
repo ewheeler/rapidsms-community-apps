@@ -3,6 +3,10 @@
 {% load pagination %}
 {% block title %}{% trans "Villages" %}{% endblock %}
 
+{% block stylesheets %} 
+<link rel="stylesheet" href="/static/stylesheets/style.css" />
+{% endblock %}
+
 {% block content %}
 
 <div class="module">
@@ -19,8 +23,8 @@
 		</thead>
 		<tbody>{% if villages.object_list %}{% for village in villages.object_list %}
 			<tr>
-				<td><a href="/village/edit/{{ village.pk }}"{% if village.name %}>{{ village.name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
-                <td><a href="/village/{{ village.pk }}"{% if village.member_count %}>{{ village.member_count }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+				<td><a href="/village/{{ village.pk }}"{% if village.name %}>{{ village.name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+                <td>{% if village.member_count %}{{ village.member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if village.message_count %}{{ village.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <!--  FIX THIS
 				<td>{% if village.messages_sent_count %}{{ village.messages_sent_count }}{% else %}<span class="na">n/a</span>{% endif %}</td> -->

@@ -2,17 +2,23 @@
 {% load pagination %}
 <div class="module">
     <h2>{% trans "Messages" %}</h2>
+    <form action="" method="POST">
     <table>
         <thead>
             <tr>
                 <th scope="col">{% trans "Date" %}</th>
                 <th scope="col">{% trans "Message" %}</th>
+                <th scope="col">{% trans "Annotation" %}</th>
             </tr>
         </thead>
         <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
             <tr>
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>
+                    <input id={{message.id}} type="text" name="annotation" value="{{ message.annotation }}" maxlength="255" />
+                    <input type="hidden" name="annotation_id" value={{message.id}}>
+                </td>
             </tr>{% endfor %}{% else %}
             <tr class="no-data">
                 <td colspan="3">
@@ -22,10 +28,15 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3">
+                <td colspan="2">
                     {% paginator messages %}
+                </td>
+                <td><span class="right">
+                    <input type="submit" value="Save Annotations" />
+                    </span>
                 </td>
             </tr>
         </tfoot>
     </table>
+    </form>
 </div>

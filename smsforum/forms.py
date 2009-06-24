@@ -16,11 +16,6 @@ class VillageForm(ModelForm):
          model = Village
          fields = ('name')
     
-class ContactForm(ModelForm):
-     class Meta:
-         model = Contact
-         fields = ('given_name','family_name','gender','age_months')
-    
 class AddCommunityForm(forms.Form):
     name = forms.CharField(label=u'Name of Community')
     members = forms.ModelMultipleChoiceField(Village.objects, label=u'Add Villages')

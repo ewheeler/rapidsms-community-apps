@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% load i18n %}
 {% load pagination %}
-{% block title %}{% trans "Members of" %}{{ village_name }}{% endblock %}
+{% block title %}{% trans "Members of" %}{{ village.name }}{% endblock %}
 
 {% block content %}
 
 <div class="module">
-	<h2>{% trans "Members of " %}{{ village_name }}</h2>
+	<h2>{% trans "Members of " %}{{ village.name }}</h2>
 	<table>
 		<thead>
 			<tr>
@@ -30,11 +30,19 @@
                 <!--  TODO: fix this
                 <td>{% if member.message_count %}{{ member.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                  -->
-			</tr>{% endfor %}{% else %}
+			</tr>{% endfor %}
+            <tr>
+                <td colspan="3">
+                    <a href="/member/add" class="add">
+                        {% trans "Add a Member" %}
+                    </a>
+                </td>
+            </tr>
+			{% else %}
 			<tr class="no-data">
 				<td colspan="3">
 					{% trans "No members yet" %}
-					<a href="/reporters/add" class="add">
+					<a href="/member/add" class="add">
 						{% trans "Add a Member" %}
 					</a>
 				</td>
@@ -49,7 +57,7 @@
 		</tfoot>
 	</table>
 	<div class="toolbar">
-		<a href="/member/add" class="add">{% trans "Add a Member" %}</a>
+		<a href="/village/edit/{{ village.id }}" class="add">{% trans "Edit Village" %}</a>
 	</div>
 </div>
 {% include 'smsforum/partials/messages.html' %}
