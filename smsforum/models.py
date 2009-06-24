@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 
 from apps.locations.models import *
 from apps.nodegraph.models import NodeSet
-from apps.logger.models import IncomingMessage
 
 class Community(NodeSet):
     name = models.CharField(max_length=255,unique=True, blank=False)
@@ -29,5 +28,5 @@ class Village(NodeSet):
 #
 def VillagesForContact(contact):
     return contact.get_immediate_ancestors(klass=Village)
-    
-   
+
+
