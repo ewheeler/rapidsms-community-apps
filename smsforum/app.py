@@ -127,6 +127,13 @@ class App(rapidsms.app.App):
         self.lang_matcher=BestMatch([
                 (name,code) for code,name in _G['SUPPORTED_LANGS'].items()
                 ])
+        
+        """ TODO: move this to fixture - just for testing right now! """
+        s = CodeSet(name="TOSTAN_CODE")
+        s.save()
+        Code.objects.get_or_create(set=s, name="code1", slug="1")
+        Code.objects.get_or_create(set=s, name="code2", slug="2")
+        Code.objects.get_or_create(set=s, name="code3", slug="3")
 
     def start(self):
         self.__loadFixtures()

@@ -21,13 +21,36 @@ from datetime import datetime, timedelta
 def index(req, template="smsforum/index.html"):
     context = {}
     if req.method == 'POST':
-        annotations = req.POST.getlist('annotation')
-        annotation_ids = req.POST.getlist('annotation_id')
-        for i in range( 0, len(annotation_ids) ):
-            msg = IncomingMessage.objects.get( id=annotation_ids[i] )
-            if msg.annotation != annotations[i]:
-                msg.annotation = annotations[i]
-                msg.save()
+        # now iterate through all the messages you learned about
+        for i in req.POST.getlist('message'):
+            #debug = debug + i
+            id = int(i)
+            m = IncomingMessage.objects.get(id=id)
+            notes = MessageAnnotation.objects.filter( message=m )
+            if 'flagged_'+ str(id) in req.POST: flagged = True
+            else: flagged = False
+            text = req.POST['text_'+str(id)]
+            code = req.POST['code_'+str(id)]
+            is_empty = len(text)==0 and len(code)==0 and flagged==False
+            if len(notes) == 0:
+                #none existing, none required
+                if is_empty: continue
+                else: # create new annotation
+                    note = MessageAnnotation(message=m)
+                    if len(code) > 0: note.code = Code.objects.get(id=code)
+                    if len(text) > 0: note.text = text
+                    note.flagged = flagged
+                    note.save()
+            else:
+                # delete existing annotation
+                if is_empty: notes[0].delete()
+                else: #modify existing annotation
+                    if len(code) == 0: notes[0].code = None
+                    else: notes[0].code = Code.objects.get(id=code)
+                    if len(text) > 0: notes[0].text = text
+                    else: notes[0].text = ''
+                    notes[0].flagged = flagged
+                    notes[0].save()
     villages = Village.objects.all()
     for village in villages:
         # once this site bears more load, we can replace flatten() with village.subnodes
@@ -39,8 +62,9 @@ def index(req, template="smsforum/index.html"):
     context['villages'] = paginated(req, villages)
     messages = IncomingMessage.objects.all().order_by('-received')
     context['messages'] = paginated(req, messages)
+    context['codes'] = Code.objects.all()
     return render_to_response(req, template, context)
-    
+
     #change this to a generic view!
     """
     communities = Community.objects.all()

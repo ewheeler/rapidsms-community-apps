@@ -9,6 +9,8 @@
                 <th scope="col">{% trans "Date" %}</th>
                 <th scope="col">{% trans "Message" %}</th>
                 <th scope="col">{% trans "Annotation" %}</th>
+                <th scope="col">{% trans "Flag" %}</th>
+                <th scope="col">{% trans "Code" %}</th>
             </tr>
         </thead>
         <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
@@ -16,19 +18,39 @@
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>
-                    <input id={{message.id}} type="text" name="annotation" value="{{ message.annotation }}" maxlength="255" />
-                    <input type="hidden" name="annotation_id" value={{message.id}}>
+                    <input type="hidden" name="message" value="{{message.id}}"/>
+                    <input type="text" name="text_{{message.id}}" value="{% if message.messageannotation.text %}{{ message.messageannotation.text }}{% else %}{% endif %}" maxlength="255" />
+                </td>
+                <td>
+                    <input type="checkbox" name="flagged_{{message.id}}" 
+                    {% if message.messageannotation.flagged %}checked{% endif %} />
+                </td>
+                <td>
+                    <select name="code_{{message.id}}" value="{{ code }}" >
+                      {% if message.messageannotation.code %}
+                          <option value='' select="selected">{{ code.name }}                             
+                      {% else %}
+                          <option value=''>{{ code.name }}                             
+                      {% endif %}
+					  {% for code in codes %}
+						  {% ifnotequal message.messageannotation.code.id code.id %}
+                              <option value={{ code.id }}>{{ code.name }}                           
+	   					  {% else %}
+                              <option value={{ code.id }} selected="selected">{{ code.name }}	   					      
+	                      {% endifnotequal %}
+					  {% endfor %}
+                    </select>
                 </td>
             </tr>{% endfor %}{% else %}
             <tr class="no-data">
-                <td colspan="3">
+                <td colspan="5">
                     {% trans "No messages yet" %}
                 </td>
             </tr>{% endif %}
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2">
+                <td colspan="5">
                     {% paginator messages %}
                 </td>
                 <td><span class="right">
