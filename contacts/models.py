@@ -573,7 +573,7 @@ class Contact(Node):
         
         # make sig
         if len(name_part)>0:
-            sig=', '.join([name_part, id_part])
+            sig=': '.join([name_part, id_part])
         else:
             sig=id_part
         if max_len is not None:
