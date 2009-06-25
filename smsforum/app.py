@@ -94,22 +94,17 @@ class App(rapidsms.app.App):
             ('duggu', {'lang':'wol','func':self.join}),
             ('genn', {'lang':'wol','func':self.leave}),
             ('sant', {'lang':'wol','func':self.register_name}),
-<<<<<<< HEAD:apps/smsforum/app.py
             ('tur', {'lang':'wol','func':self.register_name}),
+            ('help-wol', {'lang':'wol','func':self.help}),
             # Joola
             ('unoken', {'lang':'joo','func':self.join}),
+            ('ounoken', {'lang':'joo','func':self.join}),
+            ('karees', {'lang':'joo','func':self.register_name}),
             ('karess', {'lang':'joo','func':self.register_name}),
             ('upur', {'lang':'joo','func':self.leave}),
+            ('oupour', {'lang':'joo','func':self.leave}),
             ('rambenom', {'lang':'joo','func':self.help}),
             ('ukaana', {'lang':'joo','func':self.createvillage}),
-=======
-            ('help-wol', {'lang':'wol','func':self.help}),
-            # Dyuola
-            ('ounoken', {'lang':'dyu','func':self.join}),
-            ('karess', {'lang':'dyu','func':self.register_name}),
-            ('oupour', {'lang':'dyu','func':self.leave}),
-            ('rambenom', {'lang':'dyu','func':self.help}),
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
             # Debug calls ('deb' language==debug)
             ('djoin', {'lang':'deb','func':self.join}),
             ('rname', {'lang':'deb','func':self.register_name}),
@@ -162,12 +157,8 @@ class App(rapidsms.app.App):
     def parse(self, msg):
         self.debug("SMSFORUM:PARSE")
 
-<<<<<<< HEAD:apps/smsforum/app.py
         msg.sender = ContactFromMessage(msg,self.router)
-        self.__log_incoming_message( msg.persistent_msg,VillagesForContact(msg.sender) )
-=======
-        msg.sender = contacts_models.ContactFromMessage(msg,self.router)
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
+        self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
@@ -287,18 +278,6 @@ class App(rapidsms.app.App):
         else:
             village = arg
 
-<<<<<<< HEAD:apps/smsforum/app.py
-            # TODO: add administrator authentication
-        try:
-            try:
-                Village.objects.get(name=village)
-                msg.sender.send_to(_st(msg.sender, "village %(village)s already exists") % {'village':village} )
-                return True
-            except Village.DoesNotExist:
-                ville = Village(name=village).save()
-                self.village_matcher.add_target((village,ville))
-                msg.sender.send_to(_st(msg.sender, "village %(village)s created") % {'village':village} )
-=======
         if len(Village.objects.filter(name=village))!=0:
             self.__reply(msg, "The village %(village)s already exists.", {'village':village})
             return True
@@ -308,7 +287,6 @@ class App(rapidsms.app.App):
             ville.save()
             self.village_matcher.add_target((village,ville))
             self.__reply(msg, "village %(village)s created", {'village':village} )
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
         except:
             self.debug( traceback.format_exc() )
             traceback.print_exc()
@@ -496,27 +474,6 @@ class App(rapidsms.app.App):
                 self.__blast_to_contact(obj,out_text)
         return True
 
-<<<<<<< HEAD:apps/smsforum/app.py
-            # respond to sender first because the delay between now and the last recipient
-            # can be long
-            rsp= _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
-            self.debug('REPSONSE TO BLASTER: %s' % rsp)
-            msg.sender.send_to(rsp)
-            
-            # make message template for outbound
-            rsp_template=string.Template(_st(msg.sender, "%(txt)s - sent to [%(ville)s] from %(sender)s") % \
-                { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
-            # now iterate every member of the group we are broadcasting
-            # to, and queue up the same message to each of them
-            for recipient in recipients:
-                if recipient != msg.sender and recipient.can_receive:
-                    #add signature
-                    announcement = rsp_template.substitute(sig=sender.signature.replace('$','$$'))
-                    #todo: limit chars to 1 txt message?
-                    recipient.send_to(announcement) 
-            village_names = village_names.strip()
-            self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
-=======
     def blast(self, msg):
         """Takes actual Contact objects"""
         self.debug("SMSFORUM:BLAST")
@@ -527,7 +484,6 @@ class App(rapidsms.app.App):
             rsp=_st(msg.sender, "You must join a village before sending messages")
             self.debug(rsp)
             self.__reply(msg,rsp)
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
             return True
 
         recips=[v.name for v in villes]
@@ -630,8 +586,6 @@ class App(rapidsms.app.App):
         self.debug("success! %(villes)s recvd msg: %(txt)s" % { 'villes':vnames,'txt':text})
         return True
 
-<<<<<<< HEAD:apps/smsforum/app.py
-=======
     def __blast_to_contact(self, contact, text):
         """Returns True is message sent"""
         if contact.can_receive:
@@ -641,7 +595,6 @@ class App(rapidsms.app.App):
         else:
             return False
 
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
     def leave(self,msg,arg=None):
         self.debug("SMSFORUM:LEAVE: %s" % arg)
         try:
@@ -699,17 +652,7 @@ class App(rapidsms.app.App):
             # invalid lang code, send them a list
             return _return_all_langs()
 
-<<<<<<< HEAD:apps/smsforum/app.py
-    def __log_incoming_message(self,msg,domains):
-        #TODO: FIX THIS so that it logs for all domains
-        msg.persistent_msg.domain = domains[0]
-        msg.persistent_msg.save()
             
-    def __loadFixtures(self):
-        pass
-
-=======
-
     #
     # Private helpers
     # 
@@ -745,8 +688,8 @@ class App(rapidsms.app.App):
     def __loadFixtures(self):
         pass
 
-    def __log_incoming_message(self,msg,domain):
-        msg.persistent_msg.domain = domain
+    def __log_incoming_message(self,msg,domains):
+        #TODO: FIX THIS so that it logs for all domains
+        msg.persistent_msg.domain = domains[0]
         msg.persistent_msg.save()
 
->>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
