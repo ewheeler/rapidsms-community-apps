@@ -129,11 +129,12 @@ class App(rapidsms.app.App):
                 ])
         
         """ TODO: move this to fixture - just for testing right now! """
-        s = CodeSet(name="TOSTAN_CODE")
-        s.save()
+        s = CodeSet.objects.get_or_create(name="TOSTAN_CODE")[0]
         Code.objects.get_or_create(set=s, name="code1", slug="1")
         Code.objects.get_or_create(set=s, name="code2", slug="2")
         Code.objects.get_or_create(set=s, name="code3", slug="3")
+        f = CodeSet.objects.get_or_create(name="FLAGGED_CODE")[0]
+        Code.objects.get_or_create(set=f, name="flagged", slug="True")
 
     def start(self):
         self.__loadFixtures()

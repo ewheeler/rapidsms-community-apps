@@ -23,34 +23,60 @@ def index(req, template="smsforum/index.html"):
     if req.method == 'POST':
         # now iterate through all the messages you learned about
         for i in req.POST.getlist('message'):
-            #debug = debug + i
             id = int(i)
-            m = IncomingMessage.objects.get(id=id)
-            notes = MessageAnnotation.objects.filter( message=m )
-            if 'flagged_'+ str(id) in req.POST: flagged = True
-            else: flagged = False
-            text = req.POST['text_'+str(id)]
-            code = req.POST['code_'+str(id)]
-            is_empty = len(text)==0 and len(code)==0 and flagged==False
-            if len(notes) == 0:
-                #none existing, none required
-                if is_empty: continue
-                else: # create new annotation
+            m = IncomingMessage.objects.select_related().get(id=id)
+            # GATHER EXISTING TAGS
+            tags = MessageTag.objects.select_related().filter(message=m)
+            flag = None
+            code = None
+            for tag in tags:
+                if tag.code.set.name == "FLAGGED_CODE":
+                    flag = tag 
+                elif tag.code.set.name == "TOSTAN_CODE":
+                    code = tag
+            note = None
+            notes = MessageAnnotation.objects.filter(message=m)
+            if len(notes) > 0: note = notes[0]
+            
+            # CHECK FOR SUBMITTED VALUES
+            if 'flagged_'+ str(id) in req.POST: flag_bool = True
+            else: flag_bool = False
+            note_txt = req.POST['text_'+str(id)]
+            code_txt = req.POST['code_'+str(id)]
+            
+            # MAP SUBMITTED VALUES TO NEW DB STATE
+            if flag is None:
+                if flag_bool == True:
+                    flag = MessageTag(message=m)
+                    SetFlag(flag)
+                    flag.save()
+            else:
+                if flag_bool == False: flag.delete()
+                else:
+                    SetFlag(flag)
+                    flag.save()
+                    
+            if code is None:
+                if len(code_txt) > 0:
+                    code = MessageTag(message=m)
+                    code = SetCode(code,code_txt)
+                    code.save()
+            else:
+                if len(code_txt) == 0: code.delete()
+                else:
+                    SetCode(code,code_txt)
+                    code.save() 
+                                   
+            if note is None:
+                if len(note_txt) > 0:
                     note = MessageAnnotation(message=m)
-                    if len(code) > 0: note.code = Code.objects.get(id=code)
-                    if len(text) > 0: note.text = text
-                    note.flagged = flagged
+                    note.text = note_txt
                     note.save()
             else:
-                # delete existing annotation
-                if is_empty: notes[0].delete()
-                else: #modify existing annotation
-                    if len(code) == 0: notes[0].code = None
-                    else: notes[0].code = Code.objects.get(id=code)
-                    if len(text) > 0: notes[0].text = text
-                    else: notes[0].text = ''
-                    notes[0].flagged = flagged
-                    notes[0].save()
+                if len(note_txt) == 0: note.delete()
+                else:
+                    note.text = note_txt
+                    note.save()                
     villages = Village.objects.all()
     for village in villages:
         # once this site bears more load, we can replace flatten() with village.subnodes
@@ -58,9 +84,16 @@ def index(req, template="smsforum/index.html"):
         village.member_count = len( village.flatten() )
         last_week = ( datetime.now()-timedelta(weeks=1) )
         village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
+        # TODO - fix this number
         village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
-    messages = IncomingMessage.objects.all().order_by('-received')
+    messages = IncomingMessage.objects.select_related().order_by('-received')
+    for msg in messages:
+        for tag in msg.messagetag_set.all():
+            if IsFlag(tag): msg.flagged = True
+            elif tag.code.set.name == "TOSTAN_CODE": msg.code = tag.code
+        notes = msg.messageannotation_set.filter(message=msg)
+        if len(notes) > 0: msg.note = notes[0].text
     context['messages'] = paginated(req, messages)
     context['codes'] = Code.objects.all()
     return render_to_response(req, template, context)
@@ -79,6 +112,22 @@ def index(req, template="smsforum/index.html"):
     #messages sent this week
     return render_to_response(req, template, context)
     """
+
+# TODO: move this somewhere Tostan-Specifig
+# would declare this as a class but we don't need the extra database table
+def SetFlag(flag):
+    code = Code.objects.get(slug="True")
+    flag.code = code
+
+def IsFlag(tag):
+    if tag.code.set.name == "FLAGGED_CODE": return True
+    else: return False
+
+# would declare this as a class but we don't need the extra database table
+def SetCode(tag, str):
+    code = Code.objects.get(slug=str)
+    tag.code = code
+    return tag
 
 def members(req, pk, template="smsforum/members.html"):
     context = {}

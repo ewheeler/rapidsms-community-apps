@@ -19,22 +19,22 @@
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>
                     <input type="hidden" name="message" value="{{message.id}}"/>
-                    <input type="text" name="text_{{message.id}}" value="{% if message.messageannotation.text %}{{ message.messageannotation.text }}{% else %}{% endif %}" maxlength="255" />
+                    <input type="text" name="text_{{message.id}}" value="{% if message.note %}{{ message.note }}{% else %}{% endif %}" maxlength="255" />
                 </td>
                 <td>
                     <input type="checkbox" name="flagged_{{message.id}}" 
-                    {% if message.messageannotation.flagged %}checked{% endif %} />
+                    {% if message.flagged %}checked{% endif %} />
                 </td>
                 <td>
                     <select name="code_{{message.id}}" value="{{ code }}" >
-                      {% if message.messageannotation.code %}
-                          <option value='' select="selected">{{ code.name }}                             
+                      {% if message.code %}
+                          <option value='' select="selected">{{ code.slug }}                             
                       {% else %}
                           <option value=''>{{ code.name }}                             
                       {% endif %}
 					  {% for code in codes %}
-						  {% ifnotequal message.messageannotation.code.id code.id %}
-                              <option value={{ code.id }}>{{ code.name }}                           
+						  {% ifnotequal message.code.id code.id %}
+                              <option value={{ code.id }}>{{ code.slug }}                           
 	   					  {% else %}
                               <option value={{ code.id }} selected="selected">{{ code.name }}	   					      
 	                      {% endifnotequal %}
