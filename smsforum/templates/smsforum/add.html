@@ -2,9 +2,17 @@
 {% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 
+{% block stylesheets %} 
+<link rel="stylesheet" href="/static/stylesheets/style.css" />
+{% endblock %}
+
 {% block content %}
 
 <div class="module">
+    <h2>{{ title }}</h2>
+    <p/>
+    <!-- I know this isn't css-correct. But my stylesheets aren't working =b -->
+    <div style="color:red">{{ error }}</div>
 
 	<form action="" method="POST">
 	{{ form }}

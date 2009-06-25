@@ -1,3 +1,8 @@
 .right {
-        float:right;
+        float:right; 
+        color: red;
 }
+
+.error {
+        color: red;
+ }

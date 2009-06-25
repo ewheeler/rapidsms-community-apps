@@ -13,7 +13,7 @@ class Village(NodeSet):
     __SEC_UNUSED_1 = 0x04
     __SEC_UNUSED_2 = 0x08 
 
-    name = models.CharField(max_length=255, unique=True, blank=False)
+    name = models.CharField(max_length=255, unique=True, blank=False,verbose_name="Village Name")
     location = models.ForeignKey(Location, null=True, blank=True)
 
     # Security flags recorded, but not yet enforced
