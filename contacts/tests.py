@@ -157,14 +157,14 @@ class TestApp (TestScript):
 
         con1=connection.Connection(self.backend,uid0)
         msg=message.Message(con1, 'test message')
-        channel_con0=contacts_models.ChannelConnectionFromMessage(msg)
+        channel_con0=contacts_models.channel_connection_from_message(msg)
 
         "assert that the ChannelConnection's contact has the correct ID"
         self.assertTrue(channel_con0.contact.debug_id==uid0)
 
         # create a _different_ message on the same connection
         msg = message.Message(con1, 'Another Message')
-        channel_con1=contacts_models.ChannelConnectionFromMessage(msg)
+        channel_con1=contacts_models.channel_connection_from_message(msg)
 
         # assert channel_connections are the SAME
         self.assertTrue(channel_con0==channel_con1)

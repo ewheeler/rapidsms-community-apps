@@ -14,7 +14,8 @@ import gettext
 import traceback
 from apps.smsforum.models import Village, villages_for_contact
 import apps.contacts.models as contacts_models
-from apps.contacts.models import Contact
+from apps.contacts.models import Contact, contact_from_message
+from apps.logger.models import CodeSet, Code
 from pygsm import gsmcodecs
 
 MAX_LATIN_SMS_LEN = 160 
@@ -22,7 +23,7 @@ MAX_LATIN_BLAST_LEN = 140 # resere 20 chars for us
 MAX_UCS2_SMS_LEN = 70 
 MAX_UCS2_BLAST_LEN = 60 # reserve 10 chars for info
 
-CMD_MARKER=ur'[\.\*\#]'
+CMD_MARKER=ur'(?:[\.\*\#]|(?:123))'
 DM_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'(.+?)'+ \
                                     CMD_MARKER+'\s*(.+)?', re.IGNORECASE)
 CMD_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'\s*(\S+)?(.+)?',re.IGNORECASE)
@@ -132,7 +133,7 @@ class App(rapidsms.app.App):
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
-        villes=[(v.name,v) for v in Village.objects.all()]
+        villes=[(v.name, v) for v in Village.objects.all()]
         self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
         # swap dict so that we send in (name,code) tuples rather than (code,name
         self.lang_matcher=BestMatch([
@@ -157,8 +158,8 @@ class App(rapidsms.app.App):
     def parse(self, msg):
         self.debug("SMSFORUM:PARSE")
 
-        msg.sender = ContactFromMessage(msg,self.router)
-        self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
+        msg.sender = contact_from_message(msg,self.router)
+        # self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
@@ -278,7 +279,7 @@ class App(rapidsms.app.App):
         else:
             village = arg
 
-        if len(Village.objects.filter(name=village))!=0:
+        if len(Village.objects.filter(name=village)) != 0:
             self.__reply(msg, "The village %(village)s already exists.", {'village':village})
             return True
         try:
@@ -671,8 +672,7 @@ class App(rapidsms.app.App):
                     (format_values, reply_text)
                 print err
                 self.error(err)
-        msg.sender.send_response_to(msg,reply_text)
-        
+        msg.sender.send_response_to(reply_text)
     
     def __suggest_villages(self,msg):
         """helper to send informative messages"""
