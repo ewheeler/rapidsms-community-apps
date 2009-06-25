@@ -12,7 +12,7 @@ import rapidsms
 from rapidsms.parsers.bestmatch import BestMatch, MultiMatch
 import gettext
 import traceback
-from apps.smsforum.models import Village,VillagesForContact
+from apps.smsforum.models import Village, villages_for_contact
 import apps.contacts.models as contacts_models
 from apps.contacts.models import Contact
 from pygsm import gsmcodecs
@@ -281,7 +281,7 @@ class App(rapidsms.app.App):
              
     def member(self,msg,arg=None):
         try:
-            villages=VillagesForContact(msg.sender)
+            villages=villages_for_contact(msg.sender)
             if len(villages)==0:
                 self.__reply(msg, "member-of-no-village")
             else:
@@ -464,7 +464,7 @@ class App(rapidsms.app.App):
         self.debug("SMSFORUM:BLAST")
 
         #find all villages for this sender
-        villes = VillagesForContact(msg.sender)
+        villes = villages_for_contact(msg.sender)
         if len(villes)==0:
             rsp=_st(msg.sender, "You must join a village before sending messages")
             self.debug(rsp)
@@ -585,13 +585,13 @@ class App(rapidsms.app.App):
         try:
             villages=[]
             if arg is not None and len(arg)>0:
-                village_tupes=self.village_matcher.match(arg,with_data=True)
+                village_tupes = self.village_matcher.match(arg, with_data=True)
                 if len(village_tupes)>0:
-                    villages=zip(*village_tupes)[1] # the objects
+                    villages = zip(*village_tupes)[1] # the objects
             else:
-                villages=VillagesForContact(msg.sender)
+                villages = villages_for_contact(msg.sender)
             if len(villages)>0:
-                names=list()
+                names = list()
                 for ville in villages:
                     msg.sender.remove_from_parent(ville)
                     names.append(ville.name)
