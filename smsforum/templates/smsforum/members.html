@@ -33,7 +33,7 @@
 			</tr>{% endfor %}
             <tr>
                 <td colspan="3">
-                    <a href="/member/add" class="add">
+                    <a href="/village/{{village.id}}/member/add" class="add">
                         {% trans "Add a Member" %}
                     </a>
                 </td>
@@ -42,7 +42,7 @@
 			<tr class="no-data">
 				<td colspan="3">
 					{% trans "No members yet" %}
-					<a href="/member/add" class="add">
+					<a href="/village/{{village.id}}/member/add" class="add">
 						{% trans "Add a Member" %}
 					</a>
 				</td>

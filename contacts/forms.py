@@ -21,7 +21,7 @@ def get_contact_form(instance):
     form.fields['perm_ignore'].initial = instance.perm_ignore
     form.fields['age'].initial = instance.age_years
     form.fields['phone_number'].initial = instance.age_years
-    conns = ChannelConnection.objects.filter(contact_id=instance.id)
+    conns = ChannelConnection.objects.filter(contact=instance)
     if len(conns)>0: form.fields['phone_number'].initial = conns[0].user_identifier
     return form
 
@@ -34,10 +34,10 @@ def create_contact_from_post(post, contact):
     contact.perm_receive = set( 'perm_receive' )
     contact.perm_ignore = set( 'perm_ignore' )
     contact.age_years = post['age']
-    contact.save()
-    if set('phone_number') and set('communication_channel'): 
+    c = contact.save()
+    if len(post['phone_number'])>0 and len( post['communication_channel']>0 ): 
         conn = ChannelConnection( user_identifier=post['phone_number'], \
                                   communication_channel=contact.cleaned_data['communication_channel'], \
-                                  contact=contact )
+                                  contact=c )
         conn.save()
     return contact

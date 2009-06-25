@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load pagination %}
+{% if messages %}
 <div class="module">
     <h2>{% trans "Messages" %}</h2>
     <form action="" method="POST">
@@ -62,3 +63,4 @@
     </table>
     </form>
 </div>
+{% endif %}

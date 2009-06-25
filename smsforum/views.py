@@ -151,13 +151,14 @@ def member(req, pk, template="smsforum/member.html"):
     try:
         connections = ChannelConnection.objects.get(contact=contact)
         contact.phone_number = connections.user_identifier
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
+        contact.message_count = len(messages)
+        context['messages'] = paginated(req, messages)
     except ChannelConnection.DoesNotExist:
+        #this is a contact without a phone number
         pass
-    last_week = ( datetime.now()-timedelta(weeks=1) )
-    messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
-    contact.message_count = len(messages)
     context['member'] = contact
-    context['messages'] = paginated(req, messages)
     return render_to_response(req, template, context)
 
 def edit_village(req, pk, template="smsforum/edit.html"):
@@ -197,13 +198,14 @@ def add_village(req, template="smsforum/add.html"):
     context['title'] = _("Add Village")
     return render_to_response(req, template, context)    
 
-def add_member(req, template="smsforum/add.html"):
+def add_member(req, village_id=0, template="smsforum/add.html"):
     context = {}
     if req.method == 'POST':
         form = ContactForm(req.POST)
         if form.is_valid():
             c = form.save()
-            context['status'] = _("Member %s successfully created" % (c) )
+            c.add_to_parent( Village.objects.get(id=village_id) )
+            context['status'] = _("Member '%s' successfully created" % (c.signature) )
         else:
             context['error'] = form.errors
     context['form'] = ContactForm()
