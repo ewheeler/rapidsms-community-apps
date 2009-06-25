@@ -9,20 +9,25 @@ logger, contacts
 
 import re, os
 import rapidsms
-from rapidsms.parsers import Matcher
-from rapidsms.message import Message
-from rapidsms.parsers.bestmatch import BestMatch
-from models import *
+from rapidsms.parsers.bestmatch import BestMatch, MultiMatch
 import gettext
 import traceback
-import string
+from apps.smsforum.models import Village, villages_for_contact
+import apps.contacts.models as contacts_models
+from apps.contacts.models import Contact
+from pygsm import gsmcodecs
 
-from apps.smsforum.models import *
-from apps.contacts.models import *
-from apps.logger.models import *
+MAX_LATIN_SMS_LEN = 160 
+MAX_LATIN_BLAST_LEN = 140 # resere 20 chars for us
+MAX_UCS2_SMS_LEN = 70 
+MAX_UCS2_BLAST_LEN = 60 # reserve 10 chars for info
 
-MAX_BLAST_CHARS=140
-CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
+CMD_MARKER=ur'[\.\*\#]'
+DM_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'(.+?)'+ \
+                                    CMD_MARKER+'\s*(.+)?', re.IGNORECASE)
+CMD_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'\s*(\S+)?(.+)?',re.IGNORECASE)
+
+
          
 #
 # Module level translation calls so we don't have to prefix everything 
@@ -30,7 +35,7 @@ CMD_MESSAGE_MATCHER=re.compile(ur'^\s*([\.\*\#])\s*(\S+)?\s*',re.IGNORECASE)
 #
 
 # Mutable globals hack 'cause Python module globals are WHACK
-_G= { 'SUPPORTED_LANGS': {
+_G = { 'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
         'pul':u'Pulaar',
         'wol':u'Wolof',
@@ -42,7 +47,7 @@ _G= { 'SUPPORTED_LANGS': {
       'TRANSLATORS':dict()
 }
 
-def _initTranslators():
+def __init_translators():
     path = os.path.join(os.path.dirname(__file__),"locale")
     for lang,name in _G['SUPPORTED_LANGS'].items():
         trans = gettext.translation('messages',path,[lang,_G['DEFAULT_LANG']])
@@ -53,7 +58,7 @@ def _t(text, locale=None):
     translator=_G['TRANSLATORS'][_G['DEFAULT_LANG']]
     if locale in _G['TRANSLATORS']:
         translator=_G['TRANSLATORS'][locale]
-    return translator.gettext(text)
+    return translator.ugettext(text)
 
 def _st(sender,text):
     """translate a message for the given sender"""
@@ -63,7 +68,7 @@ def _st(sender,text):
     return _t(text,locale=sender.locale)
 
 # init them translators!    
-_initTranslators()
+__init_translators()
 
 
 #
@@ -82,13 +87,14 @@ class App(rapidsms.app.App):
             ('naalde', {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
             ('yaltude', {'lang':'pul','func':self.leave}),
-            ('help', {'lang':'pul','func':self.help}),
+            ('help-pul', {'lang':'pul','func':self.help}),
             # Wolof
             ('boole', {'lang':'wol','func':self.join}),
             ('yokk', {'lang':'wol','func':self.join}),
             ('duggu', {'lang':'wol','func':self.join}),
             ('genn', {'lang':'wol','func':self.leave}),
             ('sant', {'lang':'wol','func':self.register_name}),
+<<<<<<< HEAD:apps/smsforum/app.py
             ('tur', {'lang':'wol','func':self.register_name}),
             # Joola
             ('unoken', {'lang':'joo','func':self.join}),
@@ -96,12 +102,20 @@ class App(rapidsms.app.App):
             ('upur', {'lang':'joo','func':self.leave}),
             ('rambenom', {'lang':'joo','func':self.help}),
             ('ukaana', {'lang':'joo','func':self.createvillage}),
+=======
+            ('help-wol', {'lang':'wol','func':self.help}),
+            # Dyuola
+            ('ounoken', {'lang':'dyu','func':self.join}),
+            ('karess', {'lang':'dyu','func':self.register_name}),
+            ('oupour', {'lang':'dyu','func':self.leave}),
+            ('rambenom', {'lang':'dyu','func':self.help}),
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
             # Debug calls ('deb' language==debug)
             ('djoin', {'lang':'deb','func':self.join}),
             ('rname', {'lang':'deb','func':self.register_name}),
             ('dleave', {'lang':'deb','func':self.leave}),
             ('dlang', {'lang':'deb','func':self.lang}),
-            ('dcreate', {'lang':'eng','func':self.createvillage}),
+            ('dcreate', {'lang':'deb','func':self.createvillage}),
             # French
             ('entrer', {'lang':'fre','func':self.join}),
             ('nom', {'lang':'fre','func':self.register_name}),
@@ -118,6 +132,8 @@ class App(rapidsms.app.App):
             ('help', {'lang':'eng','func':self.help}),
             ('create', {'lang':'eng','func':self.createvillage}),
             ('member', {'lang':'eng','func':self.member}),
+            ('citizens', {'lang':'eng','func':self.community_members}),
+            ('remove', {'lang':'eng','func':self.destroy_community}),
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
@@ -136,14 +152,22 @@ class App(rapidsms.app.App):
         f = CodeSet.objects.get_or_create(name="FLAGGED_CODE")[0]
         Code.objects.get_or_create(set=f, name="flagged", slug="True")
 
+
     def start(self):
         self.__loadFixtures()
     
+    #####################
+    # Message Lifecycle #
+    #####################
     def parse(self, msg):
         self.debug("SMSFORUM:PARSE")
 
+<<<<<<< HEAD:apps/smsforum/app.py
         msg.sender = ContactFromMessage(msg,self.router)
         self.__log_incoming_message( msg.persistent_msg,VillagesForContact(msg.sender) )
+=======
+        msg.sender = contacts_models.ContactFromMessage(msg,self.router)
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
@@ -152,44 +176,67 @@ class App(rapidsms.app.App):
         
         # check permissions
         if msg.sender.perm_ignore:
-            self.debug('Ignoring sender: %s' % sender.signature)
+            self.debug('Ignoring sender: %s' % msg.sender.signature)
             return False
 
         if not msg.sender.can_send:
-            self.debug('Sender: %s does no have receive perms' % sender.signature)
-            msg.sender.send_to(_st(msg.sender, 'Message rejected. User does not have send perms'))
+            self.debug('Sender: %s does no have receive perms' % msg.sender.signature)
+            self.__reply(msg,'Message rejected. User does not have send perms')
         
         # Ok, we're all good, start processing
         msg.sender.sent_message_accepted(msg)
-        msg_text=msg.text.strip()
-
-        #see if it is a command
+        
+        #
+        # Now we figure out if it's a direct message, a command, or a blast
+        #
+        # ok, this is a little weird, but stay with me.
+        # commands start with '.' '*' or '#'--the cmd markers. e.g. '.join <something>'
+        # addresses are of form cmd_marker address cmd_mark--e.g. '.jeff. hello'
+        #
+        is_command=False
+        is_dm=False
         cmd=None
-        msg_match=CMD_MESSAGE_MATCHER.match(msg_text)
-        if msg_match is not None:
-            cmd=msg_match.groups()[1]
-        else:
-            # it's a blast message (not a command)
-            self.blast(msg)
-            return True
+        address=None
+        rest=None
 
-        # Command processing
+        # check for direct message first
+        m=DM_MESSAGE_MATCHER.match(msg.text)
+        if m is not None:
+            address=m.group(1).strip()
+            rest=m.group(2)
+            if rest is not None:
+                rest=rest.strip()
+            return self.blast_direct(msg,address,rest)
+        
+        # are we a command?
+        m=CMD_MESSAGE_MATCHER.match(msg.text)
+        if m is None:
+            # we are a blast
+            return self.blast(msg)
+
+        # we must be a command
+        cmd,rest=m.groups()
         if cmd is None:
             #user tried to send some sort of command (a message with .,#, or *, but nothing after)
-            msg.sender.send_to(_st(msg.sender, "command-not-understood"))
+            self.__reply(msg,"command-not-understood")
             return True
+        else:
+            cmd=cmd.strip()
+        
+        if rest is not None:
+            rest=rest.strip()
 
         # Now match the possible command to ones we know
         cmd_match=self.cmd_matcher.match(cmd,with_data=True)
 
         if len(cmd_match)==0:
             # no command match
-            msg.sender.send_to(_st(msg.sender, "command-not-understood"))
+            self.__reply(msg,"command-not-understood")
             return True
 
         if len(cmd_match)>1:
             # too many matches!
-            msg.sender.send_to(_st(msg.sender, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?') %\
+            self.__reply(msg, 'Command not understood. Did you mean one of: %(firsts)s or %(last)s?', \
                               { 'firsts':', '.join([t[0] for t in cmd_match[:-1]]),
                                 'last':cmd_match[-1:][0][0]})
             return True
@@ -197,27 +244,50 @@ class App(rapidsms.app.App):
         # Ok! We got a real command
         #
         cmd,data=cmd_match[0]
-        arg=msg_text[msg_match.end():]
+        #arg=msg_text[msg_match.end():]
 
         # set the senders default language, if not sent
         if msg.sender.locale is None:
             msg.sender.locale=data['lang']
             msg.sender.save()
-        return data['func'](msg,arg=arg)
+        return data['func'](msg,arg=rest)
+
+    def outgoing(self, msg):
+        # TODO
+        # create a ForumMessage class
+        # log messages with associated domain
+        # report on dashboard
+        pass
         
+
+    ####################
+    # Command Handlers #
+    ####################
     def help(self, msg,arg=None):
-        # TODO: grab senders language and translate based on that
-        msg.sender.send_to(_st(msg.sender, "help with commands"))
+        if arg is not None and len(arg)>0:
+            # see if it is a language and send help 
+            # for that lang
+            langs=self.lang_matcher.match(arg,with_data=True)
+            if len(langs)==1:
+                self.__reply(msg, "help-with-commands-%s" % langs[0][1])
+                return True
+            else:
+                # send the list of available langs by passing
+                # to the 'lang' command handler
+                return self.lang(msg)
+            
+        self.__reply(msg, "help with commands")
         return True
 
     def createvillage(self, msg, arg=None):
         self.debug("SMSFORUM:CREATEVILLAGE")        
         if arg is None or len(arg)<1:
-            msg.sender.send_to(_st(msg.sender, "Please send a village name: #send 'village name'"))
+            self.__reply(msg, "Please send a village name: #send 'village name'")
             return True
         else:
             village = arg
 
+<<<<<<< HEAD:apps/smsforum/app.py
             # TODO: add administrator authentication
         try:
             try:
@@ -228,37 +298,82 @@ class App(rapidsms.app.App):
                 ville = Village(name=village).save()
                 self.village_matcher.add_target((village,ville))
                 msg.sender.send_to(_st(msg.sender, "village %(village)s created") % {'village':village} )
+=======
+        if len(Village.objects.filter(name=village))!=0:
+            self.__reply(msg, "The village %(village)s already exists.", {'village':village})
+            return True
+        try:
+            # TODO: add administrator authentication
+            ville = Village(name=village)
+            ville.save()
+            self.village_matcher.add_target((village,ville))
+            self.__reply(msg, "village %(village)s created", {'village':village} )
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
         except:
             self.debug( traceback.format_exc() )
             traceback.print_exc()
-            msg.sender.send_to(_st(msg.sender, "register-fail"))
+            self.__reply(msg, "register-fail")
 
         return True
              
     def member(self,msg,arg=None):
-        # TODO: process argument to say if you
-        # are a member of _that_ village only
         try:
-            villages=VillagesForContact(msg.sender)
+            villages=villages_for_contact(msg.sender)
             if len(villages)==0:
-                msg.sender.send_to( _st(msg.sender, "nothing to leave"))
+                self.__reply(msg, "member-of-no-village")
             else:
                 village_names = ', '.join([v.name for v in villages])
-                msg.sender.send_to(_st(msg.sender, "member-of %(village_names)s") \
-                                       % {"village_names":village_names})
+                self.__reply(msg, "member-of %(village_names)s",
+                             {"village_names":village_names})
         except:
             traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp= _st(msg.sender,"register-fail")
             self.debug(rsp)
-            msg.sender.send_to(rsp)
+            self.__reply(msg,rsp)
         return True
+
+    def community_members(self,msg,arg=None):
+        if arg is None or len(arg)==0:
+            self.__reply(msg, "Missing name. Please send #citizens 'village'")
+            return True
+
+        villes=self.village_matcher.match(arg,with_data=True)
+        if len(villes)==0:
+            self.__reply(msg, "village-not-known")
+            return True
+
+        for name,ville in villes:
+            members=[c.get_signature(max_len=10) for c in \
+                         ville.flatten(klass=Contact)]
+            self.__reply(msg, '%(name)s: %(citizens)s',
+                         {'name':name, 'citizens':','.join(members)})
+        return True
+
+    def destroy_community(self,msg,arg=None):
+         if arg is None or len(arg)==0:
+            self.__reply(msg, "Missing name. Please send #destroy 'village'")
+            return True
+
+         try:
+             # EXACT MATCH ONLY!
+             ville=Village.objects.get(name=arg)
+             ville.delete()
+             self.village_matcher.remove_target(arg)
+             self.__reply(msg, "The village '%(ville)s was removed.", {'ville': arg})
+             return True
+         except:
+             rsp= _st(msg.sender,"village-not-known")
+             self.debug(rsp)
+             self.__reply(msg,rsp)
+         return True
+
             
     def register_name(self,msg,arg=None):
         print arg
         if arg is None or len(arg)==0:
-            msg.sender.send_to(_st(msg.sender,
-                "name-register-success %(name)s") % {'name':msg.sender.signature})
+            self.__reply(msg,"name-register-success %(name)s",
+                         {'name':msg.sender.signature})
             return True
 
         name=arg
@@ -266,26 +381,14 @@ class App(rapidsms.app.App):
             msg.sender.common_name = name
             msg.sender.save()
             rsp=_st(msg.sender, "name-register-success %(name)s") % {'name':msg.sender.common_name}
-            msg.sender.send_to(rsp)
+            self.__reply(msg,rsp)
         except:
             traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp= _st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.sender.send_to(rsp)
+            self.__reply(msg,rsp)
 
-        return True
-
-    def __suggest_villages(self,msg):
-        """helper to send informative messages"""
-        # pick some names from the DB
-        village_names = [v.name for v in Village.objects.all()[:3]]
-        if len(village_names) == 0:
-            village_names = _st(msg.sender,"village name")
-        else: 
-            village_names=', '.join(village_names)
-        resp =  _st(msg.sender, "village does not exist") % {"village_names": village_names}
-        msg.sender.send_to(resp)
         return True
 
     def join(self,msg,arg=None):
@@ -310,49 +413,90 @@ class App(rapidsms.app.App):
                     # use all hit targets
                     resp=_st(msg.sender, "village does not exist") % \
                         {"village_names": ', '.join(village_names)}
-                    msg.sender.send_to(resp)
+                    self.__reply(msg,resp)
                     return True
             
             # ok, here we got just one
             assert(len(villages)==1)
-            msg.sender.add_to_group(villages[0])
+            msg.sender.add_to_parent(villages[0])
             rsp=_st(msg.sender, "first-login") % {"village": village_names[0]}
             self.debug(rsp)
-            msg.sender.send_to(rsp)
+            self.__reply(msg,rsp)
         except:
             traceback.print_exc()
             self.debug( traceback.format_exc() )
             rsp=_st(msg.sender, "register-fail")
             self.debug(rsp)
-            msg.sender.send_to(rsp)
+            self.__reply(msg,rsp)
         return True
             
-    def blast(self, msg):
-        txt = msg.text
-        try:
-            sender = msg.sender
+    def blast_direct(self, msg, address, text):
+        """
+        find the matching people, groups. 
+         
+        Consider only matches that return ONE result!
+        
+        Otherwise people might accidentally send messages
+        far wider than expected!
+        
+        The direct messaging to Contacts currently uses
+        'common_name' which is not guaranteed unique,
+        so if two people have the same name, the returned set
+        will never be unique, and you will not be allowed to
+        send to them.
+        
+        a system that wants to really implement Twitter like
+        DM needs to either enforce uniqueness on common_name
+        or use the 'unique_id' field in stead.
+        
+        Either way people will need to register a 'username'
+        like handle in the field used for the match.
+        
+        """
 
-            # check for message length, and bounce messages that are too long
-            if len(txt) > MAX_BLAST_CHARS:
-                rsp= _st(msg.sender, "Message was not delivered. Please send less than %(max_chars)d characters.") % {'max_chars': MAX_BLAST_CHARS} 
-                msg.sender.send_to(rsp)
+        contacts=[(c.common_name, c) for c in Contact.objects.all()]
+        cont_matcher=BestMatch(targets=contacts)
+        found=MultiMatch(self.village_matcher,cont_matcher).\
+            match(address,with_data=True)
+        
+        if len(found)==0:
+            self.__reply(
+                msg,
+                'direct-blast_user-or-village-not-found %(searched)s',
+                {'searched':address}
+                )
+        elif len(found)>1:
+            names,objs=zip(*found)
+            self.__reply(
+                msg,
+                'direct-blast_too-many-found %(first_found)s and %(rest_found)s',
+                { 'first_found':names[0], 'rest_found': ', '.join(names[1:])}
+                )
+        else:
+            # got one person or village!
+            name,obj=found[0] # found is an array of tuples (name,obj)
+
+            # prep the outbound message
+            ok,out_text,enc=self.__prep_blast_message(msg,text,[name])
+            if not ok:
+                # oops, too long, __prep... already responded to 
+                # user, so we'll just return
                 return True
 
-            self.debug("SMSFORUM:BLAST")
-            #find all reporters from the same location
-            villages = VillagesForContact(sender)
-            if len(villages)==0:
-                rsp=_st(msg.sender, "You must join a village before sending messages")
-                self.debug(rsp)
-                msg.sender.send_to(rsp)
-                return True
+            rsp= _st(msg.sender, "direct-blast: %(txt)s to: %(recip)s") % \
+                {'recip':name,'txt':out_text}
+ 
+            self.debug('REPSONSE TO BLASTER: %s' % rsp)
+            self.__reply(msg,rsp)
 
-            recipients=set()
-            village_names = ''
-            for ville in villages:
-                village_names = ("%s %s") % (village_names, ville.name) 
-                recipients.update(ville.flatten(klass=Contact))
+            if isinstance(obj, Village):
+                self.__blast_to_villages([obj],msg.sender,out_text)
+            else:
+                assert(isinstance(obj, Contact))
+                self.__blast_to_contact(obj,out_text)
+        return True
 
+<<<<<<< HEAD:apps/smsforum/app.py
             # respond to sender first because the delay between now and the last recipient
             # can be long
             rsp= _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % {'villes':village_names,'txt':txt} 
@@ -372,38 +516,157 @@ class App(rapidsms.app.App):
                     recipient.send_to(announcement) 
             village_names = village_names.strip()
             self.debug( _st(msg.sender, "success! %(villes)s recvd msg: %(txt)s") % { 'villes':village_names,'txt':txt})
+=======
+    def blast(self, msg):
+        """Takes actual Contact objects"""
+        self.debug("SMSFORUM:BLAST")
+
+        #find all villages for this sender
+        villes = villages_for_contact(msg.sender)
+        if len(villes)==0:
+            rsp=_st(msg.sender, "You must join a village before sending messages")
+            self.debug(rsp)
+            self.__reply(msg,rsp)
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
             return True
+
+        recips=[v.name for v in villes]
+        ok,blast_text,enc=self.__prep_blast_message(msg,msg.text,recips)
+        if not ok:
+            # message was too long, prep already
+            # sent a reply to the sender, so we just 
+            # return out
+            return True
+
+        # respond to sender first because the delay between now 
+        # and the last recipient can be long
+        #
+        # TODO: send a follow-up is message sending fails!
+        rsp= _st(msg.sender, "sent: %(msg)s to: %(villages)s") % \
+            {'villages':', '.join(recips),'msg':msg.text.strip()} 
+        self.debug('REPSONSE TO BLASTER: %s' % rsp)
+        self.__reply(msg,rsp)
+
+        return self.__blast_to_villages(villes,msg.sender,blast_text)
+    
+    def __prep_blast_message(self,msg,out_text,recipients):
+        """
+        helper function formats blast msg
+        including signature and returns 3-ple
+        of ( bool <message is good to send>, 
+        formatted message w/signature, encoding required)
+        
+        If message is NOT good to send 3-ple will be
+        (False, None, encoding)
+
+        NOTE: If the message is too long this helper
+        sends a reply to the msg.sender, so don't do
+        that again!
+        
+        """
+
+        # check for message length, and bounce messages that are too long
+        #
+        # since length depends on encoding, find out if we can send 
+        # this GSM (160 chars) or UCS2 (70 chars)
+        #
+        # TODO: factor this somewhere better like the backend since
+        # it's what knows the message size limits...
+        #
+
+        gsm_enc=True
+        sender_sig=msg.sender.signature
+        try:
+            out_text.encode('gsm')
+            sender_sig.encode('gsm')
         except:
-            traceback.print_exc()
-            self.debug( traceback.format_exc() )
-            msg.sender.send_to(_st(msg.sender, "blast-fail"))
+            # Either message or sig needs UCS2 encoding
+            gsm_enc=False
+        finally:
+            encoding,max_len=(\
+                ('gsm',MAX_LATIN_BLAST_LEN) if gsm_enc \
+                    else ('ucs2',MAX_UCS2_BLAST_LEN))
+            
+        if len(out_text)>max_len: 
+            rsp= _st(msg.sender, \
+                         "%(msg_len)d: too long. Latin script max: %(max_latin)d. Unicode max: %(max_uni)s") % \
+                         {
+                'msg_len': len(out_text),
+                'max_latin': MAX_LATIN_BLAST_LEN,
+                'max_uni': MAX_UCS2_BLAST_LEN
+                } 
+            self.__reply(msg,rsp)
+            return (False, None, encoding)
+
+        # ok, we're long enough, lets make the blast text
+        # we replace '%(sender)s' with '%(sender)s' so that
+        # localized strings can put the sender where they want
+        # we then do another subsitution after we pick the send signature
+        blast_tmpl=_st(msg.sender, "%(txt)s - sent to [%(recips)s] from %(sender)s") % \
+            { 'txt':out_text, 'recips':', '.join(recipients), 'sender': '%(sender)s'}
+
+        #add signature
+        tmpl_len=len(blast_tmpl)-10  # -10 accounts from sig placeholder ('%(sender)s')
+        max_sig=max_len-tmpl_len
+        sig=msg.sender.get_signature(max_len=max_sig,for_message=msg)
+        blast_text = blast_tmpl % {'sender': sig}
+        return (True, blast_text, encoding)
+
+    def __blast_to_villages(self, villes, sender, text):
+        """Takes actual village objects"""
+        if villes is None or len(villes)==0:
+            return True
+
+        recipients=set()
+        for ville in villes:
+            recipients.update(ville.flatten(klass=Contact))
+            
+        # now iterate every member of the group we are broadcasting
+        # to, and queue up the same message to each of them
+        for recipient in recipients:
+            if recipient != sender:
+                self.__blast_to_contact(recipient,text)
+        vnames = ', '.join([v.name for v in villes])
+        self.debug("success! %(villes)s recvd msg: %(txt)s" % { 'villes':vnames,'txt':text})
         return True
 
+<<<<<<< HEAD:apps/smsforum/app.py
+=======
+    def __blast_to_contact(self, contact, text):
+        """Returns True is message sent"""
+        if contact.can_receive:
+            self.debug('Blast msg: %s to: %s' % (text,contact.signature))
+            contact.send_to(text)
+            return True
+        else:
+            return False
+
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py
     def leave(self,msg,arg=None):
         self.debug("SMSFORUM:LEAVE: %s" % arg)
         try:
             villages=[]
             if arg is not None and len(arg)>0:
-                village_tupes=self.village_matcher.match(arg,with_data=True)
+                village_tupes = self.village_matcher.match(arg, with_data=True)
                 if len(village_tupes)>0:
-                    villages=zip(*village_tupes)[1] # the objects
+                    villages = zip(*village_tupes)[1] # the objects
             else:
-                villages=VillagesForContact(msg.sender)
+                villages = villages_for_contact(msg.sender)
             if len(villages)>0:
-                names=list()
+                names = list()
                 for ville in villages:
-                    msg.sender.remove_from_group(ville)
+                    msg.sender.remove_from_parent(ville)
                     names.append(ville.name)
-                msg.sender.send_to(_st(msg.sender, "leave-success") % \
-                                       { "village": ','.join(names)})
+                self.__reply(msg, "leave-success",
+                             { "village": ','.join(names)})
             else:
-                msg.sender.send_to( _st(msg.sender, "nothing to leave"))
+                self.__reply(msg, "nothing to leave")
         except:
             # something went wrong - at the
             # moment, we don't care what
             traceback.print_exc()
             self.debug( traceback.format_exc() )
-            msg.sender.send_to(_st(msg.sender, "leave-fail"))
+            self.__reply(msg, "leave-fail")
 
         return True
 
@@ -417,10 +680,10 @@ class App(rapidsms.app.App):
             langs_sorted.sort()
             resp=_st(msg.sender, "supported-langs: %(langs)s") % \
                 { 'langs':', '.join(langs_sorted)}
-            msg.sender.send_to(resp)
+            self.__reply(msg,resp)
             return True
 
-        if len(name)==0:
+        if name is None or len(name)==0:
             return _return_all_langs()
         
         # see if we have that language
@@ -429,13 +692,14 @@ class App(rapidsms.app.App):
             name,code=langs[0]
             msg.sender.locale=code
             msg.sender.save()
-            resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
-            msg.sender.send_to(resp)
+            resp = _st(msg.sender, u'lang-set %(lang_code)s') % { 'lang_code': name }
+            self.__reply(msg,resp)
             return True       
         else:
             # invalid lang code, send them a list
             return _return_all_langs()
 
+<<<<<<< HEAD:apps/smsforum/app.py
     def __log_incoming_message(self,msg,domains):
         #TODO: FIX THIS so that it logs for all domains
         msg.persistent_msg.domain = domains[0]
@@ -444,3 +708,45 @@ class App(rapidsms.app.App):
     def __loadFixtures(self):
         pass
 
+=======
+
+    #
+    # Private helpers
+    # 
+    def __reply(self,msg,reply_text,format_values=None):
+        """
+        Formats string for response for message's sender 
+        the message's associated sender.
+
+        """
+        reply_text=_st(msg.sender,reply_text) 
+        if format_values is not None:
+            try:
+                reply_text = reply_text % format_values
+            except TypeError:
+                err="Not all format values: %r were used in the string: %s" %\
+                    (format_values, reply_text)
+                print err
+                self.error(err)
+        msg.sender.send_response_to(msg,reply_text)
+        
+    
+    def __suggest_villages(self,msg):
+        """helper to send informative messages"""
+        # pick some names from the DB
+        village_names = [v.name for v in Village.objects.all()[:3]]
+        if len(village_names) == 0:
+            village_names = _st(msg.sender,"village name")
+        else: 
+            village_names=', '.join(village_names)
+        self.__reply(msg,"village does not exist", {"village_names": village_names})
+        return True
+
+    def __loadFixtures(self):
+        pass
+
+    def __log_incoming_message(self,msg,domain):
+        msg.persistent_msg.domain = domain
+        msg.persistent_msg.save()
+
+>>>>>>> 33c9d040cf06cb678186c955d3e190b65145b06b:apps/smsforum/app.py

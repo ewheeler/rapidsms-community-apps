@@ -6,7 +6,7 @@ from datetime import datetime,timedelta
 from django.db import models
 from rapidsms.message import Message
 from rapidsms.connection import Connection
-from apps.nodegraph.models import *
+from apps.nodegraph.models import Node
 
 # 
 # Definition of Contacts (people) and ChannelConnections (ways to contact 
@@ -97,7 +97,9 @@ class Contact(Node):
     # permission masks
     __PERM_RECEIVE=0x01
     __PERM_SEND=0x02
-    __PERM_IGNORE=0x04
+    __PERM_ADMIN=0x04
+    __PERM_IGNORE=0x08 # trumps the others
+
 
     #
     # Table columns
@@ -196,21 +198,29 @@ class Contact(Node):
         "str":        unicode(self) }
     """
 
-    @property
-    def locale(self):
-        return self._locale
-
-    @locale.setter
-    def locale(self,val):
-        if val is None:
-            raise("Locale can't be None!")
-        self._locale=val
-        self.save()
-
     #
     # Use the following to make sure quotas are enforced!!
     #
-    def send_to(self,text,com_channel=None):
+    def send_response_to(self,in_reply_to,text):
+        """
+        Use to send a response to a received message.
+        
+        - in_reply_to -- the msg you are respoding to. This uses the
+                 associated CommunicationChannel to know
+                 how to send the reply. E.g. if the Contact
+                 has CommConnections to multiple cell phone
+                 companies or email acconts--that is they have
+                 multiple phone numbers or email addresses--
+                 this will make sure the response goes to the
+                 number/address that the user used to send in 
+                 the original message.
+
+        """
+        cc=ChannelConnectionFromMessage(in_reply_to)
+        print cc
+        self.send_to(text,cc)
+
+    def send_to(self,text,channel_conn=None):
         """
         Send a message to the Contact.
 
@@ -229,17 +239,16 @@ class Contact(Node):
             # When we need something more complicated than this,
             # quotas will need to move to CommunicationChannel so that
             # e.g. we can have 1 quota for SMS and another for Email
-            raise QuotaException('User over send quota',quota_type.SEND)
+            raise QuotaException('User over Receive quota',quota_type.SEND)
 
         connections=[]
-        if com_channel is not None:
-            connections.append(com_channel)
+        if channel_conn is not None:
+            connections.append(channel_conn)
         else:
             connections=self.channel_connections.all()
 
         try:
             for conn in connections:
-                comm_chan=conn.communication_channel
                 self._quota_receive_seen+=1
                 Message(conn.connection, text).send()
         finally:
@@ -257,18 +266,29 @@ class Contact(Node):
         self._quota_send_seen+=1
         self.save()
 
-    @property
-    def age_years(self):
+    ##############
+    # Properties #
+    ##############
+    def __get_locale(self):
+        return self._locale
+
+    def __set_locale(self,val):
+        if val is None:
+            raise("Locale can't be None!")
+        self._locale=val
+        self.save()
+    locale=property(__get_locale,__set_locale)
+
+    def __get_age_years(self):
         if self.age_months is None:
             return None
         return self.age_months*12
 
-    @age_years.setter
-    def age_years(self,value):
+    def __set_age_years(self,value):
         self.age_months=value*12
+    age_years=property(__get_age_years,__set_age_years)
 
-    @property
-    def can_receive(self):
+    def __can_receive(self):
         """
         Returns a _SINGLE_ 'True/False' representing
         
@@ -279,9 +299,9 @@ class Contact(Node):
 
         """
         return self.perm_receive and self.under_quota_receive
+    can_receive=property(__can_receive)
 
-    @property
-    def can_send(self):
+    def __get_can_send(self):
         """
         Returns a _SINGLE_ 'True/False' representing
         
@@ -292,21 +312,19 @@ class Contact(Node):
 
         """
         return self.perm_send and self.under_quota_send
+    can_send=property(__get_can_send)
 
-
-    @property
-    def perm_receive(self):
+    def __get_perm_receive(self):
         return bool(self._permissions & self.__PERM_RECEIVE)
 
-    @perm_receive.setter
-    def perm_receive(self,val):
+    def __set_perm_receive(self,val):
         if bool(val):
             self._permissions|=self.__PERM_RECEIVE
         else:
             self._permissions&=~self.__PERM_RECEIVE
+    perm_receive=property(__get_perm_receive, __set_perm_receive)
 
-    @property
-    def perm_send(self):
+    def __get_perm_send(self):
         """
         Returns state of 'send' permission, regardless
         of quota_type.
@@ -314,23 +332,37 @@ class Contact(Node):
         """
         return bool(self._permissions & self.__PERM_SEND)
 
-    @perm_send.setter
-    def perm_send(self,val):
+    def __set_perm_send(self,val):
         if bool(val):
             self._permissions|=self.__PERM_SEND
         else:
             self._permissions&=~self.__PERM_SEND
+    perm_send=property(__get_perm_send,__set_perm_send)
 
-    @property
-    def perm_ignore(self):
+    def __get_perm_admin(self):
+        """
+        Returns state of 'send' permission, regardless
+        of quota_type.
+
+        """
+        return bool(self._permissions & self.__PERM_ADMIN)
+
+    def __set_perm_admin(self,val):
+        if bool(val):
+            self._permissions|=self.__PERM_ADMIN
+        else:
+            self._permissions&=~self.__PERM_ADMIN
+    perm_admin=property(__get_perm_admin,__set_perm_admin)
+
+    def __get_perm_ignore(self):
         return bool(self._permissions & self.__PERM_IGNORE)
 
-    @perm_ignore.setter
-    def perm_ignore(self,val):
+    def __set_perm_ignore(self,val):
         if bool(val):
             self._permissions|=self.__PERM_IGNORE
         else:
             self._permissions&=~self.__PERM_IGNORE
+    perm_ignore=property(__get_perm_ignore, __set_perm_ignore)        
 
     # quota manipulators
     def __check_quota_period(self, type=quota_type.SEND):
@@ -366,16 +398,14 @@ class Contact(Node):
         setattr(self,'_quota_%s_period_begin' % type, None)
         setattr(self,'_quota_%s_seen' % type, 0)
 
-    @property
-    def quota_send(self):
+    def __get_quota_send(self):
         """
         returns a tuple of (max, period)
 
         """
         return (self._quota_send_max,self._quota_send_priod)
 
-    @quota_send.setter
-    def quota_send(self,val):
+    def __set_quota_send(self,val):
         """
         Takes a tupe (int: max, timedelta: period)
         or None to turn off quota
@@ -385,35 +415,36 @@ class Contact(Node):
             self.set_quota_send(quota_type.SEND,period=0)
         else:
             self.set_quota(quota_type.SEND,val[0],val[1])
+    quota_send=property(__get_quota_send,__set_quota_send)
 
-    @property
-    def quota_receive(self):
+    def __get_quota_receive(self):
         """
         returns a tuple of (max, period)
 
         """
         return (self._quota_receive_max,self._quota_receive_period)
 
-    @quota_receive.setter
-    def quota_receive(self,val):
+    def __set_quota_receive(self,val):
         if val is None:
             self.set_quota_send(quota_type.RECEIVE,period=0)
         else:
             self.set_quota(quota_type.RECEIVE,val[0],val[1])
+    quota_receive=property(__get_quota_receive,__set_quota_receive)
 
-    def get_has_quota(self,type=quota_type.SEND):
+
+    def _get_has_quota(self,type=quota_type.SEND):
         period=getattr(self, '_quota_%s_period' % type)
         return period!=0
 
-    @property
-    def has_quota_send(self):
-        return self.get_has_quota(quota_type.SEND)
+    def __get_has_quota_send(self):
+        return self._get_has_quota(quota_type.SEND)
+    has_quota_send=property(__get_has_quota_send)
 
-    @property
-    def has_quota_receive(self):
-        return self.get_has_quota(quota_type.RECEIVE)
+    def __get_has_quota_receive(self):
+        return self._get_has_quota(quota_type.RECEIVE)
+    has_quota_receive=property(__get_has_quota_receive)
 
-    def get_quota_head_room(self,type=quota_type.SEND):
+    def _get_quota_head_room(self,type=quota_type.SEND):
         """
         how many more messages can go under current quota
         OR None if infinite quota.
@@ -435,6 +466,8 @@ class Contact(Node):
 
     def __get_quota_period_remain(self,type=quota_type.SEND):
         """
+        PRIVATE VERSION needed to avoid recursion
+
         Return a timedelta object of remaining time
         in current period or None if infinite (no quota)
 
@@ -446,10 +479,10 @@ class Contact(Node):
         
         num_seen=getattr(self,'_quota_%s_seen' % type)
         period_begin=getattr(self,'_quota_%s_period_begin' % type)
-        period=gettattr(self,'_quota_%s_period' % type)
+        period=getattr(self,'_quota_%s_period' % type)
         return (datetime.utcnow()+period)-period_begin
         
-    def get_quota_period_remain(self,type=quota_type.SEND):
+    def _get_quota_period_remain(self,type=quota_type.SEND):
         """
         Return a timedelta object of remaining time
         in current period or None if infinite (no quota)
@@ -457,44 +490,106 @@ class Contact(Node):
         """
         # check and reset time period if needed before doing anything
         self.__check_quota_period(type)
-        return __get_quota_period_remain(type)
+        return self.__get_quota_period_remain(type)
         
-    @property
-    def under_quota_send(self):
+    def __get_under_quota_send(self):
         """Return number of messages under quota or 0 if over"""
-        under=self.get_quota_head_room(type=quota_type.SEND)
+        under=self._get_quota_head_room(type=quota_type.SEND)
         if under is None:
             return True
         return bool(under)
+    under_quota_send=property(__get_under_quota_send)
 
-    @property
-    def under_quota_receive(self):
+    def __get_under_quota_receive(self):
         """Return number of messages under quota or 0 if over"""
-        under=self.get_quota_head_room(type=quota_type.RECEIVE)
+        under=self._get_quota_head_room(type=quota_type.RECEIVE)
         if under is None:
             return True
         return bool(under)
+    under_quota_receive=property(__get_under_quota_receive)
 
-    @property
-    def period_remain_quota_send(self):
-        return self.get_quota_period_remain(self,quota_type.SEND)
+    def __get_period_remain_quota_send(self):
+        return self._get_quota_period_remain(self,quota_type.SEND)
+    period_remain_quota_send=property(__get_period_remain_quota_send)
 
-    @property
-    def period_remain_quota_receive(self):
-        return self.get_quota_period_remain(self,quota_type.RECEIVE)
+    def __get_period_remain_quota_receive(self):
+        return self._get_quota_period_remain(self,quota_type.RECEIVE)
+    period_remain_quota_receive=property(__get_period_remain_quota_receive)
 
-    @property
-    def signature(self):
-        sig=self.common_name
-        if len(sig.strip())==0:
-            sig=u' '.join([self.given_name,self.family_name]).strip()
-        if len(sig.strip())==0:
-            rs = ChannelConnection.objects.filter(contact=self)
-            if len(rs)==0:
-                sig=str(self.id)
+    def get_signature(self, max_len=None,for_message=None):
+        """
+        Return a string suitable for signing an SMS.
+        
+        - max_len -- max length in characters. Watch out! It may be
+                     '' (blank str) if max_len is too small to write
+                     anything meaningful
+
+        - for_message -- if the sig is used on a response to a message,
+                     or for a new one, pass that message in and the 
+                     sig will include the associated id--e.g. if you
+                     received a message on a pygsm backend talking to Orange
+                     and you pass that message, you get the user's Orange number
+                     in the sig
+                     
+        """
+        
+        # First try to make a name portion in this order
+        # of what values are set:
+        #
+        # 1. common_name
+        # 2. given_name family_name
+        #
+        # Then see if name_part + user_identifier fit under 
+        # max.
+        #
+        # If not, see if identifier alone fits under and
+        # truncate name part.
+        #
+        # If identifier alone doesn't fit center ltruncate it
+        # so +14155551212 => ...1212
+        # If that doesn't fit, return ''
+
+        
+        name_part=self.common_name
+        if len(name_part.strip())==0:
+            name_part=u' '.join([self.given_name,self.family_name]).strip()
+
+        # default to DB id so you can at least look 'em up
+        id_part=str(self.id) 
+        # try to get phone number from a channel connection
+        if for_message is not None:
+            cc=ChannelConnectionFromMessage(for_message,False)
+        else:
+            # take first one
+            ccs=self.channel_connections.all()
+            if len(ccs)==0:
+                # hmmm, user exists only in DB. Has
+                # never contacted system...
+                cc=None
             else:
-                sig=rs[0].user_identifier
+                cc=ccs[0]
+        if cc is not None:
+            id_part=cc.user_identifier
+        
+        # make sig
+        if len(name_part)>0:
+            sig=': '.join([name_part, id_part])
+        else:
+            sig=id_part
+        if max_len is not None:
+            # adjust for max len
+            if len(sig)>max_len:
+                sig=id_part
+            if len(sig)>max_len:
+                sig='...%s' % id_part[-4:]
+            if len(sig)>max_len:
+                sig=''
         return sig
+
+
+    def __get_signature(self):
+        return self.get_signature()
+    signature=property(__get_signature)
     
 #basically a PersistentBackend
 class CommunicationChannel(models.Model):
@@ -509,6 +604,10 @@ class CommunicationChannel(models.Model):
     """
     backend_slug = models.CharField(max_length=30,primary_key=True)
     title = models.CharField(max_length=255,blank=True)
+
+    def __repr__(self):
+        return 'CommunicationChannel(backend_slug=%s,title=%s' % \
+            (self.backend_slug, self.title)
 
     class Meta:
         unique_together = ('backend_slug','title')
@@ -595,7 +694,7 @@ def ChannelConnectionFromMessage(msg,save=True):
         # didn't find an existing connection, which means this specific
         # CommunicationChannel (e.g. service provider) and id (e.g. phone number)
         # combo aren't known, so we need a blank Contact for this combo.
-        contact=Contact(debug_id=u_id)
+        contact=Contact(debug_id=u_id[:16]) # debug id is only16 char
         contact.save()
         chan_con=ChannelConnection(user_identifier=u_id,\
                                        communication_channel=comm_c,\
