@@ -143,12 +143,13 @@ class App(rapidsms.app.App):
         self.debug("SMSFORUM:PARSE")
 
         msg.sender = ContactFromMessage(msg,self.router)
+        self.__log_incoming_message( msg.persistent_msg,VillagesForContact(msg.sender) )
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
     def handle(self, msg):
         self.debug("SMSFORUM:HANDLE: %s" % msg.text)
-
+        
         # check permissions
         if msg.sender.perm_ignore:
             self.debug('Ignoring sender: %s' % sender.signature)
@@ -363,7 +364,6 @@ class App(rapidsms.app.App):
                 { 'txt':txt, 'ville':ville.name, 'sender':'$sig'})
             # now iterate every member of the group we are broadcasting
             # to, and queue up the same message to each of them
-
             for recipient in recipients:
                 if recipient != msg.sender and recipient.can_receive:
                     #add signature
@@ -378,10 +378,6 @@ class App(rapidsms.app.App):
             self.debug( traceback.format_exc() )
             msg.sender.send_to(_st(msg.sender, "blast-fail"))
         return True
-
-    def __log_incoming_message(self,msg,domain):
-        msg.persistent_msg.domain = domain
-        msg.persistent_msg.save()
 
     def leave(self,msg,arg=None):
         self.debug("SMSFORUM:LEAVE: %s" % arg)
@@ -436,20 +432,15 @@ class App(rapidsms.app.App):
             resp = _st(msg.sender, "lang-set %(lang_code)s") % { 'lang_code': name }
             msg.sender.send_to(resp)
             return True       
-        else: 
+        else:
             # invalid lang code, send them a list
             return _return_all_langs()
 
+    def __log_incoming_message(self,msg,domains):
+        #TODO: FIX THIS so that it logs for all domains
+        msg.persistent_msg.domain = domains[0]
+        msg.persistent_msg.save()
+            
     def __loadFixtures(self):
         pass
-
-    def outgoing(self, msg):
-        # TODO
-        # create a ForumMessage class
-        # log messages with associated domain
-        # report on dashboard
-        pass
-        
-    def send_message(self, to, body):
-		pass
 
