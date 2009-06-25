@@ -28,19 +28,19 @@ from django.db import models
 # 
 #
 
-class AbstractNode(models.Model):
+class Node(models.Model):
     """
-    Abstract superclass for Nodes and NodeSets
+    Node's have parents but not children
 
     """
-
-    """
-    For testing only. If you want a real name, id, or any other data,
-    make Node and NodeSet subclasses
-
-    """
+    # debug_id is for testing only. If you want real data, make
+    # a subclass!
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
+    @property
+    def is_set(self):
+        """Helper to tell if a Node is in fact a NodeSet"""
+        return hasattr(self, '_children') or hasattr(self,'nodeset')
 
     def get_ancestors(self,max_alt=None,klass=None):
         """max_alt=None means no limit
@@ -60,13 +60,11 @@ class AbstractNode(models.Model):
             if node is None or \
                     (max_alt is not None and alt>max_alt) or \
                     node in seen:
-                print "done"
                 return
 
             seen.add(node)
-            for a in node.get_parents():
+            for a in node.parents.all():
                 _recurse(a,alt+1)
-
 
         _recurse(self,0)
         seen.remove(self)
@@ -86,11 +84,7 @@ class AbstractNode(models.Model):
         Downcasted to 'klass' if provided (see downcast() for more info)
 
         """
-        rents=self.parents.all()
-        if klass is not None:
-            return [r._downcast(klass) for r in rents]
-        else:
-            return rents
+        return self.get_ancestors(max_alt=1)
 
     def __unicode__(self):
         return self.debug_id
@@ -152,18 +146,6 @@ class AbstractNode(models.Model):
                 break
         return casted
         
-    class Meta:
-        abstract=True
-
-
-class Node(AbstractNode):
-    """
-    Abstract representation of a Node in the graph.
-    
-    Contains common properties of Set and Leaf.
-    
-    """
-
     # helpers 'cause directionality can be confusing
     def add_to_parent(self,rent):
         rent.add_children(self)
@@ -180,19 +162,17 @@ class Node(AbstractNode):
             self.remove_from_parent(self)
 
 
-class NodeSet(AbstractNode):
+class NodeSet(Node):
     """
     A node that has 'members', which is a set of nodes this node points too. 
     Named 'NodeSet' to distinguish from python type 'set'
 
-    Because of awkwardness in mapping Python inheritence to SQL, need
-    to hold 'Nodes' and 'NodeSets' in separate lists, but provide helpers
-    to make this invisible to user.
-
     """
 
-    _childsets = models.ManyToManyField('self',related_name='parents',symmetrical=False)
-    _childleaves = models.ManyToManyField(Node,related_name='parents') 
+    # related name is opposite meaning--from children's perspective this is a parent
+    # and vice versa
+    _children = models.ManyToManyField(Node,related_name='parents',symmetrical=False)
+    _parents = models.ManyToManyField(Node,related_name='children',symmetrical=False) 
     
     def __unicode__(self):
         """
@@ -219,19 +199,17 @@ class NodeSet(AbstractNode):
                 buf.append(u'*%s' % node.debug_id)
                 return
 
-            seen.add(node)
-            buf.append(u'%s(' % node.debug_id)
-            index=0
-            for sub in node.childsets:
-                _recurse(sub,index)
-                index+=1
-
-            leaves=u','.join([unicode(l) for l in node.childleaves])
-            if len(leaves)>0:
-                if index>0:
-                    buf.append(u',')
-                buf.append(u'%s)' % leaves)
-
+            if node.is_set:
+                seen.add(node)
+                buf.append(u'%s(' % node.debug_id)
+                index=0
+                for sub in node._children.all():
+                    _recurse(sub._downcast(klass=NodeSet),index)
+                    index+=1
+                buf.append(')')
+            else:
+                buf.append(node.debug_id)
+                
         _recurse(self,0)
 
         return u''.join(buf)
@@ -258,43 +236,23 @@ class NodeSet(AbstractNode):
             self.remove_from_parent(rent)
 
     # safe to use, but calls above should be sufficient
-    def add_children(self,*sub_nodes):
+    def add_children(self,*nodes):
         """
         Add the passed nodes to this instance as 'subnodes'
         
-        Can be NodeSets or Nodes
-        
         """
-        for n in sub_nodes:
-            # distinguish between Nodes and NodeSets
+        for n in nodes:
             if isinstance(n, Node):
-                self._childleaves.add(n)
-            elif isinstance(n, NodeSet):
-                self._childsets.add(n)
+                self._children.add(n)
 
-    def remove_children(self, *subnodes):
-        for n in subnodes:
-
-            # distinguish between Nodes and NodeSets
+    def remove_children(self, *nodes):
+        for n in nodes:
             if isinstance(n, Node):
-                self._childleaves.remove(n)
-            elif isinstance(n, NodeSet):
-                self._childsets.remove(n)
-
-    # and some shortcut properties
-    def __getchildsets(self):
-        """All the direct sub-NodeSets"""
-        return self._childsets.all()
-    childsets=property(__getchildsets)
-
-    def __getchildleaves(self):
-        """All the direct sub-Nodes"""
-        return self._childleaves.all()
-    childleaves=property(__getchildleaves)
+                self._children.remove(n)
 
     def __getchildren(self):
         """A list of both the sub-NodeSets and sub-Nodes"""
-        return self.childsets+self.childleaves
+        return self._children.all()
     children=property(__getchildren)
 
     # full graph access methods
@@ -316,26 +274,26 @@ class NodeSet(AbstractNode):
                 return leaves # empty set
 
         # recursive function to do the flattening
-        def _recurse(nodeset, depth):
+        def _recurse(node, depth):
             # check terminating cases
             # - node is None (shouldn't happen but why not be safe?)                        
             # - reached max_depth
             # - seen this guy before (which breaks any cycles)
-            if nodeset is None or \
+            if node is None or \
                     (max_depth is not None and depth==max_depth) or \
-                    nodeset in seen:
+                    node in seen:
                 return
             
-            # ok, it's a valid nodeset, add to seen
-            seen.add(nodeset)
+            # plain Node or NodeSet?
+            if node.is_set:
+                seen.add(node)
+                # recurse to its children
+                for n in node._children.all():
+                    _recurse(n._downcast(klass=NodeSet), depth+1)
+            else:
+                assert(isinstance(node, Node))
+                leaves.add(node)
             
-            # add its childleaves to 'leaves'
-            leaves.update(nodeset.childleaves)
-
-            # recurse to its childsets
-            for ns in nodeset.childsets:
-                _recurse(ns, depth+1)
-                
         # Now call recurse
         _recurse(self, 0)
         

@@ -4,16 +4,22 @@ import apps.nodegraph.app as nodegraph_app
 from apps.nodegraph.models import Node, NodeSet
 
 # helpers
-def _user(name, *grps):
-    u=Node(debug_id=name)
+class Person(Node):
+    pass
+
+class Town(NodeSet):
+    pass
+
+def _u(name, *grps):
+    u=Person(debug_id=name)
     u.save()
     for grp in grps:
         u.add_to_parent(grp)
 
     return u
 
-def _group(name, *children):
-    g=NodeSet(debug_id=name)
+def _g(name, *children):
+    g=Town(debug_id=name)
     g.save()
     g.add_children(*children)
     return g
@@ -44,78 +50,30 @@ class TestApp (TestScript):
 
     def setUp(self):
         TestScript.setUp(self)
-            
-        # make some nodes and graphs
-        # imagine this is users and groups for clarity
-        self.m_nodes = [_user(n) for n in self.m_names]
-        self.w_nodes = [_user(n) for n in self.w_names]
-        self.girl_nodes = [_user(n) for n in self.girl_names]
-        self.boy_nodes = [_user(n) for n in self.boy_names]
+        self.men = [_u(m) for m in self.m_names]
+        self.women = [_u(m) for m in self.w_names]
+        self.men_grp = _g('men', *self.men)
+        self.women_grp = _g('women', *self.women)
+        self.m_w_grp=_g('men_and_women', self.women_grp, self.men_grp)
+        self.people_grp=_g('people',self.men_grp,self.women_grp,self.m_w_grp)
+
+    def tearDown(self):
+        self.men_grp.delete()
+        self.women_grp.delete()
+        self.m_w_grp.delete()
+        self.people_grp.delete()
+        for m in self.men:
+            m.delete()
+
+        for w in self.women:
+            w.delete()
+
+        TestScript.tearDown(self)
         
-        self.m_group = _group('men',*self.m_nodes)
-        self.w_group = _group('women',*self.w_nodes)
-        self.g_group = _group('girls',*self.girl_nodes)
-        self.g_group.add_to_parent(self.w_group)
-        self.b_group = _group('boys',*self.boy_nodes)
-        self.b_group.add_to_parent(self.m_group)
-
-        self.people_group = _group('people', self.m_group, self.w_group)
-
-        # set up Cyclic(A(B(*A,woman),man))
-        self.cyc_a=_group('a',self.m_nodes[0])
-        self.cyc_b=_group('b',self.cyc_a,self.w_nodes[0])
-        self.cyc_a.add_children(self.cyc_b)
-        self.cyclic_group=_group('cyclic',self.cyc_a)
-               
-        # simple tree 
-        self.leaf1=_user('leaf1')
-        self.leaf2=_user('leaf2')
-        self.simple_tree=_group('tree', _group('L1',_group('L2',self.leaf1, _group('L3',self.leaf2))))
         
     def testNode(self):
-#        print self.people_group
-#        print self.cyclic_group
-#        print self.cyclic_group.flatten()
-#        print dir(NodeSet)
-        print
+        print self.men_grp
+        print self.men_grp.flatten(klass=Person)
+        print self.people_grp
+        print self.people_grp.flatten()
 
-
-        print self.m_nodes[0].get_ancestors(1)
-        
-        print
-
-        
-
-
-        skiers=_group('skiers', self.m_group.childleaves[1])
-        snowbs=_group('snowboarders', self.m_group.childleaves[1], *self.w_group.childleaves[0:2])
-        sporty=_group('sporty',skiers,snowbs,self.people_group)
-        sporty.add_to_parent(self.people_group)
-        sporty.remove_from_parent(self.people_group)
-
-        tb=_user('tranny boy',self.people_group)
-        print self.people_group.flatten()
-        print self.people_group.flatten(max_depth=1)
-        print self.people_group.flatten()
-        self.w_group.remove_from_parent(self.people_group)
-        self.m_group.childleaves[0].remove_from_parent(self.m_group)
-        print self.people_group.flatten()
-
-        docs=_group('docs', *self.m_nodes[0:2])
-        peds=_group('pediatricians', *self.w_nodes[1:3])
-        peds.add_to_parent(docs)
-        docs.add_children(*self.w_nodes[2:])
-        docs.add_to_parent(peds)
-
-        skiers.add_to_parent(self.m_group)
-        sporty.add_to_parent(skiers)
-        snowbs.add_to_parent(self.w_group)
-        print docs
-        print self.people_group
-
-
-
-
-
-        
-        
