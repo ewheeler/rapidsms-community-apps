@@ -163,7 +163,7 @@ class App(rapidsms.app.App):
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
     def handle(self, msg):
-        # self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
+        self.__log_incoming_message(msg, villages_for_contact(msg.sender))
         self.debug("SMSFORUM:HANDLE: %s" % msg.text)
         
         # check permissions
@@ -690,6 +690,9 @@ class App(rapidsms.app.App):
 
     def __log_incoming_message(self,msg,domains):
         #TODO: FIX THIS so that it logs for all domains
+        if domains is None or len(domains)==0:
+            return
+
         msg.persistent_msg.domain = domains[0]
         msg.persistent_msg.save()
 
