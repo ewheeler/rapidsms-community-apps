@@ -40,7 +40,7 @@ _G = { 'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
         'pul':u'Pulaar',
         'wol':u'Wolof',
-        'joo':u'Joola',
+        'dyu':u'Joola',
         'fre':u'Français',
         'eng':u'English',
     },
@@ -98,20 +98,20 @@ class App(rapidsms.app.App):
             ('tur', {'lang':'wol','func':self.register_name}),
             ('help-wol', {'lang':'wol','func':self.help}),
             # Joola
-            ('unoken', {'lang':'joo','func':self.join}),
-            ('ounoken', {'lang':'joo','func':self.join}),
-            ('karees', {'lang':'joo','func':self.register_name}),
-            ('karess', {'lang':'joo','func':self.register_name}),
-            ('upur', {'lang':'joo','func':self.leave}),
-            ('oupour', {'lang':'joo','func':self.leave}),
-            ('rambenom', {'lang':'joo','func':self.help}),
-            ('ukaana', {'lang':'joo','func':self.createvillage}),
+            ('unoken', {'lang':'dyu','func':self.join}),
+            ('ounoken', {'lang':'dyu','func':self.join}),
+            ('karees', {'lang':'dyu','func':self.register_name}),
+            ('karess', {'lang':'dyu','func':self.register_name}),
+            ('upur', {'lang':'dyu','func':self.leave}),
+            ('oupour', {'lang':'dyu','func':self.leave}),
+            ('rambenom', {'lang':'dyu','func':self.help}),
+            ('ukaana', {'lang':'dyu','func':self.createvillage}),
             # Debug calls ('deb' language==debug)
-            ('djoin', {'lang':'deb','func':self.join}),
-            ('rname', {'lang':'deb','func':self.register_name}),
-            ('dleave', {'lang':'deb','func':self.leave}),
-            ('dlang', {'lang':'deb','func':self.lang}),
-            ('dcreate', {'lang':'deb','func':self.createvillage}),
+            #('djoin', {'lang':'deb','func':self.join}),
+            #('rname', {'lang':'deb','func':self.register_name}),
+            #('dleave', {'lang':'deb','func':self.leave}),
+            #('dlang', {'lang':'deb','func':self.lang}),
+            #('dcreate', {'lang':'deb','func':self.createvillage}),
             # French
             ('entrer', {'lang':'fre','func':self.join}),
             ('nom', {'lang':'fre','func':self.register_name}),
@@ -159,11 +159,11 @@ class App(rapidsms.app.App):
         self.debug("SMSFORUM:PARSE")
 
         msg.sender = contact_from_message(msg,self.router)
-        # self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
     def handle(self, msg):
+        self.__log_incoming_message(msg, villages_for_contact(msg.sender))
         self.debug("SMSFORUM:HANDLE: %s" % msg.text)
         
         # check permissions
@@ -691,6 +691,9 @@ class App(rapidsms.app.App):
 
     def __log_incoming_message(self,msg,domains):
         #TODO: FIX THIS so that it logs for all domains
+        if domains is None or len(domains)==0:
+            return
+
         msg.persistent_msg.domain = domains[0]
         msg.persistent_msg.save()
 
