@@ -7,6 +7,7 @@ from django.db import models
 from rapidsms.message import Message
 from rapidsms.connection import Connection
 from apps.nodegraph.models import Node
+from apps.locations.models import Location
 
 # 
 # Definition of Contacts (people) and ChannelConnections (ways to contact 
@@ -122,6 +123,11 @@ class Contact(Node):
     # gloabbly unique info for the Contact. E.g. a National ID
     # where availble, or a system username
     unique_id = models.CharField(max_length=255,unique=True,null=True,blank=True)
+
+    # a nullable field to identify the actual geographic location of contacts
+    # (for ease of use, those around a village may decide to join that village
+    # even if they live somewhere else
+    location = models.ForeignKey(Location, null=True, blank=True)
 
     # 'm' or 'f'
     gender = models.CharField(max_length=1,choices=GENDER_CHOICES,blank=True) 
