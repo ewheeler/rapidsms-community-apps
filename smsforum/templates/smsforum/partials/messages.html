@@ -1,6 +1,11 @@
 {% load i18n %}
 {% load pagination %}
 {% if messages %}
+<p/>
+
+<div class="split">
+<div class="left">
+
 <div class="module">
     <h2>{% trans "Messages" %}</h2>
     <form action="" method="POST">
@@ -33,13 +38,13 @@
                       {% else %}
                           <option value=''>{{ code.name }}                             
                       {% endif %}
-					  {% for code in codes %}
-						  {% ifnotequal message.code.id code.id %}
+                      {% for code in codes %}
+                          {% ifnotequal message.code.id code.id %}
                               <option value={{ code.id }}>{{ code.slug }}                           
-	   					  {% else %}
-                              <option value={{ code.id }} selected="selected">{{ code.name }}	   					      
-	                      {% endifnotequal %}
-					  {% endfor %}
+                          {% else %}
+                              <option value={{ code.id }} selected="selected">{{ code.name }}                             
+                          {% endifnotequal %}
+                      {% endfor %}
                     </select>
                 </td>
             </tr>{% endfor %}{% else %}
@@ -51,10 +56,10 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5">
+                <td colspan="2">
                     {% paginator messages %}
                 </td>
-                <td><span class="right">
+                <td colspan="3"><span class="right">
                     <input type="submit" value="Save Annotations" />
                     </span>
                 </td>
@@ -63,4 +68,47 @@
     </table>
     </form>
 </div>
+
+
+
+</div>
+<div class="right">
+
+<div class="module">
+    <h2>{% trans "Messages" %}</h2>
+    <form action="" method="POST">
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Date" %}</th>
+                <th scope="col">{% trans "Message" %}</th>
+            </tr>
+        </thead>
+        <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
+            <tr>
+                <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+            </tr>{% endfor %}{% else %}
+            <tr class="no-data">
+                <td colspan="2">
+                    {% trans "No messages yet" %}
+                </td>
+            </tr>{% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">
+                    {% paginator messages %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    </form>
+</div>
+
+
+</div>
+<div class="clear-hack"></div>
+</div>
+
 {% endif %}
