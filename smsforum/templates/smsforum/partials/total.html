@@ -1,0 +1,27 @@
+{% load i18n %}
+
+<div class="module">
+    <h2>{% trans "Totals" %}</h2>
+    <form action="" method="POST">
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Villages" %}</th>
+                <th scope="col">{% trans "Members" %}</th>
+                <th scope="col">{% trans "All Messages Received" %}</th>
+                <th scope="col">{% trans "All Messages Sent" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{% if village_count %}{{ village_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if member_count %}{{ member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if incoming_message_count %}{{ incoming_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if outgoing_message_count %}{{ outgoing_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+    </form>
+</div>
+
+
