@@ -398,7 +398,6 @@ class App(rapidsms.app.App):
             # ok, here we got just one
             assert(len(villages)==1)
             msg.sender.add_to_parent(villages[0])
-            msg.sender.location = villages[0].location
             rsp=_st(msg.sender, "first-login") % {"village": village_names[0]}
             self.debug(rsp)
             self.__reply(msg,rsp)
