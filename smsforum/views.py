@@ -98,20 +98,6 @@ def index(req, template="smsforum/index.html"):
     context['codes'] = Code.objects.all()
     return render_to_response(req, template, context)
 
-    #change this to a generic view!
-    """
-    communities = Community.objects.all()
-    for community in communities:
-        # once this site bears more load, we can replace flatten() with village.subnodes
-        # and stop reporting num_messages
-        community.member_count = len( village.flatten() )
-        last_week = ( datetime.now()-timedelta(weeks=1) )
-        community.message_count = IncomingMessage.objects.filter(domain=community,received__gte=last_week).count()
-        community.messages_sent_count = community.message_count * community.member_count    
-    context['communities'] = paginated(req, communities)
-    #messages sent this week
-    return render_to_response(req, template, context)
-    """
 
 # TODO: move this somewhere Tostan-Specifig
 # would declare this as a class but we don't need the extra database table
@@ -165,13 +151,14 @@ def member(req, pk, template="smsforum/member.html"):
     try:
         connections = ChannelConnection.objects.get(contact=contact)
         contact.phone_number = connections.user_identifier
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
+        contact.message_count = len(messages)
+        context['messages'] = paginated(req, messages)
     except ChannelConnection.DoesNotExist:
+        #this is a contact without a phone number
         pass
-    last_week = ( datetime.now()-timedelta(weeks=1) )
-    messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
-    contact.message_count = len(messages)
     context['member'] = contact
-    context['messages'] = paginated(req, messages)
     return render_to_response(req, template, context)
 
 def edit_village(req, pk, template="smsforum/edit.html"):
@@ -188,31 +175,59 @@ def edit_member(req, pk, template="smsforum/edit.html"):
     context = {}
     contact = get_object_or_404(Contact, id=pk)
     if req.method == "POST":
-        form = SetContactFromPost(req.POST, contact)
+        form = create_contact_from_post(req.POST, contact)
     else:
-        form = GetContactForm(instance=contact)
+        form = get_contact_form(instance=contact)
     context['form'] = form
     context['title'] = _("Edit Member")
     return render_to_response(req, template, context)
 
-def add_community(req, template="smsforum/add.html"):
+def add_village(req, template="smsforum/add.html"):
     context = {}
-    if req.method == 'POST':        
-        form = AddCommunityForm(req.POST)        
+    if req.method == 'POST':
+        form = VillageForm(req.POST)
         if form.is_valid():
-            c = Community(name=form.cleaned_data['name'])
-            c.save()
-            print form.cleaned_data['members']
-            pass
-    context['form'] = AddCommunityForm()
-    context['title'] = _("Add Community")
-    return render_to_response(req, template, context)
+            v,created =Village.objects.get_or_create( name=form.cleaned_data['name'] )
+            if created:
+                context['status'] = _("Village %s successfully created" % (v.name) )
+            else:
+                context['status'] = _("Village already exists!")
+        else:
+                context['status'] = _("Form invalid")
+    context['form'] = VillageForm()
+    context['title'] = _("Add Village")
+    return render_to_response(req, template, context)    
 
-
-    
+def add_member(req, village_id=0, template="smsforum/add.html"):
+    context = {}
+    if req.method == 'POST':
+        form = ContactForm(req.POST)
+        if form.is_valid():
+            c = form.save()
+            c.add_to_parent( Village.objects.get(id=village_id) )
+            context['status'] = _("Member '%s' successfully created" % (c.signature) )
+        else:
+            context['error'] = form.errors
+    context['form'] = ContactForm()
+    context['title'] = _("Add Member")
+    return render_to_response(req, template, context)    
 
 
 """
+def view_community():
+    #change this to a generic view!
+    communities = Community.objects.all()
+    for community in communities:
+        # once this site bears more load, we can replace flatten() with village.subnodes
+        # and stop reporting num_messages
+        community.member_count = len( village.flatten() )
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        community.message_count = IncomingMessage.objects.filter(domain=community,received__gte=last_week).count()
+        community.messages_sent_count = community.message_count * community.member_count    
+    context['communities'] = paginated(req, communities)
+    #messages sent this week
+    return render_to_response(req, template, context)
+
 @require_http_methods(["GET", "POST"])  
 def edit_reporter(req, pk):
     rep = get_object_or_404(Contact, pk=pk)

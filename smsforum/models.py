@@ -15,7 +15,7 @@ class Village(NodeSet):
     __SEC_JOIN_PWD_PROTECTED = 0x10 
     __SEC_ADMIN_CMDS_PWD_PROTECTED = 0x20
 
-    name = models.CharField(max_length=255, blank=False)
+    name = models.CharField(max_length=255, blank=False, unique=True, verbose_name="Village Name")
     location = models.ForeignKey(Location, null=True, blank=True)
     # Security flags recorded, but not yet enforced
     _security = models.PositiveSmallIntegerField(\
