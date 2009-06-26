@@ -6,6 +6,6 @@ from django.contrib import admin
 from apps.contacts.models import *
 
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ('id','given_name','family_name')
+    list_display = ('id', 'debug_id', 'common_name', 'given_name', 'family_name')
 
 admin.site.register(Contact, ContactAdmin)
