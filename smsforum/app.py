@@ -159,11 +159,11 @@ class App(rapidsms.app.App):
         self.debug("SMSFORUM:PARSE")
 
         msg.sender = contact_from_message(msg,self.router)
-        # self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
                       ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
     
     def handle(self, msg):
+        # self.__log_incoming_message( msg.persistent_msg,villages_for_contact(msg.sender) )
         self.debug("SMSFORUM:HANDLE: %s" % msg.text)
         
         # check permissions
