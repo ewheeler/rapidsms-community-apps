@@ -172,7 +172,6 @@ class Contact(Node):
     _quota_receive_quota_period_begin = models.DateTimeField(null=True,blank=True)
     _quota_receive_seen = models.PositiveSmallIntegerField(default=0) # num messages seen in current period
 
-    
     """ Permissions for the webUI
     class Meta:
         ordering = ["last_name", "first_name"]
@@ -201,7 +200,7 @@ class Contact(Node):
     #
     # Use the following to make sure quotas are enforced!!
     #
-    def send_response_to(self,in_reply_to,text):
+    def send_response_to(self,text,in_reply_to=None):
         """
         Use to send a response to a received message.
         
@@ -216,8 +215,12 @@ class Contact(Node):
                  the original message.
 
         """
-        cc=ChannelConnectionFromMessage(in_reply_to)
-        print cc
+        if in_reply_to is not None:
+            cc = channel_connection_from_message(in_reply_to)
+        else:
+            print "GOT CC I WAS CREATED WITH"
+            cc = self.created_from_channel_connection
+
         self.send_to(text,cc)
 
     def send_to(self,text,channel_conn=None):
@@ -558,7 +561,7 @@ class Contact(Node):
         id_part=str(self.id) 
         # try to get phone number from a channel connection
         if for_message is not None:
-            cc=ChannelConnectionFromMessage(for_message,False)
+            cc=channel_connection_from_message(for_message,False)
         else:
             # take first one
             ccs=self.channel_connections.all()
@@ -647,7 +650,7 @@ class ChannelConnection(models.Model):
 # Read online that this is a cleaner way to do this thatn @classmethod
 # or @staticmethod which can have weird calling behavior
 #
-def CommunicationChannelFromMessage(msg, save=True):
+def communication_channel_from_message(msg, save=True):
     """
     Create a ChannelConnection object from a Message.
 
@@ -670,11 +673,10 @@ def CommunicationChannelFromMessage(msg, save=True):
     return cc
 
 
-def ContactFromMessage(msg,save=True):
-    return ChannelConnectionFromMessage(msg,save).contact
+def contact_from_message(msg,save=True):
+    return channel_connection_from_message(msg,save).contact
 
-
-def ChannelConnectionFromMessage(msg,save=True):
+def channel_connection_from_message(msg,save=True):
     """
     Create, or retrieve, a ChannelConnection from
     a message.
@@ -683,7 +685,7 @@ def ChannelConnectionFromMessage(msg,save=True):
 
     """
     # Get the comm channel
-    comm_c=CommunicationChannelFromMessage(msg)
+    comm_c=communication_channel_from_message(msg)
     u_id=msg.connection.identity
 
     # try to get an existing ChannelConnection
@@ -694,7 +696,7 @@ def ChannelConnectionFromMessage(msg,save=True):
         # didn't find an existing connection, which means this specific
         # CommunicationChannel (e.g. service provider) and id (e.g. phone number)
         # combo aren't known, so we need a blank Contact for this combo.
-        contact=Contact(debug_id=u_id[:16]) # debug id is only16 char
+        contact=Contact(debug_id=u_id[:16]) # debug id is only 16 char
         contact.save()
         chan_con=ChannelConnection(user_identifier=u_id,\
                                        communication_channel=comm_c,\
@@ -703,6 +705,10 @@ def ChannelConnectionFromMessage(msg,save=True):
             chan_con.save()
     else:
         chan_con=rs[0]
+    
+    # cache channel connection back ptr for easy responses,
+    # just in runtime object, not in db
+    chan_con.contact.created_from_channel_connection = chan_con
     return chan_con
 
 
