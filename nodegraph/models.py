@@ -38,9 +38,15 @@ class Node(models.Model):
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
     @property
-    def is_set(self):
+    def as_set(self):
         """Helper to tell if a Node is in fact a NodeSet"""
-        return hasattr(self, '_children') or hasattr(self,'nodeset')
+        if hasattr(self,'_NodeSet__children'):
+            return self
+
+        ns = self._downcast(klass=NodeSet)
+        if isinstance(ns, NodeSet):
+            return ns
+        return None
 
     def get_ancestors(self,max_alt=None,klass=None):
         """max_alt=None means no limit
@@ -114,10 +120,8 @@ class Node(models.Model):
            If you have a set of objects (d,c,b,a), all know as 'a' type, and
            you downcast to 'd', the resulting list will be typed (d,c,b,a)
 
-           NOTE2: PROBABLY WONT WORK WITH MULTIPLE INHERITENCE!! SO
-           DON'T USE IT, IT'S DUMB ANYWAY. YOU _REALLY_ WANT duck-typing OR
-           delegation OR component model instead.
-
+           NOTE2: PROBABLY WONT WORK WITH MULTIPLE INHERITENCE!!
+           
            """
         # what class do I think I am?
         # e.g. 'Node'
@@ -130,7 +134,11 @@ class Node(models.Model):
         # truncate list to only classes between target class and what
         # I think I am.
         # e.g. Man<Person
-        cast_cnames=[cn.lower() for cn in cast_cnames[:cast_cnames.index(self_cname)]]
+        try:
+            cast_cnames=[cn.lower() for cn in cast_cnames[:cast_cnames.index(self_cname)]]
+        except ValueError:
+            # self_cname not in MRO, can't downcast to the provided type
+            return None
 
         # swap order for the walk
         # e.g. Person>Man
@@ -171,8 +179,8 @@ class NodeSet(Node):
 
     # related name is opposite meaning--from children's perspective this is a parent
     # and vice versa
-    _children = models.ManyToManyField(Node,related_name='parents',symmetrical=False)
-    _parents = models.ManyToManyField(Node,related_name='children',symmetrical=False) 
+    __children = models.ManyToManyField(Node,related_name='parents',symmetrical=False)
+    __parents = models.ManyToManyField(Node,related_name='children',symmetrical=False) 
     
     def __unicode__(self):
         """
@@ -198,13 +206,14 @@ class NodeSet(Node):
             if node in seen:
                 buf.append(u'*%s' % node.debug_id)
                 return
-
-            if node.is_set:
-                seen.add(node)
-                buf.append(u'%s(' % node.debug_id)
+            
+            ns = node.as_set
+            if ns is not None:
+                seen.add(ns)
+                buf.append(u'%s(' % ns.debug_id)
                 index=0
-                for sub in node._children.all():
-                    _recurse(sub._downcast(klass=NodeSet),index)
+                for sub in ns.__children.all():
+                    _recurse(sub, index)
                     index+=1
                 buf.append(')')
             else:
@@ -214,28 +223,6 @@ class NodeSet(Node):
 
         return u''.join(buf)
 
-    #
-    # helpers because directionality is confusing
-    #
-    def add_to_parent(self,rent):
-        rent.add_children(self)
-
-    def add_to_parents(self,*rents):
-        """
-        Add this instance to the listed groups
-
-        """
-        for rent in rents:
-            self.add_to_parent(rent)
-
-    def remove_from_parent(self,rent):
-        rent.remove_children(self)
-
-    def remove_from_parents(self,*rents):
-        for rent in rents:
-            self.remove_from_parent(rent)
-
-    # safe to use, but calls above should be sufficient
     def add_children(self,*nodes):
         """
         Add the passed nodes to this instance as 'subnodes'
@@ -243,16 +230,16 @@ class NodeSet(Node):
         """
         for n in nodes:
             if isinstance(n, Node):
-                self._children.add(n)
+                self.__children.add(n)
 
     def remove_children(self, *nodes):
         for n in nodes:
             if isinstance(n, Node):
-                self._children.remove(n)
+                self.__children.remove(n)
 
     def __getchildren(self):
         """A list of both the sub-NodeSets and sub-Nodes"""
-        return self._children.all()
+        return self.__children.all()
     children=property(__getchildren)
 
     # full graph access methods
@@ -285,13 +272,13 @@ class NodeSet(Node):
                 return
             
             # plain Node or NodeSet?
-            if node.is_set:
-                seen.add(node)
+            ns = node.as_set
+            if ns is not None:
+                seen.add(ns)
                 # recurse to its children
-                for n in node._children.all():
-                    _recurse(n._downcast(klass=NodeSet), depth+1)
+                for n in ns.__children.all():
+                    _recurse(n, depth+1)
             else:
-                assert(isinstance(node, Node))
                 leaves.add(node)
             
         # Now call recurse

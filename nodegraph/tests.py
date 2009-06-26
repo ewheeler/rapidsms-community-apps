@@ -76,4 +76,7 @@ class TestApp (TestScript):
         print self.men_grp.flatten(klass=Person)
         print self.people_grp
         print self.people_grp.flatten()
-
+        self.assertTrue(self.people_grp._downcast(klass=basestring) is None)
+        self.assertTrue(isinstance( \
+                self.people_grp.children[0]._downcast(klass=Town),
+                Town))
