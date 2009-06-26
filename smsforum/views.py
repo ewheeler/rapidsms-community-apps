@@ -95,7 +95,7 @@ def index(req, template="smsforum/index.html"):
         notes = msg.messageannotation_set.filter(message=msg)
         if len(notes) > 0: msg.note = notes[0].text
     context['messages'] = paginated(req, messages)
-    context['codes'] = Code.objects.all()
+    context['codes'] = Code.objects.filter(set=CodeSet.objects.get(name="TOSTAN_CODE"))
     return render_to_response(req, template, context)
 
 
