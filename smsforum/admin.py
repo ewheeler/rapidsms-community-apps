@@ -13,6 +13,6 @@ class VillageAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'number_of_members', 'members')
    
-    fields = ('name', '_childleaves')
+    fields = ('name', '_childleaves','location')
    
 admin.site.register(Village, VillageAdmin)
