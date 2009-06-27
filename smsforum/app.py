@@ -50,7 +50,7 @@ _G = { 'SUPPORTED_LANGS': {
 def __init_translators():
     path = os.path.join(os.path.dirname(__file__),"locale")
     for lang,name in _G['SUPPORTED_LANGS'].items():
-        trans = gettext.translation('messages',path,[lang,_G['DEFAULT_LANG']])
+        trans = gettext.translation('django',path,[lang,_G['DEFAULT_LANG']])
         _G['TRANSLATORS'].update( {lang:trans} )
 
 def _t(text, locale=None):
