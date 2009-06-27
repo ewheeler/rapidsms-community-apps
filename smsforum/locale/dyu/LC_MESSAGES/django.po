@@ -15,19 +15,19 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 msgid "Je comprends pas cet ordre"
-msgstr "ji bonket, i manjout wanou tchike. ou tchik '#karamben' manou golen rambenalou"
+msgstr "ubonket, imanjut wanuciike. uciik '#karamben' manurambeni"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #unoken VOTRE COMMUNAUTE - #upur - #karess VOTRE NOM"
+msgstr "Uciik #unoken karees kati esukey _ #upur _ #karees _ #kasankenak"
 
 #: app.py:158
 msgid "member"
-msgstr "ekiney"
+msgstr "andomi"
 # as in "i am a member of this village"
 
 #: app.py:158
 msgid "name"
-msgstr "karess"
+msgstr "karees"
 # as in 'the name with which i would like to be referred'
 
 #: app.py:158
@@ -46,7 +46,7 @@ msgstr "upur"
 # as in 'leave community Ziguinchor'
 
 msgid "create"
-msgstr "ukaana"
+msgstr "etuuk"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158
@@ -55,36 +55,35 @@ msgstr "La communaute %(village)s existe deja"
 
 #: app.py:158
 msgid "village %(village)s created"
-msgstr "fou jojaf fou kankane %(village)s"
+msgstr "fujojaf futuukituuk %(village)s"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "jibonket,e babajd e probleme. lagnou likal ninen. abaraka"
+msgstr "ubonket, ebabaj mataani.ulaan uciik nikeen. abaraka"
 #msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard"
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "ji bonket, i nanjout e soukey ouyou. ou tchik # noken, karess kata e soukey. Par example, %(village_names)s"
+msgstr "ubonket,imanjut esukey uyu. uciik #noken karess kati esukey. Par example, %(village_names)s"
 #msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'. Par example, %(village_names)s"
 
 #: app.py:185
 msgid "first-login"
-msgstr "abaraka manou noken gna di fou jojaf '%(village)s'"
+msgstr "abaraka manunoken na di fujojaf fati '%(village)s'"
 #msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
 
 msgid "name-register-success %(name)s"
-msgstr "Safoul, %(name)s. abaraka manou tchikmi karessi. gna, napou tchike pani mandj ayma. Merci."
+msgstr "Saafuul, %(name)s.abaraka manunokene kareesi.naa,naapuciikumi panimanj aima. Abaraka."
 #msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "ji bonket, e messagey e babaak. ou tchit wa teumiwe. abarakamsgstr. Ca doit etre mois que %(max_chars)d caracteres"
+msgstr "ubonket, furimaf fubabaak. uciik fo tami man fujaw benen. abaraka. Ca doit etre mois que %(max_chars)d caracteres"
 #msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "ou noken difou djoj bala ou tchik e . ou tchik # noken karess kata e soukey"
+msgstr "unoken difujoj balama uciik furimaf. uciik #unoken karess kati esukey"
 #msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
-
 
 #: app.py:214
 #, python-format
@@ -99,32 +98,32 @@ msgstr "e messagey yanou bogn mi di fou jojaf e rin-ding '%(villes)s'"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "jibonket,e babajd e probleme. lagnou likal ninen. abaraka"
+msgstr "ubonket di walitenommi di eseney furimaf. usafel benen"
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "ou ou poupour difou jojaf '%(village)s' be nike!"
+msgstr "nupupur di fujojaf fati %(village)s. be nikeen!"
 #msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "ou bokawout de souk yanossan. ou tchik # karess kata e soukoul ji manjat ka boka"
+msgstr "unaamut di esuk yanoosan tan omma. manunaam, uciik #di kareesak kati esukey."
 #msgstr "Vous n'appartenez à aucune communauté pour le moment. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "jibonket,e babajd e probleme. lagnou likal ninen. abaraka"
+msgstr "ubonket di walitenomi di eseney furimaf. usafel benen"
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:275
 msgid "lang-set %(lang_code)s"
-msgstr "La langue que vous avez selectionnee est '%(lang_code)s'"
+msgstr "kasankenak kanu fajulumi ku '%(lang_code)s'"
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer a nouveau"
+msgstr "fujuumaf fan utiwummi kasankenak fumanjuti. usafel benen. abaraka"
 #msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
 
 
