@@ -15,7 +15,8 @@ class Village(NodeSet):
     __SEC_JOIN_PWD_PROTECTED = 0x10 
     __SEC_ADMIN_CMDS_PWD_PROTECTED = 0x20
 
-    name = models.CharField(max_length=255, blank=False, unique=True, verbose_name="Village Name")
+    name = models.CharField(max_length=255, blank=False, unique=True, \
+                                verbose_name="Village Name")
     location = models.ForeignKey(Location, null=True, blank=True)
     # Security flags recorded, but not yet enforced
     _security = models.PositiveSmallIntegerField(\
@@ -23,54 +24,14 @@ class Village(NodeSet):
     _join_cmd_pwd = models.CharField(max_length=10, default='0000')
     _admin_cmds_pwd = models.CharField(max_length=10, default='1212')
 
-    """
-    def __init__(self, **kwargs):
-        # find name
-        names = kwargs['names']
-        del kwargs['names']
-        
-        # call super and save
-        NodeSet.__init__(self, **kwargs)
-        self.save()
-        
-        # set up primary and aliases
-        if isinstance(names,basestring):
-            primary_name = names
-            aliases = []
-        else:
-            primary_name=names[0]
-            aliases = names[1:]
-        
-        self.name = primary_name
-        self.aliases = aliases
+    def __unicode__(self):
+        member_sigs = \
+            [c.get_signature(max_len=20) for c in self.flatten(klass=Contact)]
+        return '%s: %s' % (self.name, ', '.join(member_sigs))
 
-    # some useful props
-    def __get_name(self):
-        return self.names.get(village=self, primary=True).name()
-
-    def __set_name(self, name):
-        try:
-            prim = self.names.get(village=self, primary=True)
-            prim.name = name
-        except:
-            print 'exception'
-            prim = VillageName(village=self, primary=True, name=name)
-        prim.save()
-    name = property(__get_name, __set_name)
-
-    def __get_aliases(self):
-        return self.names.filter(village=self, primary=False)
-
-    def __set_aliases(self, aliases):
-        # delete existing ones
-        self.names.filter(village=self, primary=False).delete()
-        
-        # add new ones
-        # TODO: trap integrity errors on existing names!
-        for a in aliases:
-            vn = VillageName(village=self, name=a)
-            vn.save()
-    """
+    ##############
+    # properties #
+    ##############
 
     def __get_sec_blast_member_only(self):
         return bool(self._security & self.__SEC_BLAST_MEMBER_ONLY)
