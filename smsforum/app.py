@@ -41,10 +41,10 @@ _G = { 'SUPPORTED_LANGS': {
         'pul':u'Pulaar',
         'wol':u'Wolof',
         'dyu':u'Joola',
-        'fre':u'Français',
-        'eng':u'English',
+        'fr':u'Français',
+        'en':u'English',
     },
-      'DEFAULT_LANG':'fre',
+      'DEFAULT_LANG':'fr',
       'TRANSLATORS':dict()
 }
 
@@ -113,23 +113,23 @@ class App(rapidsms.app.App):
             #('dlang', {'lang':'deb','func':self.lang}),
             #('dcreate', {'lang':'deb','func':self.createvillage}),
             # French
-            ('entrer', {'lang':'fre','func':self.join}),
-            ('nom', {'lang':'fre','func':self.register_name}),
-            ('quitter', {'lang':'fre','func':self.leave}),
-            ('aide', {'lang':'fre','func':self.help}),
+            ('entrer', {'lang':'fr','func':self.join}),
+            ('nom', {'lang':'fr','func':self.register_name}),
+            ('quitter', {'lang':'fr','func':self.leave}),
+            ('aide', {'lang':'fr','func':self.help}),
             # TODO: make best matcher smart about accents...
-            ('créer', {'lang':'fre','func':self.createvillage}),
-            ('creer', {'lang':'fre','func':self.createvillage}),
+            ('créer', {'lang':'fr','func':self.createvillage}),
+            ('creer', {'lang':'fr','func':self.createvillage}),
             # English
-            ('join', {'lang':'eng','func':self.join}),
-            ('name', {'lang':'eng','func':self.register_name}),
-            ('leave', {'lang':'eng','func':self.leave}),
-            ('language', {'lang':'eng','func':self.lang}),
-            ('help', {'lang':'eng','func':self.help}),
-            ('create', {'lang':'eng','func':self.createvillage}),
-            ('member', {'lang':'eng','func':self.member}),
-            ('citizens', {'lang':'eng','func':self.community_members}),
-            ('remove', {'lang':'eng','func':self.destroy_community}),
+            ('join', {'lang':'en','func':self.join}),
+            ('name', {'lang':'en','func':self.register_name}),
+            ('leave', {'lang':'en','func':self.leave}),
+            ('language', {'lang':'en','func':self.lang}),
+            ('help', {'lang':'en','func':self.help}),
+            ('create', {'lang':'en','func':self.createvillage}),
+            ('member', {'lang':'en','func':self.member}),
+            ('citizens', {'lang':'en','func':self.community_members}),
+            ('remove', {'lang':'en','func':self.destroy_community}),
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)

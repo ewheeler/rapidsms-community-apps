@@ -190,7 +190,7 @@ def add_village(req, template="smsforum/add.html"):
         if form.is_valid():
             v,created =Village.objects.get_or_create( name=form.cleaned_data['name'] )
             if created:
-                context['status'] = _("Village %s successfully created" % (v.name) )
+                context['status'] = _("Village '%(village_name)s' successfully created" % {'village_name':v.name} )
             else:
                 context['status'] = _("Village already exists!")
         else:
@@ -206,7 +206,7 @@ def add_member(req, village_id=0, template="smsforum/add.html"):
         if form.is_valid():
             c = form.save()
             c.add_to_parent( Village.objects.get(id=village_id) )
-            context['status'] = _("Member '%s' successfully created" % (c.signature) )
+            context['status'] = _("Member '%(member_name)s' successfully created" % {'member_name':c.signature} )
         else:
             context['error'] = form.errors
     context['form'] = ContactForm()

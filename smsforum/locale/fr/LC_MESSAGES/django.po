@@ -1,0 +1,271 @@
+# Language eng translations for PACKAGE package.
+# Copyright (C) 2009 ORGANIZATION
+# Rowena <rowena@rowena-vm>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2009-06-15 04:09+GMT\n"
+"PO-Revision-Date: 2009-06-15 04:21+0000\n"
+"Last-Translator: Rowena <rowena@rowena-vm>\n"
+"Language-Team: Language fre\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+msgid "command-not-understood"
+msgstr "Désolé, je ne peux pas comprendre cet ordre. Txter '#aide' pour voir une liste des ordres acceptables"
+
+msgid "help with commands"
+msgstr "Vous pouvez texter: #entrer VILLAGE - #quitter - #nom NAME - #lang LANG"
+
+msgid "member"
+msgstr ""
+# as in "i am a member of this village"
+
+msgid "name"
+msgstr "nom"
+# as in 'the name with which i would like to be referred'
+
+msgid "help"
+msgstr "aide"
+# as in 'help me use this sms system'
+
+#: app.py:158
+msgid "join"
+msgstr "entrer"
+# as in 'join community Ziguinchor'
+
+#: app.py:158
+msgid "leave"
+msgstr "quitter"
+# as in 'leave community Ziguinchor'
+
+msgid "create"
+msgstr "créer"
+# as in 'create new community Ziguinchor'
+
+#: app.py:158
+msgid "village %(village)s already exists"
+msgstr "La communaute %(village)s existe deja"
+
+msgid "village %(village)s created"
+msgstr "La communauté %(village)s a été créée"
+
+#: app.py:163 app.py:189
+msgid "register-fail"
+msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
+
+#: app.py:176
+msgid "village does not exist"
+msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'. Par example, %(village_names)s"
+
+#: app.py:185
+msgid "first-login"
+msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
+
+msgid "name-register-success %(name)s"
+msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
+
+msgid "Message was not delivered. Please send less than %(max_chars)d characters."
+msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
+
+#: app.py:204
+msgid "You must join a village before sending messages"
+msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
+
+#: app.py:214
+#, python-format
+msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
+msgstr "%(txt)s - de %(sender)s"
+
+#: app.py:225 app.py:226
+#, python-format
+msgid "success! %(villes)s recvd msg: %(txt)s"
+msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
+
+#: app.py:231
+msgid "blast-fail"
+msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
+
+#: app.py:248
+msgid "leave-success"
+msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
+
+#: app.py:250
+msgid "nothing to leave"
+msgstr "Vous n'appartenez à aucune communauté pour le moment. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
+
+#: app.py:256
+msgid "leave-fail"
+msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
+
+#: app.py:275
+msgid "lang-set %(lang_code)s"
+msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
+
+#: app.py:279
+msgid "bad-lang"
+msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
+
+#: apps/smsforum/views.py:172 apps/smsforum/templates/smsforum/members.html:60
+msgid "Edit Village"
+msgstr "Modifier Le Village"
+
+#: apps/smsforum/views.py:183
+msgid "Edit Member"
+msgstr "Modifier Le Membre"
+
+#: apps/smsforum/views.py:193
+#, python-format
+msgid "Village %(village_name)s successfully created"
+msgstr "Village %(village_name)s a eté créé"
+#msgstr "Village %(village_name)s a ete cree"
+
+#: apps/smsforum/views.py:195
+msgid "Village already exists!"
+msgstr "Cette village a eté déjà créé"
+
+#: apps/smsforum/views.py:197
+msgid "Form invalid"
+msgstr "La forme est invalide"
+
+#: apps/smsforum/views.py:199
+msgid "Add Village"
+msgstr "Ajouter une village"
+
+#: apps/smsforum/views.py:209
+#, python-format
+msgid "Member '%(member_name)s' successfully created"
+msgstr "Le membre '%(member_name)s' a ete cree"
+
+#: apps/smsforum/views.py:213
+msgid "Add Member"
+msgstr "Ajouter un membre"
+
+#: apps/smsforum/templates/smsforum/index.html:4
+#: apps/smsforum/templates/smsforum/index.html:14
+#: apps/smsforum/templates/smsforum/partials/total.html:9
+msgid "Villages"
+msgstr "Villages"
+
+#: apps/smsforum/templates/smsforum/index.html:18
+msgid "Name"
+msgstr "Nom"
+
+#: apps/smsforum/templates/smsforum/index.html:19
+#: apps/smsforum/templates/smsforum/partials/total.html:10
+msgid "Members"
+msgstr "Membres"
+
+#: apps/smsforum/templates/smsforum/index.html:20
+msgid "Messages Initiated This Week"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/index.html:22
+msgid "Messages Received This Week"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/index.html:35
+msgid "No villages yet"
+msgstr "Pas de villages"
+
+#: apps/smsforum/templates/smsforum/index.html:37
+#: apps/smsforum/templates/smsforum/index.html:51
+msgid "Add a Village"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:13
+#: apps/smsforum/templates/smsforum/members.html:13
+msgid "Given Name"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:14
+#: apps/smsforum/templates/smsforum/members.html:14
+msgid "Family Name"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:15
+#: apps/smsforum/templates/smsforum/members.html:15
+msgid "Phone Number"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:16
+#: apps/smsforum/templates/smsforum/members.html:16
+msgid "Gender"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:17
+#: apps/smsforum/templates/smsforum/members.html:17
+msgid "Age"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/member.html:18
+#: apps/smsforum/templates/smsforum/members.html:19
+msgid "Messages Sent This Week"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/members.html:4
+msgid "Members of"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/members.html:9
+msgid "Members of "
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/members.html:37
+#: apps/smsforum/templates/smsforum/members.html:46
+msgid "Add a Member"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/members.html:44
+msgid "No members yet"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:10
+msgid "Content Messages"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:15
+#: apps/smsforum/templates/smsforum/partials/messages.html:83
+msgid "Date"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:16
+#: apps/smsforum/templates/smsforum/partials/messages.html:84
+msgid "Message"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:17
+msgid "Annotation"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:18
+msgid "Flag"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:19
+msgid "Code"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:53
+#: apps/smsforum/templates/smsforum/partials/messages.html:94
+msgid "No messages yet"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/messages.html:78
+msgid "Control Messages"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/total.html:4
+msgid "Totals"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/total.html:11
+msgid "All Messages Received"
+msgstr ""
+
+#: apps/smsforum/templates/smsforum/partials/total.html:12
+msgid "All Messages Sent"
+msgstr ""
