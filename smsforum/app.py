@@ -53,7 +53,7 @@ def __init_translators():
         trans = gettext.translation('django',path,[lang,_G['DEFAULT_LANG']])
         _G['TRANSLATORS'].update( {lang:trans} )
 
-def _t(text, locale=None):
+def _t(locale, text):
     """translate text with default language"""
     translator=_G['TRANSLATORS'][_G['DEFAULT_LANG']]
     if locale in _G['TRANSLATORS']:
@@ -65,7 +65,7 @@ def _st(sender,text):
     # TODO: handle fall back from say eng_US to eng
     # AND mappings from old-stylie two letter ('en') to 
     # new hotness 3-letter codes 'eng'
-    return _t(text,locale=sender.locale)
+    return _t(sender.locale, text)
 
 # init them translators!    
 __init_translators()
