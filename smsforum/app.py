@@ -18,9 +18,9 @@ from apps.logger.models import CodeSet, Code
 from pygsm import gsmcodecs
 
 MAX_LATIN_SMS_LEN = 160 
-MAX_LATIN_BLAST_LEN = 140 # resere 20 chars for us
+MAX_LATIN_BLAST_LEN = MAX_LATIN_SMS_LEN - 20 # resere 20 chars for us
 MAX_UCS2_SMS_LEN = 70 
-MAX_UCS2_BLAST_LEN = 60 # reserve 10 chars for info
+MAX_UCS2_BLAST_LEN = MAX_UCS2_SMS_LEN - 10 # reserve 10 chars for info
 MAX_VILLAGE_NAME_LEN = 40
 MAX_CONTACT_NAME_LEN = 30
 
@@ -157,7 +157,6 @@ class App(rapidsms.app.App):
     # Message Lifecycle #
     #####################
     def parse(self, msg):
-        self.debug("SMSFORUM:PARSE")
 
         msg.sender = contact_from_message(msg,self.router)
         self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
@@ -165,7 +164,7 @@ class App(rapidsms.app.App):
     
     def handle(self, msg):
         self.__log_incoming_message(msg, villages_for_contact(msg.sender))
-        self.debug("SMSFORUM:HANDLE: %s" % msg.text)
+        self.debug("In handle smsforums: %s" % msg.text)
         
         # check permissions
         if msg.sender.perm_ignore:
@@ -339,7 +338,7 @@ class App(rapidsms.app.App):
             else:
                 txt = 'citizens-success %(village)s %(citizens)s'
                 
-            self.__reply(msg, txt, {'name':name, 'citizens':','.join(members)})
+            self.__reply(msg, txt, {'village':name, 'citizens':','.join(members)})
         return True
 
     def destroy_community(self,msg,arg=None):
@@ -606,6 +605,10 @@ class App(rapidsms.app.App):
         """Returns True is message sent"""
         if contact.can_receive:
             self.debug('Blast msg: %s to: %s' % (text,contact.signature))
+            # TODO: move to lib/pygsm/gsm.py
+            # currently just log messages that are too long
+            # since these are not handled properly in modem
+            self._check_message_length(text)
             contact.send_to(text)
             return True
         else:
@@ -689,6 +692,10 @@ class App(rapidsms.app.App):
                 err="Not all format values: %r were used in the string: %s" %\
                     (format_values, reply_text)
                 self.error(err)
+        # TODO: move to lib/pygsm/gsm.py
+        # currently just log messages that are too long
+        # since these are not handled properly in modem
+        self._check_message_length(reply_text)
         msg.sender.send_response_to(reply_text)
     
     def __suggest_villages(self,msg):
@@ -712,4 +719,33 @@ class App(rapidsms.app.App):
 
         msg.persistent_msg.domain = domains[0]
         msg.persistent_msg.save()
+
+    def _check_message_length(self, text):
+        """
+        This function DOES NOT belong here - a temporary measure until 
+        rapidsms has a good api for backends to speak to router
+        
+        checks message length < 160 if gsm, else <70 if ucs-2/utf16
+        """
+
+        gsm_enc=True
+        try:
+            text.encode('gsm')
+        except:
+            gsm_enc=False
+        finally:
+            encoding,max_len=(\
+                ('gsm',MAX_LATIN_SMS_LEN) if gsm_enc \
+                    else ('ucs2',MAX_UCS2_SMS_LEN))
+        
+        if len(text)>max_len:
+            err= ("ERROR: %(encoding)s MESSAGE OF LENGTH '%(msg_len)d' IS TOO LONG. Max is %(max)d.") % \
+                         {
+                'encoding': encoding,
+                'msg_len': len(text),
+                'max': MAX_LATIN_SMS_LEN if encoding=='gsm' else MAX_UCS2_SMS_LEN
+                } 
+            self.error(err)
+            return False
+        return True
 
