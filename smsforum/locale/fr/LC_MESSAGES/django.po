@@ -66,7 +66,7 @@ msgid "first-login"
 msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
 
 msgid "name-register-success %(name)s"
-msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
+msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
 msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
