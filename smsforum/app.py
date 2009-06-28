@@ -21,6 +21,8 @@ MAX_LATIN_SMS_LEN = 160
 MAX_LATIN_BLAST_LEN = 140 # resere 20 chars for us
 MAX_UCS2_SMS_LEN = 70 
 MAX_UCS2_BLAST_LEN = 60 # reserve 10 chars for info
+MAX_VILLAGE_NAME_LEN = 40
+MAX_CONTACT_NAME_LEN = 30
 
 CMD_MARKER=ur'(?:[\.\*\#]|(?:123))'
 DM_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'(.+?)'+ \
@@ -283,6 +285,10 @@ class App(rapidsms.app.App):
             return True
         try:
             # TODO: add administrator authentication
+            if len(village) > MAX_VILLAGE_NAME_LEN:
+                self.__reply(msg, "village-name-too-long %(village)s %(max_char)d", \
+                             {'village':village, 'max_char':MAX_VILLAGE_NAME_LEN} )
+                return True
             ville = Village(name=village)
             ville.save()
             self.village_matcher.add_target((village,ville))
@@ -301,8 +307,11 @@ class App(rapidsms.app.App):
                 self.__reply(msg, "member-of-no-village")
             else:
                 village_names = ', '.join([v.name for v in villages])
-                self.__reply(msg, "member-of %(village_names)s",
-                             {"village_names":village_names})
+                txt = "member-of %(village_names)s"
+                if len(villages)>5: 
+                    villages = villages[0:5]
+                    txt = "member-of-and-more %(village_names)s"
+                self.__reply(msg, txt, {"village_names":village_names})
         except:
             traceback.print_exc()
             self.debug( traceback.format_exc() )
@@ -324,8 +333,13 @@ class App(rapidsms.app.App):
         for name,ville in villes:
             members=[c.get_signature(max_len=10) for c in \
                          ville.flatten(klass=Contact)]
-            self.__reply(msg, '%(name)s: %(citizens)s',
-                         {'name':name, 'citizens':','.join(members)})
+            if len(members)>20: 
+                members = members[0:20]
+                txt = '%(name)s: %(citizens)s and more'
+            else:
+                txt = '%(name)s: %(citizens)s'
+                
+            self.__reply(msg, txt, {'name':name, 'citizens':','.join(members)})
         return True
 
     def destroy_community(self,msg,arg=None):
@@ -356,6 +370,10 @@ class App(rapidsms.app.App):
 
         name=arg
         try:
+            if len(name) > MAX_CONTACT_NAME_LEN:
+                self.__reply(msg, "member-name-too-long %(name)s %(max_char)d", \
+                             {'name':name, 'max_char':MAX_CONTACT_NAME_LEN} )
+                return True
             msg.sender.common_name = name
             msg.sender.save()
             rsp=_st(msg.sender, "name-register-success %(name)s") % {'name':msg.sender.common_name}
