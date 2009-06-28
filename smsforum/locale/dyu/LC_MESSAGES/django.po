@@ -55,7 +55,7 @@ msgstr "La communaute %(village)s existe deja"
 
 #: app.py:158
 msgid "village %(village)s created"
-msgstr "fujojaf futuukituuk %(village)s"
+msgstr "fujojaf fati %(village)s futuukituuk"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
@@ -64,7 +64,7 @@ msgstr "ubonket, ebabaj mataani.ulaan uciik nikeen. abaraka"
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "ubonket,imanjut esukey uyu. uciik #noken karess kati esukey. Par example, %(village_names)s"
+msgstr "ubonket,imanjut esukey uyu. uciik #noken karess kati esukey. nan, %(village_names)s"
 #msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'. Par example, %(village_names)s"
 
 #: app.py:185
@@ -77,7 +77,7 @@ msgstr "Saafuul, %(name)s.abaraka manunokene kareesi.naa,naapuciikumi panimanj a
 #msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "ubonket, furimaf fubabaak. uciik fo tami man fujaw benen. abaraka. Ca doit etre mois que %(max_chars)d caracteres"
+msgstr "ubonket, furimaf fubabaak %(max_chars)d. uciik fo tami man fujaw benen. abaraka"
 #msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
