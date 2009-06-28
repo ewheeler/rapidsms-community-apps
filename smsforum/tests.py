@@ -9,6 +9,17 @@ import time
 import random
 import os
 from datetime import datetime
+
+"""
+Currently, unit tests do not work.
+This is because smsforum depends on contacts, 
+and contacts has an @property connection, which creates
+a Connection object by default without a router.
+test framework depends on us being able to send messages,
+so by fixing contact.communication_channel.backend_slug to a string
+we can get this work
+TODO: fix this
+"""
  
 class TestApp (TestScript):
     apps = (smsforum_app.App, contacts_app.App, logger_app.App, App )
