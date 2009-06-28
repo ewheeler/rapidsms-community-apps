@@ -179,7 +179,7 @@ msgid "name-acknowledge %(name)s"
 msgstr "You are registed with the name: %(name)s"
 
 msgid "direct-blast-acknowledge %(text)s %(recipient)s"
-msgstr "You message was sent to: %(recipient)s"
+msgstr "Your message was sent to: %(recipient)s"
 
 msgid "blast-acknowledge %(text)s %(recipient)s"
 msgstr "Your message was sent to these communities: %(recipient)s"
