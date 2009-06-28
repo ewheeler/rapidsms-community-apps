@@ -338,7 +338,7 @@ class App(rapidsms.app.App):
              ville=Village.objects.get(name=arg)
              ville.delete()
              self.village_matcher.remove_target(arg)
-             self.__reply(msg, "The village '%(ville)s was removed.", {'ville': arg})
+             self.__reply(msg, "The village '%(ville)s' was removed.", {'ville': arg})
              return True
          except:
              rsp= _st(msg.sender,"village-not-known")
