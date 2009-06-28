@@ -11,78 +11,195 @@ msgstr ""
 "POT-Creation-Date: 2009-06-15 20:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: LANGUAGE en\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app.py:144
-#, python-format
-msgid "village %s created"
-msgstr ""
+#
+# command names, must be one word, no spaces
+#
 
-#: app.py:149 app.py:159 app.py:160 app.py:178 app.py:179
-msgid "register-fail"
-msgstr ""
+# to join a village, e.g. '.join village_name'
+msgid "join"
+msgstr "join"
 
-#: app.py:156 app.py:157
-#, python-format
-msgid "Hello %s!"
-msgstr ""
+# to register a common name, e.g. '.name Jeff'
+# or return your common name, e.g. '.name'
+msgid "name"
+msgstr "name"
 
-#: app.py:168
-#, python-format
-msgid "%s does not exist"
-msgstr ""
+# to leave a village, or ALL villages if no arg
+# e.g. '.leave' or '.leave village_name'
+msgid "leave"
+msgstr "leave"
 
-#: app.py:174 app.py:175
-msgid "first-login"
-msgstr ""
+# set language or show supported languages
+# e.g. '.language english'
+msgid "language"
+msgstr "language"
 
-#: app.py:188
-#, python-format
-msgid ""
-"Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr ""
+# help--return help text in registered language
+# or in requested language
+# e.g. '.help' or '.help wolof'
+msgid "help"
+msgstr "help"
 
-#: app.py:199 app.py:200
-msgid "You must join a village before sending messages"
-msgstr ""
+# create a village
+# e.g. '.create village_name'
+msgid "create"
+msgstr "create"
 
-#: app.py:214
-#, python-format
-msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
-msgstr ""
+# delete a village
+# e.g. '.remove village_name'
+msgid "remove"
+msgstr "remove"
 
-#: app.py:225 app.py:226
-#, python-format
-msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr ""
+# show sender's village membership
+msgid "member"
+msgstr "member"
 
-#: app.py:231
-msgid "blast-fail"
-msgstr ""
+# show all members of a village
+# e.g. '.citizens village_name'
+msgid "citizens"
+msgstr "citizens"
 
-#: app.py:246
-msgid "leave-success"
-msgstr ""
+#
+# SMS App strings
+#
 
-#: app.py:248
-msgid "nothing to leave"
-msgstr ""
+# exception caught somewhere in processing, nothing
+# really to do!
+msgid "internal-error"
+msgstr "Sorry, there has been an error. Please try again later"
 
-#: app.py:254
-msgid "leave-fail"
-msgstr ""
+# exact match village argument not found
+msgid "village-not-known %(unknown)s"
+msgstr "The community '%(unknown)s' does not exist"
 
-#: app.py:265
-msgid "denied"
-msgstr ""
+# system does not know requested village.
+# 'suggested' is a list of known villages to suggest to the user
+msgid "village-not-found %(suggested)s"
+msgstr "Sorry, I don't know that place. Did you mean one of: %(suggested)s ?"
 
-#: app.py:274 app.py:275
-msgid "lang-set"
-msgstr ""
+# message blast failed because sender is not in any village
+msgid "blast-fail_not-member-of-any-village"
+msgstr "Please join a community before sending a message: send me '.join <village>'"
 
-#: app.py:279
-msgid "bad-lang"
-msgstr ""
+# message blast failed because message text was too long
+msgid "blast-fail_message-to-long %(msg_len)d %(max_latin)d %(max_unicode)d"
+msgstr "Message length (%(msg_len)d) is too long. Latin script max: %(max_latin)d. Unicode max: %(max_unicode)d"
+
+# outgoing message sent on blasts
+msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
+msgstr "%(txt)s - %(sender)s"
+
+# List of languages system supports sent in response to
+# blank '.language' command
+msgid "supported-langs %(langs)s"
+msgstr "You may set your language to any of: %(langs)s"
+
+msgid "language-set-success %(lang)s"
+msgstr "You language has been set to: %(lang)s"
+
+# used for placeholder in help messages--e.g.
+# Please enter a name like 'village name'
+msgid "village_name"
+msgstr "community name"
+
+# sent to user who does not have 'send' permissions
+msgid "inbound-message_rejected"
+msgstr "Message rejected. You do not have 'send' permission."
+
+# sent when received command not found
+msgid "command-not-understood"
+msgstr "Sorry, I do not understand that command. Type '#help' to see a list of available commands"
+
+# sent when command not found, but the system found some
+# useful suggestions
+msgid "command-not-understood %(sug_1)s %(sug_rest)s"
+msgstr "Command not understood. Did you mean one of: %(sug_1)s or %(sug_rest)s?"
+
+# Help with commands for specific languages. Should
+# send the commands for the given language translated to this
+# language.
+msgid "help-with-commands_fr"
+msgstr ".entrer (join) .quitter (leave) .nom (name) .lang (language) .aide (help)"
+
+msgid "help-with-commands_en"
+msgstr ".join .leave .name .language .help"
+
+msgid "help-with-commands_pul"
+msgstr ".naalde (join) .yaltude (leave) .yettoode (name) .lang (language) .help-pul (help)"
+
+msgid "help-with-commands_wol"
+msgstr ".duggu (join) .genn (leave) .sant (name) .lang (language) .help-wol (help)"
+
+msgid "help-with-commands_dyu"
+msgstr ".unoken (join) .upur (leave) .karees (name) .lang (language) .rambenom (help)"
+
+msgid "help-with-commands"
+msgstr "Available Commands: #join VILLAGE - #leave - #name NAME - #lang LANG"
+
+msgid "create-village-fail_no-village-name"
+msgstr "Please send a village name, e.g. #create 'village name'"
+
+msgid "create-village-fail_village-already-exists %(village)s"
+msgstr "The %(village)s community already exists"
+
+msgid "create-village-success %(village)s"
+msgstr "Community '%(village)s' was created"
+
+# when 'member' command sent by user who is not member of
+# any village
+msgid "member-fail_not-member-of-village"
+msgstr "You are not a member of any community"
+
+# successful response to 'member' command
+msgid "member-success %(village_names)s"
+msgstr "You are a member of these communities: %(village_names)s"
+
+# when 'citizens' command is sent with no village
+msgid "citizens-fail_no-village"
+msgstr "Please send again with the name of a community, e.g.: '.citizens village'"
+
+msgid "citizens-success %(village)s %(citizens)s"
+msgstr "%(village)s: %(citizens)s"
+
+msgid "remove-fail_no-village"
+msgstr "Please send again with the name of a community, e.g.: '.remove village'"
+
+msgid "remove-success %(village)s"
+msgstr "The community '%(village)s' was removed."
+
+msgid "name-register-success %(name)s"
+msgstr "Hello %(name)s!"
+
+msgid "name-acknowledge %(name)s"
+msgstr "You are registed with the name: %(name)s"
+
+msgid "direct-blast-acknowledge %(text)s %(recipient)s"
+msgstr "Your message was sent to: %(recipient)s"
+
+msgid "blast-acknowledge %(text)s %(recipient)s"
+msgstr "Your message was sent to these communities: %(recipient)s"
+
+msgid "direct-blast-fail_recipient-not-found %(recipient)s"
+msgstr "Could not send message. Recipient '%(recipient)s' not found."
+
+msgid "direct-blast-fail_too-many-recipients %(recip_1)s and %(recip_rest)s"
+msgstr "Recipient not found. Did you mean %(recip_1)s?"
+
+msgid "leave-success %(villages)s"
+msgstr "You have left these communities: %(villages)s"
+
+msgid "leave-fail_village-not-found %(village)s"
+msgstr "Could not find a community named '%(village)s'"
+
+msgid "leave-fail_not-member-of-village"
+msgstr "You are not a member of any communities"
+
+msgid "join-success %(village)s"
+msgstr "Thank you for joining the %(village)s community - welcome!"
+
+

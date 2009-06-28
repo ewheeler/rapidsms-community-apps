@@ -1,255 +1,205 @@
-# Language eng translations for PACKAGE package.
-# Copyright (C) 2009 ORGANIZATION
-# Rowena <rowena@rowena-vm>, 2009.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-06-15 04:09+GMT\n"
-"PO-Revision-Date: 2009-06-15 04:21+0000\n"
-"Last-Translator: Rowena <rowena@rowena-vm>\n"
-"Language-Team: Language eng\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-06-15 20:56+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
 
-msgid "command-not-understood"
-msgstr "Sorry, I do not understand that command. Type '#help' to see a list of available commands"
+#
+# command names, must be one word, no spaces
+#
 
-msgid "help with commands"
-msgstr "Available Commands: #join VILLAGE - #leave - #name NAME - #lang LANG"
-
-#: app.py:158
+# to join a village, e.g. '.join village_name'
 msgid "join"
 msgstr "join"
 
-#: app.py:158
+# to register a common name, e.g. '.name Jeff'
+# or return your common name, e.g. '.name'
+msgid "name"
+msgstr "name"
+
+# to leave a village, or ALL villages if no arg
+# e.g. '.leave' or '.leave village_name'
 msgid "leave"
 msgstr "leave"
 
-#: app.py:158
-msgid "village %(village)s already exists"
-msgstr "The %(village)s community already exists"
+# set language or show supported languages
+# e.g. '.language english'
+msgid "language"
+msgstr "language"
 
-#: app.py:158
-msgid "village %(village)s created"
-msgstr "The %(village)s community has been created"
+# help--return help text in registered language
+# or in requested language
+# e.g. '.help' or '.help wolof'
+msgid "help"
+msgstr "help"
 
-#: app.py:163 app.py:189
-msgid "register-fail"
+# create a village
+# e.g. '.create village_name'
+msgid "create"
+msgstr "create"
+
+# delete a village
+# e.g. '.remove village_name'
+msgid "remove"
+msgstr "remove"
+
+# show sender's village membership
+msgid "member"
+msgstr "member"
+
+# show all members of a village
+# e.g. '.citizens village_name'
+msgid "citizens"
+msgstr "citizens"
+
+#
+# SMS App strings
+#
+
+# exception caught somewhere in processing, nothing
+# really to do!
+msgid "internal-error"
 msgstr "Sorry, there has been an error. Please try again later"
 
-#: app.py:176
-msgid "village does not exist"
-msgstr "Sorry, I don't know that place. Please type '#join villagename'. Existing villages include: %(village_names)s"
+# exact match village argument not found
+msgid "village-not-known %(unknown)s"
+msgstr "The community '%(unknown)s' does not exist"
 
-#: app.py:185
-msgid "first-login"
-msgstr "Thank you for joining the %(village)s community - welcome!"
+# system does not know requested village.
+# 'suggested' is a list of known villages to suggest to the user
+msgid "village-not-found %(suggested)s"
+msgstr "Sorry, I don't know that place. Did you mean one of: %(suggested)s ?"
 
-msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Sorry this message is more than %(max_chars)d characters. Please make is shorter and send again." 
+# message blast failed because sender is not in any village
+msgid "blast-fail_not-member-of-any-village"
+msgstr "Please join a community before sending a message: send me '.join <village>'"
 
-#: app.py:204
-msgid "You must join a village before sending messages"
-msgstr "Please join a community before sending a message: send me #join villagename "
+# message blast failed because message text was too long
+msgid "blast-fail_message-to-long %(msg_len)d %(max_latin)d %(max_unicode)d"
+msgstr "Message length (%(msg_len)d) is too long. Latin script max: %(max_latin)d. Unicode max: %(max_unicode)d"
 
-#: app.py:214
-#, python-format
-msgid "%(txt)s - sent to [%(ville)s] from %(sender)s"
+# outgoing message sent on blasts
+msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(txt)s - %(sender)s"
 
-#: app.py:225 app.py:226
-#, python-format
-msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "Congratulations - your message sent to the %(villes)s community"
+# List of languages system supports sent in response to
+# blank '.language' command
+msgid "supported-langs %(langs)s"
+msgstr "You may set your language to any of: %(langs)s"
 
-#: app.py:231
-msgid "blast-fail"
-msgstr "Sorry, there has been an error - please try again later"
+msgid "language-set-success %(lang)s"
+msgstr "You language has been set to: %(lang)s"
 
-#: app.py:248
-msgid "leave-success"
-msgstr "You have left the %(village)s community - good-bye!"
+# used for placeholder in help messages--e.g.
+# Please enter a name like 'village name'
+msgid "village_name"
+msgstr "community name"
 
-#: app.py:250
-msgid "nothing to leave"
-msgstr "You do not belong to any communities. To join, please type #join village_name"
+# sent to user who does not have 'send' permissions
+msgid "inbound-message_rejected"
+msgstr "Message rejected. You do not have 'send' permission."
 
-#: app.py:256
-msgid "leave-fail"
-msgstr "Sorry, there has been an error - please try again later"
+# sent when received command not found
+msgid "command-not-understood"
+msgstr "Sorry, I do not understand that command. Type '#help' to see a list of available commands"
 
-#: app.py:275
-msgid "lang-set %(lang_code)s"
-msgstr "Your language is now set to %(lang_code)s"
+# sent when command not found, but the system found some
+# useful suggestions
+msgid "command-not-understood %(sug_1)s %(sug_rest)s"
+msgstr "Command not understood. Did you mean one of: %(sug_1)s or %(sug_rest)s?"
 
-#: app.py:279
-msgid "bad-lang"
-msgstr "That language code is not recognized - please try again"
+# Help with commands for specific languages. Should
+# send the commands for the given language translated to this
+# language.
+msgid "help-with-commands_fr"
+msgstr ".entrer (join) .quitter (leave) .nom (name) .lang (language) .aide (help)"
 
-#: app.py:279
+msgid "help-with-commands_en"
+msgstr ".join .leave .name .language .help"
+
+msgid "help-with-commands_pul"
+msgstr ".naalde (join) .yaltude (leave) .yettoode (name) .lang (language) .help-pul (help)"
+
+msgid "help-with-commands_wol"
+msgstr ".duggu (join) .genn (leave) .sant (name) .lang (language) .help-wol (help)"
+
+msgid "help-with-commands_dyu"
+msgstr ".unoken (join) .upur (leave) .karees (name) .lang (language) .rambenom (help)"
+
+msgid "help-with-commands"
+msgstr "Available Commands: #join VILLAGE - #leave - #name NAME - #lang LANG"
+
+msgid "create-village-fail_no-village-name"
+msgstr "Please send a village name, e.g. #create 'village name'"
+
+msgid "create-village-fail_village-already-exists %(village)s"
+msgstr "The %(village)s community already exists"
+
+msgid "create-village-success %(village)s"
+msgstr "Community '%(village)s' was created"
+
+# when 'member' command sent by user who is not member of
+# any village
+msgid "member-fail_not-member-of-village"
+msgstr "You are not a member of any community"
+
+# successful response to 'member' command
+msgid "member-success %(village_names)s"
+msgstr "You are a member of these communities: %(village_names)s"
+
+# when 'citizens' command is sent with no village
+msgid "citizens-fail_no-village"
+msgstr "Please send again with the name of a community, e.g.: '.citizens village'"
+
+msgid "citizens-success %(village)s %(citizens)s"
+msgstr "%(village)s: %(citizens)s"
+
+msgid "remove-fail_no-village"
+msgstr "Please send again with the name of a community, e.g.: '.remove village'"
+
+msgid "remove-success %(village)s"
+msgstr "The community '%(village)s' was removed."
+
 msgid "name-register-success %(name)s"
 msgstr "Hello %(name)s!"
 
+msgid "name-acknowledge %(name)s"
+msgstr "You are registed with the name: %(name)s"
 
-#: apps/smsforum/views.py:172 apps/smsforum/templates/smsforum/members.html:60
-msgid "Edit Village"
-msgstr ""
+msgid "direct-blast-acknowledge %(text)s %(recipient)s"
+msgstr "Your message was sent to: %(recipient)s"
 
-#: apps/smsforum/views.py:183
-msgid "Edit Member"
-msgstr "Edit Member"
+msgid "blast-acknowledge %(text)s %(recipient)s"
+msgstr "Your message was sent to these communities: %(recipient)s"
 
-#: apps/smsforum/views.py:193
-#, python-format
-msgid "Village %(village_name)s successfully created"
-msgstr "Village %(village_name)s successfully created"
+msgid "direct-blast-fail_recipient-not-found %(recipient)s"
+msgstr "Could not send message. Recipient '%(recipient)s' not found."
 
-#: apps/smsforum/views.py:195
-msgid "Village already exists!"
-msgstr "Village already exists!"
+msgid "direct-blast-fail_too-many-recipients %(recip_1)s and %(recip_rest)s"
+msgstr "Recipient not found. Did you mean %(recip_1)s?"
 
-#: apps/smsforum/views.py:197
-msgid "Form invalid"
-msgstr "Form invalid"
+msgid "leave-success %(villages)s"
+msgstr "You have left these communities: %(villages)s"
 
-#: apps/smsforum/views.py:199
-msgid "Add Village"
-msgstr "Add Village"
+msgid "leave-fail_village-not-found %(village)s"
+msgstr "Could not find a community named '%(village)s'"
 
-#: apps/smsforum/views.py:209
-#, python-format
-msgid "Member '%(member_name)s' successfully created"
-msgstr "Member '%(member_name)s' successfully created"
+msgid "leave-fail_not-member-of-village"
+msgstr "You are not a member of any communities"
 
-#: apps/smsforum/views.py:213
-msgid "Add Member"
-msgstr ""
+msgid "join-success %(village)s"
+msgstr "Thank you for joining the %(village)s community - welcome!"
 
-#: apps/smsforum/templates/smsforum/index.html:4
-#: apps/smsforum/templates/smsforum/index.html:14
-#: apps/smsforum/templates/smsforum/partials/total.html:9
-msgid "Villages"
-msgstr ""
 
-#: apps/smsforum/templates/smsforum/index.html:18
-msgid "Name"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/index.html:19
-#: apps/smsforum/templates/smsforum/partials/total.html:10
-msgid "Members"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/index.html:20
-msgid "Messages Initiated This Week"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/index.html:22
-msgid "Messages Received This Week"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/index.html:35
-msgid "No villages yet"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/index.html:37
-#: apps/smsforum/templates/smsforum/index.html:51
-msgid "Add a Village"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:13
-#: apps/smsforum/templates/smsforum/members.html:13
-msgid "Given Name"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:14
-#: apps/smsforum/templates/smsforum/members.html:14
-msgid "Family Name"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:15
-#: apps/smsforum/templates/smsforum/members.html:15
-msgid "Phone Number"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:16
-#: apps/smsforum/templates/smsforum/members.html:16
-msgid "Gender"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:17
-#: apps/smsforum/templates/smsforum/members.html:17
-msgid "Age"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/member.html:18
-#: apps/smsforum/templates/smsforum/members.html:19
-msgid "Messages Sent This Week"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/members.html:4
-msgid "Members of"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/members.html:9
-msgid "Members of "
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/members.html:37
-#: apps/smsforum/templates/smsforum/members.html:46
-msgid "Add a Member"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/members.html:44
-msgid "No members yet"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:10
-msgid "Content Messages"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:15
-#: apps/smsforum/templates/smsforum/partials/messages.html:83
-msgid "Date"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:16
-#: apps/smsforum/templates/smsforum/partials/messages.html:84
-msgid "Message"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:17
-msgid "Annotation"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:18
-msgid "Flag"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:19
-msgid "Code"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:53
-#: apps/smsforum/templates/smsforum/partials/messages.html:94
-msgid "No messages yet"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/messages.html:78
-msgid "Control Messages"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/total.html:4
-msgid "Totals"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/total.html:11
-msgid "All Messages Received"
-msgstr ""
-
-#: apps/smsforum/templates/smsforum/partials/total.html:12
-msgid "All Messages Sent"
-msgstr ""

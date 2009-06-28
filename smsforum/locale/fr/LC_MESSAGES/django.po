@@ -47,14 +47,14 @@ msgstr "créer"
 # as in 'create new community Ziguinchor'
 
 #: app.py:158
-msgid "village %(village)s already exists"
+msgid "create-village-fail_village-already-exists %(village)s"
 msgstr "La communaute %(village)s existe deja"
 
-msgid "village %(village)s created"
+msgid "create-village-success %(village)s"
 msgstr "La communauté %(village)s a été créée"
 
 #: app.py:163 app.py:189
-msgid "register-fail"
+msgid "internal-error"
 msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 #: app.py:176

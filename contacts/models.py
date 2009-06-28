@@ -224,7 +224,6 @@ class Contact(Node):
         if in_reply_to is not None:
             cc = channel_connection_from_message(in_reply_to)
         else:
-            print "GOT CC I WAS CREATED WITH"
             cc = self.created_from_channel_connection
 
         self.send_to(text,cc)
