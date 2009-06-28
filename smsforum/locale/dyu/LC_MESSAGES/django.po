@@ -74,7 +74,7 @@ msgstr "abaraka manunoken na di fujojaf fati '%(village)s'"
 
 msgid "name-register-success %(name)s"
 msgstr "Saafuul, %(name)s.abaraka manunokene kareesi.naa,naapuciikumi panimanj aima. Abaraka."
-#msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
+#msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
 msgstr "ubonket, furimaf fubabaak. uciik fo tami man fujaw benen. abaraka. Ca doit etre mois que %(max_chars)d caracteres"

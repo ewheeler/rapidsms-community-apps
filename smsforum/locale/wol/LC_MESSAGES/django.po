@@ -1,3 +1,5 @@
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
+
 # Language eng translations for PACKAGE package.
 # Copyright (C) 2009 ORGANIZATION
 # Rowena <rowena@rowena-vm>, 2009.
@@ -15,33 +17,35 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 msgid "command-not-understood"
-msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help wolof' pour voir une liste des ordres acceptables"
+msgstr "Maa ngi jéggalu ci ñàkka xam li nga begga santaane. Besal '# ndimbal wolof' ngir am mbooleem santaane yi mena nekk"
+#msgstr "Desole, je ne peux pas comprendre cet ordre. Txter '#help wolof' pour voir une liste des ordres acceptables"
 
 msgid "help with commands"
-msgstr "Vous pouvez texter: #duggu VILLAGE - #genn - #sant NAME - #lang LANG"
+msgstr "Buton yi jàppandi: # dugal TURU DEKK BI - # tur SA TUR - # làkk SAW KALLAAMA"
+#msgstr "Vous pouvez texter: #duggu VILLAGE - #genn - #sant NAME - #lang LANG"
 
 msgid "member"
-msgstr "?"
+msgstr "aji bokk"
 # as in "i am a member of this village"
 
 msgid "name"
-msgstr "sant"
+msgstr "tur"
 # as in 'the name with which i would like to be referred'
 
 msgid "help"
-msgstr "?"
+msgstr "ndimbal"
 # as in 'help me use this sms system'
 
 #: app.py:158
 msgid "join"
-msgstr "duggu"
+msgstr "dugg"
 
 #: app.py:158
 msgid "leave"
-msgstr "genn"
+msgstr "génn"
 
 msgid "create"
-msgstr "?"
+msgstr "sos"
 #msgstr "créer"
 
 #: app.py:158
@@ -50,35 +54,35 @@ msgstr "La communaute %(village)s existe deja"
 
 #: app.py:158
 msgid "village %(village)s created"
-msgstr "Deukoub %(village)s gni ngako soss"
+msgstr "Dekk bi, ci %(village)s lañu ko sos"
 #msgstr "La communaute %s a ete creee"
 
 #: app.py:163 app.py:189
 msgid "register-fail"
-msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
+msgstr "Nu ngi jéggalu ci ñàkka jàll bi, di la ñaan, nga jéemaat ci kanam."
 #msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 #: app.py:176
 msgid "village does not exist"
-msgstr "Diegueulou, khaamee wouma deuk bii. Baalma bindal # dugg, bo o nopee bindal (turu deukbi)"
+msgstr "Nu ngi jéggalu ci ñàkka xam bérab bi nga soxla. Ñu lay ñaan, nga bind # dugg, teg ci (turu dekk bi)."
 #msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'"
 
 #: app.py:185
 msgid "first-login"
-msgstr "Jerejef ci dugg bi ja dugg '%(village)s' dalal ak jamm"
+msgstr "Jerejef ci dugg bi nga dugg ci '%(village)s ' dalal ak jamm"
 #msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
 
 msgid "name-register-success %(name)s"
-msgstr "%(name)s: Jerejef cij jox banga nu jex satur bepp xibaar bunu yoonee citelefon bii dinanu keo xamee ci tur wii."
-#msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaîtra dorénavant sur tous les messages que vous envoyez"
+msgstr "Jàmm ngaam%(name)s: Jerejef ci li nga dugal sa tur ! gannaawsi tey, tur woowu mooy feeñ ci bépp xebaar boo yonnee."
+#msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "Message was not delivered. Please send less than %(max_chars)d characters."
-msgstr "Haa jeegale xibaar amna lu epp %(max_chars)d mbind yu wuute - sula soobee def kocianam ixiu galt te yoone waat ko."
+msgstr "Nu ngi jéggalu, xebaar bii, araf yi ci embu, dañoo bari te warula epp %(max_chars)d - nu laay ñaan, nga wàññi leen te yonnewaat ko."
 #msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
 msgid "You must join a village before sending messages"
-msgstr "Sula soobee duggal ci dekk bi balaa naa yonee xibaar. Poindal #dugg boo nopee na yokk i turu dekbi."
+msgstr "Nu ngi lay ñaan, nga dugal dekk bi jekk, door di yonnee xebaar. Bindal #dugg, teg ci turu dekk bi."
 #msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
 
 #: app.py:214
@@ -89,37 +93,44 @@ msgstr "%(txt)s - %(sender)s"
 #: app.py:225 app.py:226
 #, python-format
 msgid "success! %(villes)s recvd msg: %(txt)s"
-msgstr "Waaw goor sa xibaar yegg na ca dekkub '%(villes)s'"
+msgstr "yonnee ko ci %(villes)s"
+#msgstr "Waaw goor sa xibaar yegg na ca dekkub '%(villes)s'"
 #msgstr "Félicitations! Votre message a été envoyé à la communauté '%(villes)s'"
 
 #: app.py:231
 msgid "blast-fail"
-msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
+msgstr "Nu ngi jéggalu ci ñàkka jàll bi, di la ñaan nga jéemaat ci kanam."
+#msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:248
 msgid "leave-success"
-msgstr "Jegenga ci dekk bi '%(village)s' yu gise waat."
+msgstr" Joge nga ci dekk bi '%(village)s' Ba beneen."
+#msgstr "Jegenga ci dekk bi '%(village)s' yu gise waat."
 #msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 #: app.py:250
 msgid "nothing to leave"
-msgstr "Dugga goo cibenn dekk. Poindal #dugg boo nopee na yokk i turu dekbi."
+msgstr "Fii ñu tollu, bokkaguloo ci benn dekk. Boo beggee bokk, bindal  #dugg, teg ci 'turu dekk bi'."
+#msgstr "Dugga goo cibenn dekk. Poindal #dugg boo nopee na yokk i turu dekbi."
 #msgstr "Vous n'appartenez à aucune communauté pour le moment. Pour nous rejoindre, vueillez écrire # puis 'nom de village"
 
 #: app.py:256
 msgid "leave-fail"
-msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
+msgstr "Nu ngi jéggalu ci ñàkka jàll bi, di la ñaan nga jéemaat ci kanam."
+#msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
 #msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard"
 
 #: app.py:275
 msgid "lang-set %(lang_code)s"
-msgstr "fi mu nekk lakk binga doon jefandi koo sopi nanu ko wolof."
+msgstr "Làkk wi nga tànn moo kàllaama %(lang_code)s"
+#msgstr "fi mu nekk lakk binga doon jefandi koo sopi nanu ko wolof."
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
 #: app.py:279
 msgid "bad-lang"
-msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
+msgstr "Lim bi nga dugal ngir soppi kàllaama bi baaxul, nu lay ñaan nga jéemaat."
+#msgstr "Maangi jeegalu dafa ameen njumte, sula soobee jeemaalal ci kanam."
 #msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
 
 
