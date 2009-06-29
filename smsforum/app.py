@@ -717,8 +717,11 @@ class App(rapidsms.app.App):
         if domains is None or len(domains)==0:
             return
 
-        msg.persistent_msg.domain = domains[0]
-        msg.persistent_msg.save()
+        #msg.persistent_msg should never be none if app.logger is used
+        #this is to ensure smsforum does not fail even if logger fails...
+        if msg.persistent_msg is not None:
+            msg.persistent_msg.domain = domains[0]
+            msg.persistent_msg.save()
 
     def _check_message_length(self, text):
         """
