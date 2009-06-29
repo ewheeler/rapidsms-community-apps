@@ -98,7 +98,7 @@ class App(rapidsms.app.App):
             ('sant', {'lang':'wol','func':self.register_name}),
             ('tur', {'lang':'wol','func':self.register_name}),
             ('help-wol', {'lang':'wol','func':self.help}),
-            # Joola
+            # Dyuola    
             ('unoken', {'lang':'dyu','func':self.join}),
             ('ounoken', {'lang':'dyu','func':self.join}),
             ('karees', {'lang':'dyu','func':self.register_name}),
@@ -285,7 +285,7 @@ class App(rapidsms.app.App):
         try:
             # TODO: add administrator authentication
             if len(village) > MAX_VILLAGE_NAME_LEN:
-                self.__reply(msg, "village-name-too-long %(village)s %(max_char)d", \
+                self.__reply(msg, "create-village-fail_name-too-long %(village)s %(max_char)d", \
                              {'village':village, 'max_char':MAX_VILLAGE_NAME_LEN} )
                 return True
             ville = Village(name=village)
@@ -369,7 +369,7 @@ class App(rapidsms.app.App):
         name=arg
         try:
             if len(name) > MAX_CONTACT_NAME_LEN:
-                self.__reply(msg, "member-name-too-long %(name)s %(max_char)d", \
+                self.__reply(msg, "name-register-fail_name-too-long %(name)s %(max_char)d", \
                              {'name':name, 'max_char':MAX_CONTACT_NAME_LEN} )
                 return True
             msg.sender.common_name = name
@@ -560,7 +560,7 @@ class App(rapidsms.app.App):
                     else ('ucs2',MAX_UCS2_BLAST_LEN))
             
         if len(out_text)>max_len: 
-            rsp= _st(msg.sender, "blast-fail_message-to-long %(msg_len)d %(max_latin)d %(max_unicode)d") % \
+            rsp= _st(msg.sender, "blast-fail_message-too-long %(msg_len)d %(max_latin)d %(max_unicode)d") % \
                 {
                 'msg_len': len(out_text),
                 'max_latin': MAX_LATIN_BLAST_LEN,
@@ -653,7 +653,7 @@ class App(rapidsms.app.App):
             # return available langs
             langs_sorted=_G['SUPPORTED_LANGS'].values()
             langs_sorted.sort()
-            rsp=_st(msg.sender, "supported-langs %(langs)s") % \
+            rsp=_st(msg.sender, "language-set-fail_code-not-understood %(langs)s") % \
                 { 'langs':', '.join(langs_sorted)}
             self.__reply(msg,rsp)
             return True
