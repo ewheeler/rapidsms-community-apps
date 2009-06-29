@@ -118,7 +118,6 @@ class App(rapidsms.app.App):
             ('nom', {'lang':'fr','func':self.register_name}),
             ('quitter', {'lang':'fr','func':self.leave}),
             ('aide', {'lang':'fr','func':self.help}),
-            ('membre', {'lang':'fr','func':self.member}),
             # TODO: make best matcher smart about accents...
             ('créer', {'lang':'fr','func':self.createvillage}),
             ('creer', {'lang':'fr','func':self.createvillage}),
