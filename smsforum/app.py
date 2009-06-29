@@ -719,7 +719,7 @@ class App(rapidsms.app.App):
 
         #msg.persistent_msg should never be none if app.logger is used
         #this is to ensure smsforum does not fail even if logger fails...
-        if msg.persistent_msg is not None:
+        if hasattr(msg,'persistent_msg'):
             msg.persistent_msg.domain = domains[0]
             msg.persistent_msg.save()
 
