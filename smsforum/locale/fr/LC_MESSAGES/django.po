@@ -61,7 +61,7 @@ msgstr "citoyens"
 # exception caught somewhere in processing, nothing
 # really to do!
 msgid "internal-error"
-msgstr "Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard" 
+msgstr "ERROR: Désolé, il y a eu un problème. Merci d'envoyer à nouveau plus tard" 
 
 # used for placeholder in help messages--e.g.
 # Please enter a name like 'village name'
@@ -98,8 +98,8 @@ msgstr "Désolé, ce message fait plus de %(max_latin)d caractères. Merci de le
 msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(text)s - %(sender)s"
 
-msgid "blast-acknowledge %(text)s %(recipient)s"
-msgstr "Votre message a été envoyé à: %(recipient)s"
+msgid "blast-acknowledge %(text)s %(recipients)s"
+msgstr "Votre message a été envoyé à: %(recipients)s"
 
 # when 'citizens' command is sent with no village
 msgid "citizens-fail_no-village"

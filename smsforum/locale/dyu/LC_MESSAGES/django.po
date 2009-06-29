@@ -65,7 +65,7 @@ msgstr "citoyens"
 # exception caught somewhere in processing, nothing
 # really to do!
 msgid "internal-error"
-msgstr "ubonket, ebabaj mataani.ulaan uciik nikeen. abaraka"
+msgstr "ERROR: ubonket, ebabaj mataani.ulaan uciik nikeen. abaraka"
 
 # used for placeholder in help messages--e.g.
 # Please enter a name like 'village name'
@@ -104,8 +104,8 @@ msgstr "ubonket, furimaf fubabaak %(max_latin)d. uciik fo tami man fujaw benen. 
 msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(text)s - %(sender)s"
 
-msgid "blast-acknowledge %(text)s %(recipient)s"
-msgstr "e messagey yanou bogn mi di fou jojaf e rin-ding '%(recipient)s'"
+msgid "blast-acknowledge %(text)s %(recipients)s"
+msgstr "e messagey yanou bogn mi di fou jojaf e rin-ding '%(recipients)s'"
 
 # when 'citizens' command is sent with no village
 msgid "citizens-fail_no-village"
@@ -181,7 +181,7 @@ msgstr "kasankenak kanu fajulumi ku '%(lang)s'"
 # List of languages system supports sent in response to
 # blank '.language' command
 msgid "language-set-fail_code-not-understood %(langs)s"
-msgstr "fujuumaf fan utiwummi kasankenak fumanjuti. usafel benen. abaraka. Est-ce que vous voules dire l'un des suivants? %(langs)s"
+msgstr "fujuumaf fan utiwummi kasankenak fumanjuti. usafel benen. abaraka. Vous pouvez utiliser: %(langs)s"
 #msgstr msgstr "Vous pouvez utiliser un des langues suivants: %(langs)s"
 
 msgid "leave-success %(villages)s"

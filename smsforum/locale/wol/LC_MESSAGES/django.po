@@ -61,7 +61,7 @@ msgstr "citoyens"
 # exception caught somewhere in processing, nothing
 # really to do!
 msgid "internal-error"
-msgstr "Nu ngi jéggalu ci ñàkka jàll bi, di la ñaan, nga jéemaat ci kanam."
+msgstr "ERROR: Nu ngi jéggalu ci ñàkka jàll bi, di la ñaan, nga jéemaat ci kanam."
 #msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 # used for placeholder in help messages--e.g.
@@ -77,7 +77,7 @@ msgstr "Nu ngi jéggalu ci ñàkka xam bérab bi nga soxla. Ñu lay ñaan, nga b
 # system does not know requested village.
 # 'suggested' is a list of known villages to suggest to the user
 msgid "village-not-found %(suggested)s"
-msgstr "Nu ngi jéggalu ci ñàkka xam bérab bi nga soxla. Ñu lay ñaan, nga bind # dugg, teg ci (turu dekk bi)."
+msgstr "Nu ngi jéggalu ci ñàkka xam bérab bi nga soxla. Ñu lay ñaan, nga bind # dugg, teg ci %(suggested)s."
 #msgstr "Désolé, je ne reconnais pas cet endroit. Est-ce que vous pensez de l'un de ceci? %(suggested)s"
 
 msgid "command-not-understood"
@@ -103,9 +103,9 @@ msgstr "Nu ngi jéggalu, xebaar bii, araf yi ci embu, dañoo bari te warula epp 
 msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(text)s - %(sender)s"
 
-msgid "blast-acknowledge %(text)s %(recipient)s"
-msgstr "yonnee ko ci %(recipient)s"
-#msgstr "Votre message a été envoyé à: %(recipient)s"
+msgid "blast-acknowledge %(text)s %(recipients)s"
+msgstr "yonnee ko ci %(recipients)s"
+#msgstr "Votre message a été envoyé à: %(recipients)s"
 
 # when 'citizens' command is sent with no village
 msgid "citizens-fail_no-village"
@@ -180,7 +180,7 @@ msgstr "Làkk wi nga tànn moo kàllaama %(lang)s"
 # List of languages system supports sent in response to
 # blank '.language' command
 msgid "language-set-fail_code-not-understood %(langs)s"
-msgstr "Lim bi nga dugal ngir soppi kàllaama bi baaxul, nu lay ñaan nga jéemaat."
+msgstr "Lim bi nga dugal ngir soppi kàllaama bi baaxul, nu lay ñaan nga jéemaat.%(langs)s"
 #msgstr "Vous pouvez utiliser un des langues suivants: %(langs)s"
 
 #: app.py:248

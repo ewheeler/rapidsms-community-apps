@@ -196,8 +196,8 @@ msgstr "You are registed with the name: %(name)s"
 msgid "direct-blast-acknowledge %(text)s %(recipient)s"
 msgstr "Your message was sent to: %(recipient)s"
 
-msgid "blast-acknowledge %(text)s %(recipient)s"
-msgstr "Your message was sent to these communities: %(recipient)s"
+msgid "blast-acknowledge %(text)s %(recipients)s"
+msgstr "Your message was sent to these communities: %(recipients)s"
 
 msgid "direct-blast-fail_recipient-not-found %(recipient)s"
 msgstr "Could not send message. Recipient '%(recipient)s' not found."

@@ -59,7 +59,7 @@ msgstr "citoyens"
 # exception caught somewhere in processing, nothing
 # really to do!
 msgid "internal-error"
-msgstr "Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
+msgstr "ERROR: Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
 #msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 # used for placeholder in help messages--e.g.
@@ -74,7 +74,7 @@ msgstr "yaafo mi heptinaani nokku o yaafo seeda"
 # system does not know requested village.
 # 'suggested' is a list of known villages to suggest to the user
 msgid "village-not-found %(suggested)s"
-msgstr "yaafo mi heptinaani nokku o yaafo seeda, mbinnde # naatde, e %(village_names)s"
+msgstr "yaafo mi heptinaani nokku o yaafo seeda, mbinnde # naatde, e %(suggested)s"
 #msgstr "Désolé, je ne reconnais pas cet endroit. Est-ce que vous pensez de l'un de ceci? %(suggested)s"
 
 msgid "command-not-understood"
@@ -99,9 +99,9 @@ msgstr "yaafo - njokkondir e sahre nde gila a nuldaani message. Mbinnde #naatde 
 msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(text)s - %(sender)s"
 
-msgid "blast-acknowledge %(text)s %(recipient)s"
-msgstr "Miu njettiima, mesaaj ma nawaama to sahre to '%(recipient)s'"
-#msgstr "Votre message a été envoyé à: %(recipient)s"
+msgid "blast-acknowledge %(text)s %(recipients)s"
+msgstr "Miu njettiima, mesaaj ma nawaama to sahre to '%(recipients)s'"
+#msgstr "Votre message a été envoyé à: %(recipients)s"
 
 # when 'citizens' command is sent with no village
 msgid "citizens-fail_no-village"
@@ -170,7 +170,7 @@ msgstr "a Jaaraama nde njukku - da e Sahre nde '%(village)s' - bienvenue!"
 
 #: app.py:279
 msgid "language-set-fail_code-not-understood %(langs)s"
-msgstr "Kod O ngam waylude demngal heptinaaka. A Jaaraama nde ngeto_daa Kadi."
+msgstr "Kod O ngam waylude demngal heptinaaka. A Jaaraama nde ngeto_daa Kadi. %(langs)s"
 #msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
 #msgstr "Vous pouvez utiliser un des langues suivants: %(langs)s"
 
