@@ -4,8 +4,9 @@
 <p/>
 
 <div class="split">
-<div class="left">
 
+{% if blast_messages %}
+<div class="left">
 <div class="module">
     <h2>{% trans "Content Messages" %}</h2>
     <form action="" method="POST">
@@ -68,12 +69,11 @@
     </table>
     </form>
 </div>
-
-
-
 </div>
-<div class="right">
+{% endif %}
 
+{% if cmd_messages %}
+<div class="right">
 <div class="module">
     <h2>{% trans "Control Messages" %}</h2>
     <form action="" method="POST">
@@ -108,7 +108,7 @@
 
 
 </div>
+{% endif %}
 <div class="clear-hack"></div>
 </div>
-
 {% endif %}

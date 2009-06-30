@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 
 def index(req, template="smsforum/index.html"):
     context = {}
-    if req.method == 'POST':
+    if req.method == 'POST':    
         # now iterate through all the messages you learned about
         for i in req.POST.getlist('message'):
             id = int(i)
@@ -89,6 +89,11 @@ def index(req, template="smsforum/index.html"):
         village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
     messages = IncomingMessage.objects.select_related().order_by('-received')
+    context.update( format_messages_in_context(req, context, messages) )
+    context.upate( totals(context) )
+    return render_to_response(req, template, context)
+
+def format_messages_in_context(req, context, messages):
     cmd_messages = []
     blast_messages = []
     for msg in messages:
@@ -105,12 +110,8 @@ def index(req, template="smsforum/index.html"):
         context['cmd_messages'] = paginated(req, cmd_messages, per_page=10, prefix="cmd")
     if len(blast_messages)>0:
         context['blast_messages'] = paginated(req, blast_messages, per_page=10, prefix="blast")
-    
-    
-    
     context['codes'] = Code.objects.filter(set=CodeSet.objects.get(name="TOSTAN_CODE"))
-    __append_totals_to_context(context)
-    return render_to_response(req, template, context)
+    return context
 
 
 # TODO: move this somewhere Tostan-Specifig
@@ -143,7 +144,7 @@ def members(req, pk, template="smsforum/members.html"):
     context['village'] = village
     context['members'] = paginated(req, members)
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
-    context['messages'] = paginated(req, messages)
+    format_messages_in_context(req, context, messages)
     return render_to_response(req, template, context)
 
 def member(req, pk, template="smsforum/member.html"):
@@ -168,7 +169,7 @@ def member(req, pk, template="smsforum/member.html"):
         last_week = ( datetime.now()-timedelta(weeks=1) )
         messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
         contact.message_count = len(messages)
-        context['messages'] = paginated(req, messages)
+        format_messages_in_context(req, context, messages)
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
         pass
@@ -227,7 +228,8 @@ def add_member(req, village_id=0, template="smsforum/add.html"):
     return render_to_response(req, template, context)    
 
 
-def __append_totals_to_context(context):
+def totals(context):
     context['village_count'] = Village.objects.all().count()
     context['member_count'] = Contact.objects.all().count()
     context['incoming_message_count'] = IncomingMessage.objects.all().count()
+    return context
