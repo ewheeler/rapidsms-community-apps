@@ -12,6 +12,7 @@ from rapidsms.webui.utils import *
 from apps.smsforum.models import *
 from apps.smsforum.utils import *
 from apps.smsforum.forms import *
+from apps.smsforum.app import CMD_MESSAGE_MATCHER
 from apps.logger.models import *
 from apps.contacts.models import *
 from apps.contacts.forms import *
@@ -88,13 +89,25 @@ def index(req, template="smsforum/index.html"):
         village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
     messages = IncomingMessage.objects.select_related().order_by('-received')
+    cmd_messages = []
+    blast_messages = []
     for msg in messages:
         for tag in msg.messagetag_set.all():
             if IsFlag(tag): msg.flagged = True
             elif tag.code.set.name == "TOSTAN_CODE": msg.code = tag.code
         notes = msg.messageannotation_set.filter(message=msg)
         if len(notes) > 0: msg.note = notes[0].text
-    context['messages'] = paginated(req, messages)
+        # are we a command?
+        m=CMD_MESSAGE_MATCHER.match(msg.text)
+        if m is None: blast_messages.append(msg)
+        else: cmd_messages.append(msg)
+    if len(cmd_messages)>0:
+        context['cmd_messages'] = paginated(req, cmd_messages, per_page=10, prefix="cmd")
+    if len(blast_messages)>0:
+        context['blast_messages'] = paginated(req, blast_messages, per_page=10, prefix="blast")
+    
+    
+    
     context['codes'] = Code.objects.filter(set=CodeSet.objects.get(name="TOSTAN_CODE"))
     __append_totals_to_context(context)
     return render_to_response(req, template, context)

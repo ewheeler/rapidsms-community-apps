@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load pagination %}
-{% if messages %}
+{% if cmd_messages or blast_messages %}
 <p/>
 
 <div class="split">
@@ -19,7 +19,7 @@
                 <th scope="col">{% trans "Code" %}</th>
             </tr>
         </thead>
-        <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
+        <tbody>{% if blast_messages.object_list %}{% for message in blast_messages.object_list %}
             <tr>
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
@@ -57,7 +57,7 @@
         <tfoot>
             <tr>
                 <td colspan="2">
-                    {% paginator messages %}
+                    {% paginator blast_messages %}
                 </td>
                 <td colspan="3"><span class="right">
                     <input type="submit" value="Save Annotations" />
@@ -84,7 +84,7 @@
                 <th scope="col">{% trans "Message" %}</th>
             </tr>
         </thead>
-        <tbody>{% if messages.object_list %}{% for message in messages.object_list %}
+        <tbody>{% if cmd_messages.object_list %}{% for message in cmd_messages.object_list %}
             <tr>
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
@@ -98,7 +98,7 @@
         <tfoot>
             <tr>
                 <td colspan="2">
-                    {% paginator messages %}
+                    {% paginator cmd_messages %}
                 </td>
             </tr>
         </tfoot>
