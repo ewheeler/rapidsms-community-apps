@@ -90,7 +90,7 @@ def index(req, template="smsforum/index.html"):
     context['villages'] = paginated(req, villages)
     messages = IncomingMessage.objects.select_related().order_by('-received')
     context.update( format_messages_in_context(req, context, messages) )
-    context.upate( totals(context) )
+    context.update( totals(context) )
     return render_to_response(req, template, context)
 
 def format_messages_in_context(req, context, messages):
