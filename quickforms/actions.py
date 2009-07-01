@@ -23,6 +23,6 @@ class FormActions():
     ''' Methods in this class will be called after a keyword's form
         has been parsed. Methods should have the same name as the keyword. '''
 
-@staticmethod
+    @staticmethod
     def alpha(formentry, errors):
         print "HARDCORE FORM ACTION"

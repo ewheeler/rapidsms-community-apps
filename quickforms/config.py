@@ -2,5 +2,5 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 title = "Quick forms"
-tab_link = "/forms"
+tab_link = "/keywords"
 
