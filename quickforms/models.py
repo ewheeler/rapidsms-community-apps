@@ -11,6 +11,18 @@ class Form(models.Model):
     def __unicode__(self):
         return self.description 
 
+    @property
+    def keyword(self):
+        return self.keyword_set.all()[0]
+
+    @property
+    def fields(self):
+        return self.field_set.all()
+
+    @property
+    def entries(self):
+        return self.formentry_set.all()
+
 class Field(models.Model):
     DATA_TYPES = (("float", "Number"),
                   ("str",   "Any word"),
@@ -27,12 +39,19 @@ class Field(models.Model):
     class Meta:
         order_with_respect_to = "form"
 
+    @property
+    def entries(self):
+        return self.fieldentry_set.all()
+
 class Keyword(models.Model):
     word = models.SlugField(max_length=25, unique=True)
     form = models.ForeignKey(Form, blank=True, null=True)
 
     def __unicode__(self):
         return self.word
+
+    def actions(self):
+        return self.action_set.all()
 
 class FormEntry(models.Model):
     reporter = models.ForeignKey(Reporter, blank=True, null=True, related_name='reporters')
@@ -41,6 +60,10 @@ class FormEntry(models.Model):
 
     def __unicode__(self):
         return "%s %s" % (self.form.description, self.date)
+
+    @property
+    def entries(self):
+        return self.fieldentry_set.all()
 
 class FieldEntry(models.Model):
     form_entry = models.ForeignKey(FormEntry)

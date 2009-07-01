@@ -1,0 +1,57 @@
+{% extends "layout-split-2.html" %}
+{% block title %}Quick forms{% endblock %}
+
+{% block left %}
+<div class="module">
+	<h2>All Keywords</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Keyword</th>
+				<th scope="col">Form</th>
+				<th scope="col">Actions</th>
+			</tr>
+		</thead>
+		<tbody>{% if keywords %}{% for keyword in keywords %}
+			<tr>
+				<td>{% if keyword.word %}{{ keyword.word }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+				<td><a href="/keyword/{{ keyword.pk }}/form"{% if keyword.form %}>{{ keyword.form }}{% else %}<a href="keyword/{{ keyword.pk }}/form/add" class="add">Add form</a>{% endif %}</a></td>
+				{% if keyword.actions %}
+                                        {% for action in keyword.actions %}
+                                            <td>{{ keyword.word }}</td>
+                                        {% endfor %}
+                                    {% else %}
+                                        <td><span class="na"><a href="/keyword/{{ keyword.pk }}/action/add" class="add">Add action</a></span></td>
+                                    {% endif %}
+                                {% if keyword.form %}
+                                    <tr>{% for field in keyword.form.fields %}
+                                        <td></td>
+                                        <td>{{ field.title }}</td>
+                                    {% endfor %}</tr>
+                                {% endif %}
+                                {% if keyword.form.entries %}
+                                    {% for entry in keyword.form.entries %}
+                                        <tr><td>{{ entry.date }}</td>
+                                            {% for field in entry.entries %}
+                                                <td>{{ field.data }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+			</tr>{% endfor %}{% else %}
+			<tr class="no-data">
+				<td colspan="3">
+					No keywords Yet.
+					<a href="/keyword/add" class="add">
+						Add a Keyword
+					</a>
+				</td>
+			</tr>{% endif %}
+		</tbody>
+	</table>
+	<div class="toolbar">
+		<a href="/keyword/add" class="add">Add a Keyword</a>
+	</div>
+</div>
+{% endblock %}
+
