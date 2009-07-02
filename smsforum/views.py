@@ -7,6 +7,7 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 
 from rapidsms.webui.utils import *
 from apps.smsforum.models import *
@@ -176,6 +177,7 @@ def member(req, pk, template="smsforum/member.html"):
     context['member'] = contact
     return render_to_response(req, template, context)
 
+@login_required
 def edit_village(req, pk, template="smsforum/edit.html"):
     context = {}
     form = get_object_or_404(Village, id=pk)
@@ -186,6 +188,7 @@ def edit_village(req, pk, template="smsforum/edit.html"):
     context['title'] = _("Edit Village")
     return render_to_response(req, template, context)
     
+@login_required
 def edit_member(req, pk, template="smsforum/edit.html"):
     context = {}
     contact = get_object_or_404(Contact, id=pk)
