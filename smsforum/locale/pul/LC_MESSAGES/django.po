@@ -16,7 +16,7 @@ msgstr ""
 
 #: app.py:158
 msgid "join"
-msgstr "naalde"
+msgstr "naatde"
 
 msgid "name"
 msgstr "yettoode"
@@ -32,7 +32,7 @@ msgid "language"
 msgstr "langage"
 
 msgid "help"
-msgstr "aide"
+msgstr "dallal"
 # as in 'help me use this sms system'
 
 msgid "create"
@@ -59,7 +59,7 @@ msgstr "citoyens"
 # exception caught somewhere in processing, nothing
 # really to do!
 msgid "internal-error"
-msgstr "ERROR: Yaafo won cadeele ngonde. A jaaraama nde ngetoto - daa Kadi."
+msgstr "ERROR: Yaafo ina waåi caåeele . A jaaraama nde ngetoto - åaa Kaåi."
 #msgstr "Désolé, il y a eu un problème. Merci d'enayer à nouveau plus tard" 
 
 # used for placeholder in help messages--e.g.
@@ -74,7 +74,7 @@ msgstr "yaafo mi heptinaani nokku o yaafo seeda"
 # system does not know requested village.
 # 'suggested' is a list of known villages to suggest to the user
 msgid "village-not-found %(suggested)s"
-msgstr "yaafo mi heptinaani nokku o yaafo seeda, mbinnde # naatde, e %(suggested)s"
+msgstr "Yaafo mi heptinaani nokku o yaafo seeåa, mbinnde #naatde, e  %(suggested)s"
 #msgstr "Désolé, je ne reconnais pas cet endroit. Est-ce que vous pensez de l'un de ceci? %(suggested)s"
 
 msgid "command-not-understood"
@@ -86,12 +86,12 @@ msgid "command-not-understood %(sug_1)s %(sug_rest)s"
 msgstr "Désolé, je ne peux pas comprendre cet ordre. Est-ce que vous voulez dire: %(sug_1)s ou %(sug_rest)s?"
 
 msgid "blast-fail_message-too-long %(msg_len)d %(max_latin)d %(max_unicode)d"
-msgstr "Yaafo _ eewnaango ngo na wadi. Teemedere e cappande nay %(max_latin)d alkule e limooje. A jaaraana nde ndabindin Taa nuldaa Kadi."
+msgstr "Yaafo, oo kaøaaru ina juuti. %(max_chars)d. A jaaraana nde nåaøinåintaa tee nulåaa kaåi."
 #msgstr "Désolé, ce message fait plus de %(max_chars)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 #: app.py:204
 msgid "blast-fail_not-member-of-any-village"
-msgstr "yaafo - njokkondir e sahre nde gila a nuldaani message. Mbinnde #naatde [le nom]"
+msgstr "Yaafo - njokkondiree e sahre nde gila on nulåaani kabaaru. Mbinnåee #naatåe e nom de communaute e [le nom]"
 #msgstr "SVP, rejoignez une communauté avant d'envoyer un message. Escrivez # entrer puis 'nom de village'"
 
 #: app.py:214
@@ -100,7 +100,7 @@ msgid  "blast-message_outgoing %(text)s %(recipients)s %(sender)s"
 msgstr "%(text)s - %(sender)s"
 
 msgid "blast-acknowledge %(text)s %(recipients)s"
-msgstr "Miu njettiima, mesaaj ma nawaama to sahre to '%(recipients)s'"
+msgstr "nulåu feewåe e '%(recipients)s'"
 #msgstr "Votre message a été envoyé à: %(recipients)s"
 
 # when 'citizens' command is sent with no village
@@ -125,7 +125,7 @@ msgid "create-village-fail_name-too-long %(village)s %(max_char)d"
 msgstr "Désolé, ce nom fait plus de %(max_char)d caractères. Merci de le reccourcir et de l'envoyer à nouveau."
 
 msgid "create-village-success %(village)s"
-msgstr "Sahre nde sinica koe %(village)s"
+msgstr "Sahre nåe sinicaa ko %(village)s"
 #msgstr "La communauté %(village)s a été créée"
 
 msgid "direct-blast-acknowledge %(text)s %(recipient)s"
@@ -165,22 +165,22 @@ msgid "inbound-message_rejected"
 msgstr "Vous ne pouvez pas envoyer les messages. Vous n'avez pas le permission d'envoyer."
 
 msgid "join-success %(village)s"
-msgstr "a Jaaraama nde njukku - da e Sahre nde '%(village)s' - bienvenue!"
+msgstr "a Jaaraama nåe tawtu - åaa e Sahre nåe '%(village)s' - Bisimilla!"
 #msgstr "Merci d'avoir rejoint la communauté '%(village)s' - bienvenue!"
 
 #: app.py:279
 msgid "language-set-fail_code-not-understood %(langs)s"
-msgstr "Kod O ngam waylude demngal heptinaaka. A Jaaraama nde ngeto_daa Kadi. %(langs)s"
+msgstr "Koå o ngam wayluåe åemngal ngal heptinaaka. A Jaaraama nde ngeto-daa kadi. %(langs)s"
 #msgstr "Le code pour changer de langue n'est pas reconnu. Merci d'envoyer à nouveau"
 #msgstr "Vous pouvez utiliser un des langues suivants: %(langs)s"
 
 msgid "language-set-success %(lang)s"
-msgstr "Demngal ngal cubiola ko  %(lang)s."
+msgstr "Åemngal ngal cuøi- daa  ko %(lang)s."
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
 #: app.py:248
 msgid "leave-success %(villages)s"
-msgstr "On ngummiima to sahre '%(villages)s' haa nalnde wodnde"
+msgstr "On ngiwii to sahre to '%(village)s' haa nalnde woånde"
 #msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 msgid "leave-fail_village-not-found %(village)s"
@@ -193,7 +193,8 @@ msgstr "O woodaaka hay sahre e oo dumunna So a yidii heptaademin mbinndee # naat
 # when 'member' command sent by user who is not member of
 # any village
 msgid "member-fail_not-member-of-village"
-msgstr "Vous n'etes pas parti d'aucune communauté"
+msgstr "On njeyaaka e hay sahre wootere oo åumunna So on njiåii hebde min møinndee #naatde e innde share nåe"
+#msgstr "Vous n'etes pas parti d'aucune communauté"
 
 # successful response to 'member' command
 msgid "member-success %(village_names)s"
@@ -204,7 +205,7 @@ msgid "member-success_long-list %(village_names)s"
 msgstr "Vous etes membre des communautés suivants: %(village_names)s et de plus"
 
 msgid "name-register-success %(name)s"
-msgstr "No pinda x A jaaraama nde mbinndu - da innde. Maafeenoy e Kala sahaa mbo nuldudon eewnaango."
+msgstr "Jam waali %(name)s. A jaaraama nåe møinndu - åaa innåe. Maa feeñoy e kala nåe  nulåu-åon kaøaaruuji."
 #msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "name-register-fail_name-too-long %(name)s %(max_char)d"
