@@ -87,6 +87,7 @@ class App(rapidsms.app.App):
         self.cmd_targets = [ 
             # Pulaar
             ('naalde', {'lang':'pul','func':self.join}),
+            ('naatde', {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
             ('yaltude', {'lang':'pul','func':self.leave}),
             ('help-pul', {'lang':'pul','func':self.help}),
