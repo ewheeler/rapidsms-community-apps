@@ -6,6 +6,7 @@ from django.conf.urls.defaults import *
 import apps.smsforum.views as views
 
 urlpatterns = patterns('',
+    url(r'^$',                               views.index),
     url(r'^villages$',                       views.index),
     url(r'^village/(?P<pk>\d+)$',            views.members),
     url(r'^village/add$',                    views.add_village),

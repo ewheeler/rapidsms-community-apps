@@ -6,7 +6,8 @@
 <div class="split">
 
 {% if blast_messages %}
-<div class="left">
+<!-- TODO: put style in stylesheet -->
+<div class="left" style="width:70%">
 <div class="module">
     <h2>{% trans "Content Messages" %}</h2>
     <form action="" method="POST">
@@ -43,7 +44,7 @@
                           {% ifnotequal message.code.id code.id %}
                               <option value={{ code.id }}>{{ code.slug }}                           
                           {% else %}
-                              <option value={{ code.id }} selected="selected">{{ code.name }}                             
+                              <option value={{ code.id }} selected="selected">{{ code.slug }}                             
                           {% endifnotequal %}
                       {% endfor %}
                     </select>
@@ -73,7 +74,8 @@
 {% endif %}
 
 {% if cmd_messages %}
-<div class="right">
+<!-- TODO: put style in stylesheet -->
+<div class="right" style="width:30%" >
 <div class="module">
     <h2>{% trans "Control Messages" %}</h2>
     <form action="" method="POST">
