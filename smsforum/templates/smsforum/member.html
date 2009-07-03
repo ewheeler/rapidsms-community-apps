@@ -10,9 +10,14 @@
 	<table>
 		<thead>
 			<tr>
-				<th scope="col">{% trans "Given Name" %}</th>
-				<th scope="col">{% trans "Family Name" %}</th>
-                <th scope="col">{% trans "Phone Number" %}</th>
+                {% if user.is_staff %}
+					<th scope="col">{% trans "Common Name" %}</th>
+					<th scope="col">{% trans "Given Name" %}</th>
+					<th scope="col">{% trans "Family Name" %}</th>
+	                <th scope="col">{% trans "Phone Number" %}</th>
+	            {% else %}
+					<th scope="col">{% trans "ID" %}</th>
+				{% endif %}
 				<th scope="col">{% trans "Gender" %}</th>
                 <th scope="col">{% trans "Age" %}</th>
                 <th scope="col">{% trans "Messages Sent This Week" %}</th>
@@ -21,9 +26,14 @@
 		<tbody>
 			<tr>
                 <!--  TODO: COME BACK AND FIX THIS -->
-                <td><a href="/member/edit/{{ member.pk }}"{% if member.given_name %}>{{ member.given_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
-				<td>{% if member.family_name %}{{ member.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if user.is_staff %}
+	                <td><a href="/member/edit/{{ member.pk }}"{% if member.common_name %}>{{ member.common_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+					<td>{% if member.given_name %}{{ member.given_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+					<td>{% if member.family_name %}{{ member.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+	                <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+	            {% else %}
+					<td>{{ member.pk }}</td>
+				{% endif %}
                 <td>{% if member.gender %}{{ member.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.age %}{{ member.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count %}{{ member.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
@@ -33,6 +43,7 @@
 </div>
 <br/>
 
+<!-- Not implemented yet
 {% if member.phone_number %}
 <form id="send" method="post">
 <h2>Send a message to {{ member.signature }}</h2>
@@ -42,6 +53,8 @@
     </div>
 </form>
 {% endif %}
+ -->
+    
     
 {% include 'smsforum/partials/messages.html' %}
 {% endblock %}

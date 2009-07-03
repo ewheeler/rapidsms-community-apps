@@ -10,9 +10,14 @@
 	<table>
 		<thead>
 			<tr>
-				<th scope="col">{% trans "Given Name" %}</th>
-				<th scope="col">{% trans "Family Name" %}</th>
-                <th scope="col">{% trans "Phone Number" %}</th>
+                {% if user.is_staff %}
+					<th scope="col">{% trans "Common Name" %}</th>
+					<th scope="col">{% trans "Given Name" %}</th>
+					<th scope="col">{% trans "Family Name" %}</th>
+	                <th scope="col">{% trans "Phone Number" %}</th>
+	            {% else %}
+					<th scope="col">{% trans "ID" %}</th>
+				{% endif %}
 				<th scope="col">{% trans "Gender" %}</th>
                 <th scope="col">{% trans "Age" %}</th>
                 <!-- TODO: fix this
@@ -22,9 +27,14 @@
 		</thead>
 		<tbody>{% if members.object_list %}{% for member in members.object_list %}
 			<tr>
-                <td><a href="/member/{{ member.pk }}"{% if member.given_name %}>{{ member.given_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
-				<td>{% if member.family_name %}{{ member.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if user.is_staff %}
+	                <td><a href="/member/{{ member.pk }}"{% if member.common_name %}>{{ member.common_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+					<td>{% if member.given_name %}{{ member.given_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+					<td>{% if member.family_name %}{{ member.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+	                <td>{% if member.phone_number %}{{ member.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+	            {% else %}
+					<td><a href="/member/{{ member.pk }}">{{ member.pk }}</a></td>
+				{% endif %}
                 <td>{% if member.gender %}{{ member.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.age %}{{ member.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <!--  TODO: fix this
@@ -32,15 +42,23 @@
                  -->
 			</tr>{% endfor %}
             <tr>
-                <td colspan="3">
-                    <a href="/village/{{village.id}}/member/add" class="add">
-                        {% trans "Add a Member" %}
-                    </a>
+                {% if user.is_staff %}
+	                <td colspan="6">
+	            {% else %}
+    	            <td colspan="3">
+				{% endif %}
+	                    <a href="/village/{{village.id}}/member/add" class="add">
+	                        {% trans "Add a Member" %}
+	                    </a>
                 </td>
             </tr>
 			{% else %}
 			<tr class="no-data">
-				<td colspan="3">
+                {% if user.is_staff %}
+	                <td colspan="6">
+	            {% else %}
+    	            <td colspan="3">
+				{% endif %}
 					{% trans "No members yet" %}
 					<a href="/village/{{village.id}}/member/add" class="add">
 						{% trans "Add a Member" %}
@@ -50,15 +68,21 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3">
+                {% if user.is_staff %}
+	                <td colspan="6">
+	            {% else %}
+    	            <td colspan="3">
+				{% endif %}
 					{% paginator members %}
 				</td>
 			</tr>
 		</tfoot>
 	</table>
-	<div class="toolbar">
-		<a href="/village/edit/{{ village.id }}" class="add">{% trans "Edit Village" %}</a>
-	</div>
+    {% if user.is_staff %}
+	   	<div class="toolbar">
+			<a href="/village/edit/{{ village.id }}" class="add">{% trans "Edit Village" %}</a>
+		</div>
+	{% endif %}
 </div>
 {% include 'smsforum/partials/messages.html' %}
 {% endblock %}
