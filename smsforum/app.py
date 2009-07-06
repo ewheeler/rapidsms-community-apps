@@ -90,7 +90,7 @@ class App(rapidsms.app.App):
             ('naatde', {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
             ('yaltude', {'lang':'pul','func':self.leave}),
-            ('help-pul', {'lang':'pul','func':self.help}),
+            ('dallal', {'lang':'pul','func':self.help}),
             # Wolof
             ('boole', {'lang':'wol','func':self.join}),
             ('yokk', {'lang':'wol','func':self.join}),
@@ -98,7 +98,7 @@ class App(rapidsms.app.App):
             ('genn', {'lang':'wol','func':self.leave}),
             ('sant', {'lang':'wol','func':self.register_name}),
             ('tur', {'lang':'wol','func':self.register_name}),
-            ('help-wol', {'lang':'wol','func':self.help}),
+            ('ndimbal', {'lang':'wol','func':self.help}),
             # Dyuola    
             ('unoken', {'lang':'dyu','func':self.join}),
             ('ounoken', {'lang':'dyu','func':self.join}),
