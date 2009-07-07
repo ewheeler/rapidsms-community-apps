@@ -39,11 +39,11 @@ CMD_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'\s*(\S+)?(.+)?',re.IGNOREC
 # Mutable globals hack 'cause Python module globals are WHACK
 _G = { 'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
-        'pul':u'Pulaar',
-        'wol':u'Wolof',
-        'dyu':u'Joola',
-        'fr':u'Français',
-        'en':u'English',
+        'pul':['Pulaar'],
+        'wol':['Wolof'],
+        'dyu':['Diola','Dyula','Dioula','Joola'],
+        'fr':[u'Français'],
+        'en':['English'],
     },
       'DEFAULT_LANG':'fr',
       'TRANSLATORS':dict()
@@ -130,7 +130,7 @@ class App(rapidsms.app.App):
         self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
         # swap dict so that we send in (name,code) tuples rather than (code,name
         self.lang_matcher=BestMatch([
-                (name,code) for code,name in _G['SUPPORTED_LANGS'].items()
+                (names,code) for code,names in _G['SUPPORTED_LANGS'].items()
                 ])
         
         """ TODO: move this to fixture - just for testing right now! """
@@ -643,7 +643,7 @@ class App(rapidsms.app.App):
         
         def _return_all_langs():
             # return available langs
-            langs_sorted=_G['SUPPORTED_LANGS'].values()
+            langs_sorted=[l[0] for l in _G['SUPPORTED_LANGS'].values()]
             langs_sorted.sort()
             rsp=_st(msg.sender, "language-set-fail_code-not-understood %(langs)s") % \
                 { 'langs':', '.join(langs_sorted)}
