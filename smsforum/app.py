@@ -86,26 +86,19 @@ class App(rapidsms.app.App):
         # could also do the hasattr thing when calling instead
         self.cmd_targets = [ 
             # Pulaar
-            ('naalde', {'lang':'pul','func':self.join}),
-            ('naatde', {'lang':'pul','func':self.join}),
+            (['naalde', 'naatde'], {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
             ('yaltude', {'lang':'pul','func':self.leave}),
             ('dallal', {'lang':'pul','func':self.help}),
             # Wolof
-            ('boole', {'lang':'wol','func':self.join}),
-            ('yokk', {'lang':'wol','func':self.join}),
-            ('duggu', {'lang':'wol','func':self.join}),
+            (['boole', 'yokk', 'duggu'], {'lang':'wol','func':self.join}),
             ('genn', {'lang':'wol','func':self.leave}),
-            ('sant', {'lang':'wol','func':self.register_name}),
-            ('tur', {'lang':'wol','func':self.register_name}),
+            (['sant', 'tur'], {'lang':'wol','func':self.register_name}),
             ('ndimbal', {'lang':'wol','func':self.help}),
             # Dyuola    
-            ('unoken', {'lang':'dyu','func':self.join}),
-            ('ounoken', {'lang':'dyu','func':self.join}),
-            ('karees', {'lang':'dyu','func':self.register_name}),
-            ('karess', {'lang':'dyu','func':self.register_name}),
-            ('upur', {'lang':'dyu','func':self.leave}),
-            ('oupour', {'lang':'dyu','func':self.leave}),
+            (['unoken', 'ounoken'], {'lang':'dyu','func':self.join}),
+            (['karees', 'karees'], {'lang':'dyu','func':self.register_name}),
+            (['upur', 'oupour'], {'lang':'dyu','func':self.leave}),
             ('rambenom', {'lang':'dyu','func':self.help}),
             ('ukaana', {'lang':'dyu','func':self.createvillage}),
             # Debug calls ('deb' language==debug)
@@ -119,9 +112,7 @@ class App(rapidsms.app.App):
             ('nom', {'lang':'fr','func':self.register_name}),
             ('quitter', {'lang':'fr','func':self.leave}),
             ('aide', {'lang':'fr','func':self.help}),
-            # TODO: make best matcher smart about accents...
-            ('créer', {'lang':'fr','func':self.createvillage}),
-            ('creer', {'lang':'fr','func':self.createvillage}),
+            ([u'créer', 'creer'], {'lang':'fr','func':self.createvillage}),
             # English
             ('join', {'lang':'en','func':self.join}),
             ('name', {'lang':'en','func':self.register_name}),
