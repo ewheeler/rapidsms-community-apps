@@ -37,18 +37,51 @@ CMD_MESSAGE_MATCHER = re.compile(ur'^\s*'+CMD_MARKER+'\s*(\S+)?(.+)?',re.IGNOREC
 #
 
 # Mutable globals hack 'cause Python module globals are WHACK
-_G = { 'SUPPORTED_LANGS': {
+_G = { 
+    'SUPPORTED_LANGS': {
         # 'deb':u'Debug',
         'pul':['Pulaar'],
         'wol':['Wolof'],
         'dyu':['Diola','Dyula','Dioula','Joola'],
         'fr':[u'Français'],
         'en':['English'],
-    },
-      'DEFAULT_LANG':'fr',
-      'TRANSLATORS':dict()
-}
+        },
+    'TRANSLATORS':dict(),
+    'DEFAULT_LANG':'fr',
+    'ADMIN_CMD_PWD': None
+    }
 
+#####################
+# Helpful Decorator #
+#####################
+
+def passwordProtectedCmd(f):
+    """
+    Password protect command calls.
+
+    NOTE: only works within this module as
+    depends on global config
+
+    """
+    def pwd_protected_f(*args, **kwargs):
+        print "HERE"
+        if _G['ADMIN_CMD_PWD'] != None:
+            cmd_string = kwargs.pop('arg').strip()
+            msg = args[1] # args[0] is the app object
+            pwd,sp,rest = cmd_string.partition(' ')
+            if pwd.strip() != _G['ADMIN_CMD_PWD']:
+                msg.sender.send_response_to(
+                    _st(msg.sender, 'admin-cmd-fail_pwd-incorrect')
+                    )
+                return True
+            
+            kwargs['arg'] = rest.strip()
+        return f(*args, **kwargs)
+    return pwd_protected_f
+
+########
+# i18n #
+########
 def __init_translators():
     path = os.path.join(os.path.dirname(__file__),"locale")
     for lang,name in _G['SUPPORTED_LANGS'].items():
@@ -141,7 +174,17 @@ class App(rapidsms.app.App):
         f = CodeSet.objects.get_or_create(name="FLAGGED_CODE")[0]
         Code.objects.get_or_create(set=f, name="flagged", slug="True")
 
+    def configure(self, **kwargs):
+        try:
+            _G['DEFAULT_LANG'] = kwargs.pop('default_lang')
+        except:
+            pass
 
+        try:
+            _G['ADMIN_CMD_PWD'] = kwargs.pop('admin_cmd_pwd')
+        except:
+            pass
+     
     def start(self):
         self.__loadFixtures()
     
@@ -206,7 +249,7 @@ class App(rapidsms.app.App):
             return True
         else:
             cmd=cmd.strip()
-        
+
         if rest is not None:
             rest=rest.strip()
 
@@ -263,6 +306,7 @@ class App(rapidsms.app.App):
         self.__reply(msg, "help-with-commands")
         return True
 
+    @passwordProtectedCmd
     def createvillage(self, msg, arg=None):
         self.debug("SMSFORUM:CREATEVILLAGE")        
         if arg is None or len(arg)<1:
@@ -311,6 +355,7 @@ class App(rapidsms.app.App):
             self.__reply(msg,rsp)
         return True
 
+    @passwordProtectedCmd
     def community_members(self,msg,arg=None):
         if arg is None or len(arg)==0:
             self.__reply(msg, "citizens-fail_no-village")
@@ -333,6 +378,7 @@ class App(rapidsms.app.App):
             self.__reply(msg, txt, {'village':name, 'citizens':','.join(members)})
         return True
 
+    @passwordProtectedCmd
     def destroy_community(self,msg,arg=None):
          if arg is None or len(arg)==0:
             self.__reply(msg, "remove-fail_no-village")
@@ -439,7 +485,6 @@ class App(rapidsms.app.App):
         like handle in the field used for the match.
         
         """
-
         contacts=[(c.common_name, c) for c in Contact.objects.all()]
         cont_matcher=BestMatch(targets=contacts)
         found=MultiMatch(self.village_matcher,cont_matcher).\
