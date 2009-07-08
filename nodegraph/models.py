@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 
 from django.db import models
@@ -7,10 +7,10 @@ from django.db import models
 # 
 # A data model for simple interconnected graphs of nodes.
 #
-# There are two types of nodes: Sets and Leaves.
+# There are two types of nodes: Sets and Nodes.
 #
 # The only distinction is:
-# - Sets may contain other nodes (both Sets and Leaves)
+# - Sets may contain other nodes (both Sets and Nodes)
 # - Leaves may _not_ contain other nodes (they terminate the graph)
 #
 # Speaking concretely, A graph of Nodes can represent GROUPS of USERS where:
@@ -41,11 +41,22 @@ class AbstractNode(models.Model):
     """
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
+    @property
+    def as_set(self):
+        """Helper to tell if a Node is in fact a NodeSet"""
+        if hasattr(self,'children'):
+            return self
 
+        ns = self._downcast(klass=NodeSet)
+        if isinstance(ns, NodeSet):
+            return ns
+        return None
+    
     def get_ancestors(self,max_alt=None,klass=None):
-        """max_alt=None means no limit
+        """
+        max_alt=None means no limit
         
-           if 'klass' is a Class, downcast results
+        if 'klass' is a Class, downcast results
 
         """
         seen=set()
@@ -54,22 +65,17 @@ class AbstractNode(models.Model):
             max_alt=int(max_alt)
             if max_alt<1:
                 return
-            max_alt
             
         def _recurse(node,alt):
-            if node is None or \
-                    (max_alt is not None and alt>max_alt) or \
-                    node in seen:
-                print "done"
+            if max_alt is not None and alt==max_alt:
                 return
 
-            seen.add(node)
             for a in node.get_parents():
+                seen.add(a)
                 _recurse(a,alt+1)
 
 
         _recurse(self,0)
-        seen.remove(self)
         ret=None
         if klass is not None:
             ret = [r._downcast(klass) for r in seen]
@@ -86,45 +92,61 @@ class AbstractNode(models.Model):
         Downcasted to 'klass' if provided (see downcast() for more info)
 
         """
-        rents=self.parents.all()
+        rents=self._parents.all()
         if klass is not None:
             return [r._downcast(klass) for r in rents]
         else:
             return rents
 
-    def __unicode__(self):
-        return self.debug_id
+    @property
+    def parents(self):
+        return self.get_parents()
+        
+    def add_to_parent(self,rent):
+        rent.add_children(self)
 
+    def add_to_parents(self,*rents):
+        for rent in rents:
+            self.add_to_parent(rent)
+
+    def remove_from_parent(self,rent):
+        rent.remove_children(self)
+
+    def remove_from_parents(self,*rents):
+        for rent in rents:
+            self.remove_from_parent(rent)
+            
     def _downcast(self, klass):
-        """Multiple-inherited models are weird.
-           If you access a subclass from a superclass manager, you
-           get an object of superclass type.
+        """
+        Multiple-inherited models are weird.
+        If you access a subclass from a superclass manager, you
+        get an object of superclass type.
 
-           E.g. You do aNone=Node.objects.all()[0], you will get Node classes
-           even if the actual object is a subclass like a Contact.
+        E.g. You do aNone=Node.objects.all()[0], you will get Node classes
+        even if the actual object is a subclass like a Contact.
 
-           The 'contact' object will be availble as aNode.contact
+        The 'contact' object will be availble as aNode.contact
 
-           This method, given a target Class, will return the properly typed
-           subclass.
+        This method, given a target Class, will return the properly typed
+        subclass.
 
-           Usage example: aWorker=aNode.downcast(Worker)
+        Usage example: aWorker=aNode.downcast(Worker)
 
-           NOTE: If the object is not fully downcastable, it
-           casts as far as possible, so return values may be of
-           differing types.
-
-           Take this obj map where '<' means inherits from:
-           d<c<b<a
-
-           If you have a set of objects (d,c,b,a), all know as 'a' type, and
-           you downcast to 'd', the resulting list will be typed (d,c,b,a)
-
-           NOTE2: PROBABLY WONT WORK WITH MULTIPLE INHERITENCE!! SO
-           DON'T USE IT, IT'S DUMB ANYWAY. YOU _REALLY_ WANT duck-typing OR
-           delegation OR component model instead.
-
-           """
+        NOTE: If the object is not fully downcastable, it
+        casts as far as possible, so return values may be of
+        differing types.
+        
+        Take this obj map where '<' means inherits from:
+        d<c<b<a
+        
+        If you have a set of objects (d,c,b,a), all know as 'a' type, and
+        you downcast to 'd', the resulting list will be typed (d,c,b,a)
+        
+        NOTE2: PROBABLY WONT WORK WITH MULTIPLE INHERITENCE!! SO
+        DON'T USE IT, IT'S DUMB ANYWAY. YOU _REALLY_ WANT duck-typing OR
+        delegation OR component model instead.
+        
+        """
         # what class do I think I am?
         # e.g. 'Node'
         self_cname=self.__class__.__name__
@@ -151,49 +173,11 @@ class AbstractNode(models.Model):
             else:
                 break
         return casted
-        
-    class Meta:
-        abstract=True
-
-
-class Node(AbstractNode):
-    """
-    Abstract representation of a Node in the graph.
     
-    Contains common properties of Set and Leaf.
-    
-    """
 
-    # helpers 'cause directionality can be confusing
-    def add_to_parent(self,rent):
-        rent.add_children(self)
+class NodeSet(Node):
+    _children = models.ManyToManyField(Node,related_name='_parents')
 
-    def add_to_parents(self,*rents):
-        for rent in rents:
-            self.add_to_parent(rent)
-
-    def remove_from_parent(self,rent):
-        rent.remove_children(self)
-
-    def remove_from_parents(self,*rents):
-        for rent in rents:
-            self.remove_from_parent(self)
-
-
-class NodeSet(AbstractNode):
-    """
-    A node that has 'members', which is a set of nodes this node points too. 
-    Named 'NodeSet' to distinguish from python type 'set'
-
-    Because of awkwardness in mapping Python inheritence to SQL, need
-    to hold 'Nodes' and 'NodeSets' in separate lists, but provide helpers
-    to make this invisible to user.
-
-    """
-
-    _childsets = models.ManyToManyField('self',related_name='parents',symmetrical=False)
-    _childleaves = models.ManyToManyField(Node,related_name='parents') 
-    
     def __unicode__(self):
         """
         Prints the graph starting at this instance.
@@ -211,53 +195,32 @@ class NodeSet(AbstractNode):
 
         buf=list()
         seen=set()
-        def _recurse(node, index):
+        def _recurse(node, index):            
             if index>0:
                 buf.append(u',')
 
-            if node in seen:
-                buf.append(u'*%s' % node.debug_id)
-                return
-
-            seen.add(node)
-            buf.append(u'%s(' % node.debug_id)
-            index=0
-            for sub in node.childsets:
-                _recurse(sub,index)
-                index+=1
-
-            leaves=u','.join([unicode(l) for l in node.childleaves])
-            if len(leaves)>0:
-                if index>0:
-                    buf.append(u',')
-                buf.append(u'%s)' % leaves)
+            ns = node.as_set
+            if ns is not None:
+                # it's a nodeset
+                if ns in seen:
+                    buf.append(u'*%s' % ns.debug_id)
+                    return
+                else:
+                    seen.add(ns)
+                    buf.append(u'%s(' % ns.debug_id)
+                    i=0
+                    for sub in ns.children:
+                        _recurse(sub,i)
+                        i+=1
+                    buf.append(u')')
+            else:
+                # it's a node
+                buf.append(u'%s' % node.debug_id)
 
         _recurse(self,0)
 
         return u''.join(buf)
 
-    #
-    # helpers because directionality is confusing
-    #
-    def add_to_parent(self,rent):
-        rent.add_children(self)
-
-    def add_to_parents(self,*rents):
-        """
-        Add this instance to the listed groups
-
-        """
-        for rent in rents:
-            self.add_to_parent(rent)
-
-    def remove_from_parent(self,rent):
-        rent.remove_children(self)
-
-    def remove_from_parents(self,*rents):
-        for rent in rents:
-            self.remove_from_parent(rent)
-
-    # safe to use, but calls above should be sufficient
     def add_children(self,*sub_nodes):
         """
         Add the passed nodes to this instance as 'subnodes'
@@ -266,36 +229,24 @@ class NodeSet(AbstractNode):
         
         """
         for n in sub_nodes:
-            # distinguish between Nodes and NodeSets
-            if isinstance(n, Node):
-                self._childleaves.add(n)
-            elif isinstance(n, NodeSet):
-                self._childsets.add(n)
+            self._children.add(n)
 
     def remove_children(self, *subnodes):
         for n in subnodes:
-
-            # distinguish between Nodes and NodeSets
-            if isinstance(n, Node):
-                self._childleaves.remove(n)
-            elif isinstance(n, NodeSet):
-                self._childsets.remove(n)
+            self._children.remove(n)
+        
+    def get_children(self, klass=None):
+        childs = self._children.all()
+        if klass is not None:
+            return [c._downcast(klass) for c in childs]
+        else:
+            return childs
 
     # and some shortcut properties
-    def __getchildsets(self):
+    def __get_children(self):
         """All the direct sub-NodeSets"""
-        return self._childsets.all()
-    childsets=property(__getchildsets)
-
-    def __getchildleaves(self):
-        """All the direct sub-Nodes"""
-        return self._childleaves.all()
-    childleaves=property(__getchildleaves)
-
-    def __getchildren(self):
-        """A list of both the sub-NodeSets and sub-Nodes"""
-        return self.childsets+self.childleaves
-    children=property(__getchildren)
+        return self.get_children()
+    children=property(__get_children)
 
     # full graph access methods
     def flatten(self, max_depth=None,klass=None):
@@ -316,25 +267,24 @@ class NodeSet(AbstractNode):
                 return leaves # empty set
 
         # recursive function to do the flattening
-        def _recurse(nodeset, depth):
+        def _recurse(node, depth):
             # check terminating cases
             # - node is None (shouldn't happen but why not be safe?)                        
             # - reached max_depth
             # - seen this guy before (which breaks any cycles)
-            if nodeset is None or \
-                    (max_depth is not None and depth==max_depth) or \
-                    nodeset in seen:
+            ns = node.as_set
+            if (max_depth is not None and depth>max_depth) or \
+                    ns in seen: 
                 return
             
-            # ok, it's a valid nodeset, add to seen
-            seen.add(nodeset)
-            
-            # add its childleaves to 'leaves'
-            leaves.update(nodeset.childleaves)
-
-            # recurse to its childsets
-            for ns in nodeset.childsets:
-                _recurse(ns, depth+1)
+            if ns is not None:
+                seen.add(ns)
+                # recurse to its childsets
+                for n in ns.children:
+                    _recurse(n, depth+1)
+            else:
+                # add it to leaves
+                leaves.add(node)
                 
         # Now call recurse
         _recurse(self, 0)
@@ -345,5 +295,3 @@ class NodeSet(AbstractNode):
             return [l._downcast(klass) for l in leaves]
         else:
             return list(leaves)
-
-

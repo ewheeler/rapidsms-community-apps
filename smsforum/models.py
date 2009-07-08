@@ -4,6 +4,7 @@
 from django.db import models
 from apps.locations.models import Location
 from apps.nodegraph.models import NodeSet
+from apps.contacts.models import Contact
 
 
 class Village(NodeSet):
@@ -99,10 +100,7 @@ class Village(NodeSet):
     sec_pwd_protect_blast = property(__get_sec_admin_cmds_pwd_protected, \
                                __set_sec_admin_cmds_pwd_protected)
 
-    def __unicode__(self):
-        return unicode(self.name)
-
-"""
+'''
 class VillageName(models.Model):
     name = models.CharField(max_length=255, blank=False)
     primary = models.BooleanField(default=False)
@@ -110,7 +108,7 @@ class VillageName(models.Model):
 
     class Meta:
         unique_together = ('village', 'name')
-"""
+'''
 
 class Community(Village):
     pass
