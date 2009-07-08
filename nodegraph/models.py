@@ -28,9 +28,9 @@ from django.db import models
 # 
 #
 
-class AbstractNode(models.Model):
+class Node(models.Model):
     """
-    Abstract superclass for Nodes and NodeSets
+    Represents a Node in a cyclic graph. Superclass to NodeSet
 
     """
 
@@ -41,6 +41,9 @@ class AbstractNode(models.Model):
     """
     debug_id = models.CharField(max_length=16,blank=True,null=True)
     
+    def __unicode__(self):
+        return u'%s' % self.debug_id
+
     @property
     def as_set(self):
         """Helper to tell if a Node is in fact a NodeSet"""
@@ -67,15 +70,17 @@ class AbstractNode(models.Model):
                 return
             
         def _recurse(node,alt):
-            if max_alt is not None and alt==max_alt:
+            if (max_alt is not None and alt>max_alt) or \
+                    node in seen:
                 return
-
+            else:
+                seen.add(node)
+                
             for a in node.get_parents():
-                seen.add(a)
                 _recurse(a,alt+1)
 
-
         _recurse(self,0)
+        seen.remove(self)
         ret=None
         if klass is not None:
             ret = [r._downcast(klass) for r in seen]

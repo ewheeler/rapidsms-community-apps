@@ -57,7 +57,6 @@ class TestApp (TestScript):
         self.w_nodes = [_user(n) for n in self.w_names]
         self.girl_nodes = [_user(n) for n in self.girl_names]
         self.boy_nodes = [_user(n) for n in self.boy_names]
-        
         self.m_group = _group('men',*self.m_nodes)
         self.w_group = _group('women',*self.w_nodes)
         self.g_group = _group('girls',*self.girl_nodes)
@@ -102,6 +101,7 @@ class TestApp (TestScript):
         
     def test01BasicNodeAndNodeSet(self):
         print
+        print "BASIC NODE and SET TESTS"
         print 'Create Node'
         n1 = _user('Node01')
         print 'Create NodeSet'
@@ -163,6 +163,8 @@ class TestApp (TestScript):
             n.delete()
 
     def test02FlattenTests(self):
+        print
+        print "FLATTEN TESTS"
         print 'Simple 1-level flatten'
         self.assertTrue(set(self.b_group.flatten())==set(self.boy_nodes))
         print 'Two level flatten'
@@ -174,6 +176,8 @@ class TestApp (TestScript):
                         set(self.m_nodes))
 
     def test03Ancestors(self):
+        print
+        print "ANCESTOR TESTS"
         print 'Test of 1-level high ancestor chain'
         self.assertTrue(
             set(self.boy_nodes[0].get_ancestors(max_alt=1,klass=NodeSet))==
@@ -193,6 +197,8 @@ class TestApp (TestScript):
             )
                             
     def test04Downcast(self):
+        print
+        print "DOWNCAST TESTS"
         prnt = Parent(debug_id='Parent1')
         prnt.save()
         prsn = Person(debug_id='Person1')
@@ -213,3 +219,10 @@ class TestApp (TestScript):
             self.assertTrue(type(p)==Person and
                             p.who_am_i=='Person')
         
+    def test05Cyclic(self):
+        print
+        print "CYCLIC TESTS"
+        self.assertTrue(set(self.cyclic_group.flatten())==
+                        set([self.m_nodes[0],self.w_nodes[0]]))
+        self.assertTrue(set(self.cyc_a.get_ancestors(klass=NodeSet))==
+                        set([self.cyc_b,self.cyclic_group]))
