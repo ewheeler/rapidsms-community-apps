@@ -82,7 +82,7 @@ def passwordProtectedCmd(f):
 ########
 # i18n #
 ########
-def __init_translators():
+def _init_translators():
     path = os.path.join(os.path.dirname(__file__),"locale")
     for lang,name in _G['SUPPORTED_LANGS'].items():
         trans = gettext.translation('django',path,[lang,_G['DEFAULT_LANG']])
@@ -115,7 +115,7 @@ class App(rapidsms.app.App):
         # because of depencies between GNUTranslations (a -used here) 
         # and DJangoTranslations (b -used in views)
         # i.e. initializing b then a is ok, but a then b fails
-        __init_translators()
+        _init_translators()
 
         # command target. ToDo--get names from gettext...
         # needs to be here so that 'self' has meaning.
