@@ -12,6 +12,29 @@ class ContactForm(ModelForm):
      class Meta:
          model = Contact
          fields = ('common_name','given_name','family_name','gender')
+    
+     def clean(self):
+         cleaned_data = self.cleaned_data
+         if 'phone_number' in cleaned_data and cleaned_data['phone_number']>0: 
+             if cleaned_data['communication_channel'] is None:
+                 # don't need to set the communication channel if there is only one in the system
+                 raise forms.ValidationError("If you specify phone number, you must also add communication channel")
+         return cleaned_data;
+     
+     def save(self):
+        contact = super(ContactForm, self).save()
+        if 'phone_number' in self.cleaned_data and self.cleaned_data['phone_number']>0: 
+            conns = ChannelConnection.objects.filter(contact=contact)
+            if len(conns) == 0:
+                conn = ChannelConnection( contact=contact )
+            else:
+                conn = conns[0]
+            conn.user_identifier=self.cleaned_data['phone_number']
+            if self.cleaned_data['communication_channel'] is None:
+                 raise forms.ValueError("If you specify phone number, you must also add communication channel")
+            conn.communication_channel=self.cleaned_data['communication_channel']
+            conn.save()
+        return contact
 
 #gets/sets ContactForm with correct permissions
 def get_contact_form(instance):
@@ -34,11 +57,7 @@ def create_contact_from_post(post, contact):
     contact.perm_receive = set( 'perm_receive' )
     contact.perm_ignore = set( 'perm_ignore' )
     contact.age_years = post['age']
-    c = contact.save()
-    
-    if len(post['phone_number'])>0 and len( post['communication_channel']) >0 : 
-        conn = ChannelConnection( user_identifier=post['phone_number'], \
-                                  communication_channel=contact.cleaned_data['communication_channel'], \
-                                  contact=c )
-        conn.save()
+    if not contact.is_valid():
+        return contact
+    contact.save()
     return contact
