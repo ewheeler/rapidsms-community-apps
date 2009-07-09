@@ -217,8 +217,8 @@ def participants(req):
         else:
             return render_to_response(req, "iavi/no_profile.html", {})
     
-    reporters = IaviReporter.objects.filter(location__in=locations).order_by('alias')
-    return render_to_response(req, template_name, {"reporters" : reporters })
+    parts = StudyParticipant.objects.filter(reporter__location__in=locations).order_by('reporter__alias')
+    return render_to_response(req, template_name, {"participants" : parts})
 
 
 @login_required
