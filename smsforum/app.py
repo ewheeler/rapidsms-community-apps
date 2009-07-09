@@ -102,9 +102,6 @@ def _st(sender,text):
     # new hotness 3-letter codes 'eng'
     return _t(sender.locale, text)
 
-# init them translators!    
-__init_translators()
-
 
 #
 # App class
@@ -113,6 +110,12 @@ __init_translators()
 class App(rapidsms.app.App):
     def __init__(self, router):
         rapidsms.app.App.__init__(self, router)
+        
+        # NB: this cannot be called globally
+        # because of depencies between GNUTranslations (a -used here) 
+        # and DJangoTranslations (b -used in views)
+        # i.e. initializing b then a is ok, but a then b fails
+        __init_translators()
 
         # command target. ToDo--get names from gettext...
         # needs to be here so that 'self' has meaning.
