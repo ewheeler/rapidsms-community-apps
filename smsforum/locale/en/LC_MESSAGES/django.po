@@ -225,53 +225,52 @@ msgstr "Thank you for joining the %(village)s community - welcome!"
 
 #: apps/smsforum/views.py:172 apps/smsforum/templates/smsforum/members.html:60
 msgid "Edit Village"
-msgstr "Modifier Le Village"
+msgstr ""
 
 #: apps/smsforum/views.py:183
 msgid "Edit Member"
-msgstr "Modifier Le Membre"
+msgstr "Edit Member"
 
 #: apps/smsforum/views.py:193
 #, python-format
 msgid "Village %(village_name)s successfully created"
-msgstr "Village %(village_name)s a eté créé"
-#msgstr "Village %(village_name)s a ete cree"
+msgstr ""
 
 #: apps/smsforum/views.py:195
 msgid "Village already exists!"
-msgstr "Cette village a eté déjà créé"
+msgstr ""
 
 #: apps/smsforum/views.py:197
 msgid "Form invalid"
-msgstr "La forme est invalide"
+msgstr ""
 
 #: apps/smsforum/views.py:199
 msgid "Add Village"
-msgstr "Ajouter une village"
+msgstr ""
 
 #: apps/smsforum/views.py:209
 #, python-format
 msgid "Member '%(member_name)s' successfully created"
-msgstr "Le membre '%(member_name)s' a ete cree"
+msgstr ""
 
 #: apps/smsforum/views.py:213
 msgid "Add Member"
-msgstr "Ajouter un membre"
+msgstr ""
 
 #: apps/smsforum/templates/smsforum/index.html:4
 #: apps/smsforum/templates/smsforum/index.html:14
 #: apps/smsforum/templates/smsforum/partials/total.html:9
 msgid "Villages"
-msgstr "Villages"
+msgstr ""
 
 #: apps/smsforum/templates/smsforum/index.html:18
 msgid "Name"
-msgstr "Nom"
+msgstr ""
 
 #: apps/smsforum/templates/smsforum/index.html:19
 #: apps/smsforum/templates/smsforum/partials/total.html:10
 msgid "Members"
-msgstr "Membres"
+msgstr "Members"
 
 #: apps/smsforum/templates/smsforum/index.html:20
 msgid "Messages Initiated This Week"
@@ -283,7 +282,7 @@ msgstr ""
 
 #: apps/smsforum/templates/smsforum/index.html:35
 msgid "No villages yet"
-msgstr "Pas de villages"
+msgstr ""
 
 #: apps/smsforum/templates/smsforum/index.html:37
 #: apps/smsforum/templates/smsforum/index.html:51
