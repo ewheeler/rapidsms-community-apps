@@ -20,9 +20,8 @@
 				{% endif %}
 				<th scope="col">{% trans "Gender" %}</th>
                 <th scope="col">{% trans "Age" %}</th>
-                <!-- TODO: fix this
                 <th scope="col">{% trans "Messages Sent This Week" %}</th>
-                 -->
+                <th scope="col">{% trans "Messages Received This Week" %}</th>
 			</tr>
 		</thead>
 		<tbody>{% if members.object_list %}{% for member in members.object_list %}
@@ -37,15 +36,14 @@
 				{% endif %}
                 <td>{% if member.gender %}{{ member.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.age %}{{ member.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <!--  TODO: fix this
                 <td>{% if member.message_count %}{{ member.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                 -->
+                <td>{% if member.received_message_count %}{{ member.received_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
 			</tr>{% endfor %}
             <tr>
                 {% if user.is_staff %}
-	                <td colspan="6">
+	                <td colspan="8">
 	            {% else %}
-    	            <td colspan="3">
+    	            <td colspan="5">
 				{% endif %}
 	                    <a href="/village/{{village.id}}/member/add" class="add">
 	                        {% trans "Add a Member" %}
@@ -55,9 +53,9 @@
 			{% else %}
 			<tr class="no-data">
                 {% if user.is_staff %}
-	                <td colspan="6">
+	                <td colspan="8">
 	            {% else %}
-    	            <td colspan="3">
+    	            <td colspan="5">
 				{% endif %}
 					{% trans "No members yet" %}
 					<a href="/village/{{village.id}}/member/add" class="add">
@@ -69,9 +67,9 @@
 		<tfoot>
 			<tr>
                 {% if user.is_staff %}
-	                <td colspan="6">
+	                <td colspan="8">
 	            {% else %}
-    	            <td colspan="3">
+    	            <td colspan="5">
 				{% endif %}
 					{% paginator members %}
 				</td>

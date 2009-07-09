@@ -83,11 +83,10 @@ def index(req, template="smsforum/index.html"):
     for village in villages:
         # once this site bears more load, we can replace flatten() with village.subnodes
         # and stop reporting num_messages
-        village.member_count = len( village.flatten() )
+        members = village.flatten()
+        village.member_count = len( members )
         last_week = ( datetime.now()-timedelta(weeks=1) )
         village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
-        # TODO - fix this number
-        village.messages_sent_count = village.message_count * village.member_count
     context['villages'] = paginated(req, villages)
     messages = IncomingMessage.objects.select_related().order_by('-received')
     context.update( format_messages_in_context(req, context, messages) )
@@ -142,6 +141,7 @@ def members(req, pk, template="smsforum/members.html"):
             member.phone_number = connections[0].user_identifier
             last_week = ( datetime.now()-timedelta(weeks=1) )
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
+            member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
     context['village'] = village
     context['members'] = paginated(req, members)
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
@@ -170,6 +170,7 @@ def member(req, pk, template="smsforum/member.html"):
         last_week = ( datetime.now()-timedelta(weeks=1) )
         messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
         contact.message_count = len(messages)
+        contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number,sent__gte=last_week).count()
         format_messages_in_context(req, context, messages)
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
@@ -194,6 +195,7 @@ def edit_member(req, pk, template="smsforum/edit.html"):
     contact = get_object_or_404(Contact, id=pk)
     if req.method == "POST":
         form = create_contact_from_post(req.POST, contact)
+        context['error'] = form.errors
     else:
         form = get_contact_form(instance=contact)
     context['form'] = form
@@ -235,4 +237,5 @@ def totals(context):
     context['village_count'] = Village.objects.all().count()
     context['member_count'] = Contact.objects.all().count()
     context['incoming_message_count'] = IncomingMessage.objects.all().count()
+    context['outgoing_message_count'] = OutgoingMessage.objects.all().count()
     return context
