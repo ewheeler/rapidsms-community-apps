@@ -3,10 +3,9 @@ from rapidsms.backends import test
 from app import App
 import apps.contacts.app as contacts_app
 #from models import *
-import apps.contacts.models as contacts_models
-from apps.contacts.models import *
-from apps.nodegraph.models import Node,NodeSet
-from apps.smsforum.models import Village,Community
+from apps.contacts.models import Contact
+from apps.nodegraph.models import NodeSet
+from apps.smsforum.models import Village
 
 # helpers
 def _contact(name, *grps):
