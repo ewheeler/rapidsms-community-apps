@@ -616,7 +616,10 @@ class CommunicationChannel(models.Model):
     def __repr__(self):
         return 'CommunicationChannel(backend_slug=%s,title=%s' % \
             (self.backend_slug, self.title)
-
+    
+    def __unicode__(self):
+        return unicode(self.backend_slug)
+    
     class Meta:
         unique_together = ('backend_slug','title')
             
