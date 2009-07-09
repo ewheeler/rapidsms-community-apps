@@ -36,12 +36,13 @@ def compliance(req):
     reporters = IaviReporter.objects.filter(location__in=locations).order_by('alias')
     seven_days = timedelta(days=7)
     thirty_days = timedelta(days=30)
-    tomorrow = datetime.today() + timedelta(days=1)
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
     for reporter in reporters:
         
         all_reports = Report.objects.filter(reporter=reporter)
-        last_7 = all_reports.filter(started__gte=tomorrow-seven_days)
-        last_30 = all_reports.filter(started__gte=tomorrow-thirty_days)
+        last_7 = all_reports.filter(started__gte=today-seven_days)
+        last_30 = all_reports.filter(started__gte=today-thirty_days)
         
         reporter.all_reports = len(all_reports)
         reporter.all_compliant = len(all_reports.filter(status="F"))
