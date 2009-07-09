@@ -64,7 +64,6 @@ def passwordProtectedCmd(f):
 
     """
     def pwd_protected_f(*args, **kwargs):
-        print "HERE"
         if _G['ADMIN_CMD_PWD'] != None:
             cmd_string = kwargs.pop('arg').strip()
             msg = args[1] # args[0] is the app object
@@ -187,7 +186,7 @@ class App(rapidsms.app.App):
             _G['ADMIN_CMD_PWD'] = kwargs.pop('admin_cmd_pwd')
         except:
             pass
-     
+
     def start(self):
         self.__loadFixtures()
     
