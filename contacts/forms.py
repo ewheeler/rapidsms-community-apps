@@ -35,7 +35,8 @@ def create_contact_from_post(post, contact):
     contact.perm_ignore = set( 'perm_ignore' )
     contact.age_years = post['age']
     c = contact.save()
-    if len(post['phone_number'])>0 and len( post['communication_channel']>0 ): 
+    
+    if len(post['phone_number'])>0 and len( post['communication_channel']) >0 : 
         conn = ChannelConnection( user_identifier=post['phone_number'], \
                                   communication_channel=contact.cleaned_data['communication_channel'], \
                                   contact=c )
