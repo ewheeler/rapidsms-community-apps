@@ -161,8 +161,8 @@ class App(rapidsms.app.App):
             ]
         
         self.cmd_matcher=BestMatch(self.cmd_targets)
-        villes=[(v.name, v) for v in Village.objects.all()]
-        self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
+        #villes=[(v.name, v) for v in Village.objects.all()]
+        #self.village_matcher=BestMatch(villes, ignore_prefixes=['keur'])
         # swap dict so that we send in (name,code) tuples rather than (code,name
         self.lang_matcher=BestMatch([
                 (names,code) for code,names in _G['SUPPORTED_LANGS'].items()
@@ -175,7 +175,15 @@ class App(rapidsms.app.App):
         Code.objects.get_or_create(set=s, name="code3", slug="3")
         f = CodeSet.objects.get_or_create(name="FLAGGED_CODE")[0]
         Code.objects.get_or_create(set=f, name="flagged", slug="True")
-
+    
+    def __get_village_matcher(self):
+        """
+        HACK to force reload of names before each match
+        
+        """
+        villes=[(v.name, v) for v in Village.objects.all()]
+        return BestMatch(villes, ignore_prefixes=['keur'])
+        
     def configure(self, **kwargs):
         try:
             _G['DEFAULT_LANG'] = kwargs.pop('default_lang')
@@ -328,7 +336,7 @@ class App(rapidsms.app.App):
                 return True
             ville = Village(name=village)
             ville.save()
-            self.village_matcher.add_target((village,ville))
+            # self.village_matcher.add_target((village,ville))
             self.__reply(msg, "create-village-success %(village)s", {'village':village} )
         except:
             self.debug( traceback.format_exc() )
@@ -363,7 +371,7 @@ class App(rapidsms.app.App):
             self.__reply(msg, "citizens-fail_no-village")
             return True
 
-        villes=self.village_matcher.match(arg,with_data=True)
+        villes=self.__get_village_matcher().match(arg,with_data=True)
         if len(villes)==0:
             self.__reply(msg, "village-not-known %(unknown)s", {'unknown':arg})
             return True
@@ -382,22 +390,22 @@ class App(rapidsms.app.App):
 
     @passwordProtectedCmd
     def destroy_community(self,msg,arg=None):
-         if arg is None or len(arg)==0:
+        if arg is None or len(arg)==0:
             self.__reply(msg, "remove-fail_no-village")
             return True
 
-         try:
-             # EXACT MATCH ONLY!
-             ville=Village.objects.get(name=arg)
-             ville.delete()
-             self.village_matcher.remove_target(arg)
-             self.__reply(msg, "remove-success %(village)s", {'village': arg})
-             return True
-         except:
-             rsp= _st(msg.sender,"village-not-known %(unknown)s") % {'unknown':arg} 
-             self.debug(rsp)
-             self.__reply(msg,rsp)
-         return True
+        try:
+            # EXACT MATCH ONLY!
+            ville=Village.objects.get(name=arg)
+            ville.delete()
+            # self.village_matcher.remove_target(arg)
+            self.__reply(msg, "remove-success %(village)s", {'village': arg})
+            return True
+        except:
+            rsp= _st(msg.sender,"village-not-known %(unknown)s") % {'unknown':arg} 
+            self.debug(rsp)
+            self.__reply(msg,rsp)
+        return True
 
             
     def register_name(self,msg,arg=None):
@@ -433,7 +441,7 @@ class App(rapidsms.app.App):
             village=arg
 
         try:
-            matched_villes=self.village_matcher.match(village,with_data=True)
+            matched_villes=self.__get_village_matcher().match(village,with_data=True)
             # send helpful message if 0 or more than 1 found
             num_villes=len(matched_villes)
             # unzip data from names if can
@@ -489,7 +497,7 @@ class App(rapidsms.app.App):
         """
         contacts=[(c.common_name, c) for c in Contact.objects.all()]
         cont_matcher=BestMatch(targets=contacts)
-        found=MultiMatch(self.village_matcher,cont_matcher).\
+        found=MultiMatch(self.__get_village_matcher(),cont_matcher).\
             match(address,with_data=True)
         
         if len(found)==0:
@@ -658,7 +666,7 @@ class App(rapidsms.app.App):
         try:
             villages=[]
             if arg is not None and len(arg)>0:
-                village_tupes = self.village_matcher.match(arg, with_data=True)
+                village_tupes = self.__get_village_matcher().match(arg, with_data=True)
                 if len(village_tupes)>0:
                     villages = zip(*village_tupes)[1] # the objects
             else:
