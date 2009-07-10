@@ -3,6 +3,7 @@
 
 
 from django.db import models
+from datetime import datetime
 
 # 
 # A data model for simple interconnected graphs of nodes.
@@ -178,7 +179,6 @@ class Node(models.Model):
             else:
                 break
         return casted
-    
 
 class NodeSet(Node):
     _children = models.ManyToManyField(Node,related_name='_parents')
@@ -234,10 +234,12 @@ class NodeSet(Node):
         
         """
         for n in sub_nodes:
+            NodeSetLog(nodeset=self, node=n, action='C').save()
             self._children.add(n)
 
     def remove_children(self, *subnodes):
         for n in subnodes:
+            NodeSetLog(nodeset=self, node=n, action='D').save()
             self._children.remove(n)
         
     def get_children(self, klass=None):
@@ -300,3 +302,17 @@ class NodeSet(Node):
             return [l._downcast(klass) for l in leaves]
         else:
             return list(leaves)
+
+# we don't currently log 'updates'
+# but maybe one day we'll want to...
+ACTION = (
+    ('C', 'Create'),
+    ('U', 'Update'),
+    ('D', 'Delete'),
+)
+
+class NodeSetLog(Node):
+    date = models.DateTimeField(null=False, default = datetime.now())
+    nodeset = models.ForeignKey(NodeSet,null=True, related_name='parent') #can reference a deleted nodeset
+    node = models.ForeignKey(Node,null=True, related_name='child') #can reference a deleted node
+    action = models.CharField(max_length=1, choices=ACTION)
