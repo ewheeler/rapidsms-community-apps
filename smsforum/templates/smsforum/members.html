@@ -76,11 +76,12 @@
 			</tr>
 		</tfoot>
 	</table>
-    {% if user.is_staff %}
 	   	<div class="toolbar">
-			<a href="/village/edit/{{ village.id }}" class="add">{% trans "Edit Village" %}</a>
+		   	<a href="/village/{{ village.id }}/history" class="add">{% trans "View History" %}</a>
+    		{% if user.is_staff %}
+		   		<a href="/village/edit/{{ village.id }}" class="add">{% trans "Edit Village" %}</a>
+			{% endif %}
 		</div>
-	{% endif %}
 </div>
 {% include 'smsforum/partials/messages.html' %}
 {% endblock %}

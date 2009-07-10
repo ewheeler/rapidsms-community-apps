@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load pagination %}
+{% load smsforum %}
+{% block title %}{% trans "History of" %}{{ village.name }}{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>{% trans "History of " %}{{ village.name }}</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">{% trans "Date" %}</th>
+                <th scope="col">{% trans "Person" %}</th>
+                <th scope="col">{% trans "Event" %}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if history.object_list %}{% for event in history.object_list %}
+			<tr>
+                <td>{{ event.date }}</td>
+                <td>{% if event.node %}{{ event.node }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{{ event.action|human_readable_action }}</td>
+			</tr>{% endfor %}
+			{% else %}
+			<tr class="no-data">
+    	            <td colspan="3">
+					{% trans "Nothing has happened yet" %}
+				</td>
+			</tr>{% endif %}
+		</tbody>
+		<tfoot>
+			<tr>
+   	            <td colspan="3">
+					{% paginator history %}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+{% endblock %}
+

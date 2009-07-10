@@ -315,4 +315,4 @@ class NodeSetLog(Node):
     date = models.DateTimeField(null=False, default = datetime.now())
     nodeset = models.ForeignKey(NodeSet,null=True, related_name='parent') #can reference a deleted nodeset
     node = models.ForeignKey(Node,null=True, related_name='child') #can reference a deleted node
-    action = models.CharField(max_length=1, choices=ACTION)
+    action = models.CharField(max_length=1, choices=ACTION, null=False)

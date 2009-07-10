@@ -17,6 +17,7 @@ from apps.smsforum.app import CMD_MESSAGE_MATCHER
 from apps.logger.models import *
 from apps.contacts.models import *
 from apps.contacts.forms import *
+from apps.nodegraph.models import *
 
 from datetime import datetime, timedelta
 
@@ -129,6 +130,14 @@ def SetCode(tag, str):
     code = Code.objects.get(slug=str)
     tag.code = code
     return tag
+
+def village_history(req, pk, template="smsforum/history.html"):
+    context = {}
+    village = Village.objects.get(id=pk)
+    history = NodeSetLog.objects.filter(nodeset=village).select_related('Node')
+    context['village'] = village
+    context['history'] = paginated(req, history)
+    return render_to_response(req, template, context)
 
 def members(req, pk, template="smsforum/members.html"):
     context = {}
