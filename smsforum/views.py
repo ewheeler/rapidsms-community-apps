@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 from django.utils.translation import ugettext as _
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError
-from django.template import RequestContext
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
 from rapidsms.webui.utils import *
@@ -18,6 +14,7 @@ from apps.logger.models import *
 from apps.contacts.models import *
 from apps.contacts.forms import *
 from apps.nodegraph.models import *
+from apps.reporting.util import export
 
 from datetime import datetime, timedelta
 
@@ -248,3 +245,11 @@ def totals(context):
     context['incoming_message_count'] = IncomingMessage.objects.all().count()
     context['outgoing_message_count'] = OutgoingMessage.objects.all().count()
     return context
+
+def export_village_history(req, pk, format='csv'):
+    context = {}
+    village = Village.objects.get(id=pk)
+    history = NodeSetLog.objects.filter(nodeset=village)
+    if req.user.is_authenticated():
+        return export(history, ['id','date','node','action'])
+    return export(history, ['id','date','action'])

@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load pagination %}
+{% block title %}{% trans "Contacts" %}{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>{% trans "Contacts" %}</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">{% trans "ID" %}</th>
+                {% if user.is_staff %}
+					<th scope="col">{% trans "Common Name" %}</th>
+					<th scope="col">{% trans "Given Name" %}</th>
+					<th scope="col">{% trans "Family Name" %}</th>
+	                <th scope="col">{% trans "Phone Number" %}</th>
+				{% endif %}
+				<th scope="col">{% trans "Gender" %}</th>
+                <th scope="col">{% trans "Age" %}</th>
+			</tr>
+		</thead>
+		<tbody>{% if contacts.object_list %}{% for contact in contacts.object_list %}
+			<tr>
+				<td><a href="/contact/{{ contact.pk }}">{{ contact.pk }}</a></td>
+                {% if user.is_staff %}
+	                <td><a href="/contact/{{ contact.pk }}"{% if contact.common_name %}>{{ contact.common_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+					<td>{% if contact.given_name %}{{ contact.given_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+					<td>{% if contact.family_name %}{{ contact.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+	                <td>{% if contact.phone_number %}{{ contact.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+				{% endif %}
+                <td>{% if contact.gender %}{{ contact.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if contact.age %}{{ contact.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+			</tr>{% endfor %}
+            <tr>
+                {% if user.is_staff %}
+	                <td colspan="8">
+	            {% else %}
+    	            <td colspan="5">
+				{% endif %}
+	                    <a href="/village/{{village.id}}/contact/add" class="add">
+	                        {% trans "Add a Contact" %}
+	                    </a>
+                </td>
+            </tr>
+			{% else %}
+			<tr class="no-data">
+                {% if user.is_staff %}
+	                <td colspan="8">
+	            {% else %}
+    	            <td colspan="5">
+				{% endif %}
+					{% trans "No members yet" %}
+					<a href="/village/{{village.id}}/contact/add" class="add">
+						{% trans "Add a Contact" %}
+					</a>
+				</td>
+			</tr>{% endif %}
+		</tbody>
+		<tfoot>
+			<tr>
+                {% if user.is_staff %}
+	                <td colspan="8">
+	            {% else %}
+    	            <td colspan="5">
+				{% endif %}
+					{% paginator contacts %}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+	   	<div class="toolbar">
+		   	<a href="csv" class="add">{% trans "Export to CSV" %}</a>
+		</div>
+</div>
+{% endblock %}
+

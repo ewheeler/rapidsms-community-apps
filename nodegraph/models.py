@@ -311,7 +311,7 @@ ACTION = (
     ('D', 'Delete'),
 )
 
-class NodeSetLog(Node):
+class NodeSetLog(models.Model):
     date = models.DateTimeField(null=False, default = datetime.now())
     nodeset = models.ForeignKey(NodeSet,null=True, related_name='parent') #can reference a deleted nodeset
     node = models.ForeignKey(Node,null=True, related_name='child') #can reference a deleted node
