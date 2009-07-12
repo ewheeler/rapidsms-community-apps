@@ -177,7 +177,7 @@ msgstr "Koå o ngam wayluåe åemngal ngal heptinaaka. A Jaaraama nde ngeto-daa 
 #msgstr "Vous pouvez utiliser un des langues suivants: %(langs)s"
 
 msgid "language-set-success %(lang)s"
-msgstr "Åemngal ngal cuøi- daa  ko %(lang)s."
+msgstr "Åemngal ngal cuøi- daa ko %(lang)s."
 #msgstr "La langue que vous avez sélectionnée est '%(lang_code)s'"
 
 #: app.py:248
