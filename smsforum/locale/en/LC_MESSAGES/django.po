@@ -1,3 +1,5 @@
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
+#
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
