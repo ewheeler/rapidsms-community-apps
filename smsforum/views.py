@@ -14,7 +14,7 @@ from apps.logger.models import *
 from apps.contacts.models import *
 from apps.contacts.forms import *
 from apps.nodegraph.models import *
-from apps.reporting.util import export
+from utilities.export import export
 
 from datetime import datetime, timedelta
 

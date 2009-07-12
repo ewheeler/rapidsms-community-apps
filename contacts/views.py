@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from rapidsms.webui.utils import render_to_response, paginated
 from apps.contacts.models import Contact
 from apps.contacts.forms import *
-from apps.reporting.util import export
+from utilities.export import export
 
 def index(req, template="contacts/index.html"):
     context = {}
