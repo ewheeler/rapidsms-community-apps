@@ -195,19 +195,6 @@ def edit_village(req, pk, template="smsforum/edit.html"):
     context['title'] = _("Edit Village")
     return render_to_response(req, template, context)
     
-@login_required
-def edit_member(req, pk, template="smsforum/edit.html"):
-    context = {}
-    contact = get_object_or_404(Contact, id=pk)
-    if req.method == "POST":
-        form = create_contact_from_post(req.POST, contact)
-        context['error'] = form.errors
-    else:
-        form = get_contact_form(instance=contact)
-    context['form'] = form
-    context['title'] = _("Edit Member")
-    return render_to_response(req, template, context)
-
 def add_village(req, template="smsforum/add.html"):
     context = {}
     if req.method == 'POST':
@@ -224,21 +211,6 @@ def add_village(req, template="smsforum/add.html"):
     context['title'] = _("Add Village")
     return render_to_response(req, template, context)    
 
-def add_member(req, village_id=0, template="smsforum/add.html"):
-    context = {}
-    if req.method == 'POST':
-        form = ContactForm(req.POST)
-        if form.is_valid():
-            c = form.save()
-            c.add_to_parent( Village.objects.get(id=village_id) )
-            context['status'] = _("Member '%(member_name)s' successfully created" % {'member_name':c.signature} )
-        else:
-            context['error'] = form.errors
-    context['form'] = ContactForm()
-    context['title'] = _("Add Member")
-    return render_to_response(req, template, context)    
-
-
 def totals(context):
     context['village_count'] = Village.objects.all().count()
     context['member_count'] = Contact.objects.all().count()
@@ -253,3 +225,18 @@ def export_village_history(req, pk, format='csv'):
     if req.user.is_authenticated():
         return export(history, ['id','date','node','action'])
     return export(history, ['id','date','action'])
+
+def add_member(req, village_id=0, template="contacts/add.html"):
+    context = {}
+    if req.method == 'POST':
+        form = ContactForm(req.POST)
+        if form.is_valid():
+            c = form.save()
+            if village_id != 0:
+                c.add_to_parent( Village.objects.get(id=village_id) )
+            context['status'] = _("Member '%(member_name)s' successfully created" % {'member_name':c.signature} )
+        else:
+            context['error'] = form.errors
+    context['form'] = ContactForm()
+    context['title'] = _("Add Member")
+    return render_to_response(req, template, context)    
