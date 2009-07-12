@@ -42,7 +42,7 @@ _G = {
         # 'deb':u'Debug',
         'pul':['Pulaar'],
         'wol':['Wolof'],
-        'dyu':['Diola','Dyula','Dioula','Joola'],
+        'dyu':['Joola','Dyula','Dioula','Diola'],
         'fr':[u'Français'],
         'en':['English'],
         },
@@ -135,26 +135,20 @@ class App(rapidsms.app.App):
             (['karees', 'karees'], {'lang':'dyu','func':self.register_name}),
             (['upur', 'oupour'], {'lang':'dyu','func':self.leave}),
             ('rambenom', {'lang':'dyu','func':self.help}),
-            ('ukaana', {'lang':'dyu','func':self.createvillage}),
-            # Debug calls ('deb' language==debug)
-            #('djoin', {'lang':'deb','func':self.join}),
-            #('rname', {'lang':'deb','func':self.register_name}),
-            #('dleave', {'lang':'deb','func':self.leave}),
-            #('dlang', {'lang':'deb','func':self.lang}),
-            #('dcreate', {'lang':'deb','func':self.createvillage}),
+            ('ukaana', {'lang':'dyu','func':self.create_village}),
             # French
             ('entrer', {'lang':'fr','func':self.join}),
             ('nom', {'lang':'fr','func':self.register_name}),
             ('quitter', {'lang':'fr','func':self.leave}),
             ('aide', {'lang':'fr','func':self.help}),
-            ([u'créer', 'creer'], {'lang':'fr','func':self.createvillage}),
+            ([u'créer', 'creer'], {'lang':'fr','func':self.create_village}),
             # English
             ('join', {'lang':'en','func':self.join}),
             ('name', {'lang':'en','func':self.register_name}),
             ('leave', {'lang':'en','func':self.leave}),
             ('language', {'lang':'en','func':self.lang}),
             ('help', {'lang':'en','func':self.help}),
-            ('create', {'lang':'en','func':self.createvillage}),
+            ('create', {'lang':'en','func':self.create_village}),
             ('member', {'lang':'en','func':self.member}),
             ('citizens', {'lang':'en','func':self.community_members}),
             ('remove', {'lang':'en','func':self.destroy_community}),
@@ -309,7 +303,7 @@ class App(rapidsms.app.App):
         return True
 
     @passwordProtectedCmd
-    def createvillage(self, msg, arg=None):
+    def create_village(self, msg, arg=None):
         self.debug("SMSFORUM:CREATEVILLAGE")        
         if arg is None or len(arg)<1:
             self.__reply(msg, "create-village-fail_no-village-name")
