@@ -212,7 +212,7 @@ msgid "member-success_long-list %(village_names)s"
 msgstr "Vous etes membre des communautés suivants: %(village_names)s et de plus"
 
 msgid "name-register-success %(name)s"
-msgstr "Jàmm ngaam%(name)s: Jerejef ci li nga dugal sa tur ! gannaawsi tey, tur woowu mooy feeñ ci bépp xebaar boo yonnee."
+msgstr "Jàmm ngaam %(name)s: Jerejef ci li nga dugal sa tur ! gannaawsi tey, tur woowu mooy feeñ ci bépp xebaar boo yonnee."
 #msgstr "Bonjour %(name)s. Merci d'avoir enregistré votre nom! Il apparaitra dorénavant sur tous les messages que vous envoyez"
 
 msgid "name-register-fail_name-too-long %(name)s %(max_char)d"

@@ -182,8 +182,8 @@ msgstr "Åemngal ngal cuøi- daa ko %(lang)s."
 
 #: app.py:248
 msgid "leave-success %(villages)s"
-msgstr "On ngiwii to sahre to '%(village)s' haa nalnde woånde"
-#msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
+msgstr "On ngiwii to sahre to '%(villages)s' haa nalnde woånde"
+#msgstr "Vous venez de quitter la communauté '%(villages)s' Au revoir!"
 
 msgid "leave-fail_village-not-found %(village)s"
 msgstr "Je ne peux pas trouver la communauté quit s'appelle '%(village)s'"

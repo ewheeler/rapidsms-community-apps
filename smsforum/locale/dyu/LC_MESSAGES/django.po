@@ -191,8 +191,8 @@ msgstr "nupupur di fujojaf fati %(villages)s. be nikeen!"
 #msgstr "Vous venez de quitter la communauté '%(village)s' Au revoir!"
 
 msgid "leave-fail_village-not-found %(village)s"
-msgstr "ubonket,imanjut esukey uyu. uciik #noken karess kati esukey. nan, %(village_names)s"
-#msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'. Par example, %(village_names)s"
+msgstr "ubonket,imanjut esukey uyu. uciik #noken karess kati esukey. nan, %(village)s"
+#msgstr "Désolé, je ne reconnais pas cet endroit. SVP, écrivez #entrer puis 'noms de villages'. Par example, %(village)s"
 
 msgid "leave-fail_not-member-of-village"
 msgstr "unaamut di esuk yanoosan tan omma. manunaam, uciik #di kareesak kati esukey."

@@ -121,13 +121,13 @@ class App(rapidsms.app.App):
         # could also do the hasattr thing when calling instead
         self.cmd_targets = [ 
             # Pulaar
-            (['naalde', 'naatde'], {'lang':'pul','func':self.join}),
+            (['naalde', 'naatde', 'tawtude'], {'lang':'pul','func':self.join}),
             ('yettoode', {'lang':'pul','func':self.register_name}),
-            ('yaltude', {'lang':'pul','func':self.leave}),
-            ('dallal', {'lang':'pul','func':self.help}),
+            (['yaltude','iwde'], {'lang':'pul','func':self.leave}),
+            (['dallal','ballal'], {'lang':'pul','func':self.help}),
             # Wolof
             (['boole', 'yokk', 'duggu'], {'lang':'wol','func':self.join}),
-            ('genn', {'lang':'wol','func':self.leave}),
+            (['genn', 'génn'], {'lang':'wol','func':self.leave}),
             (['sant', 'tur'], {'lang':'wol','func':self.register_name}),
             ('ndimbal', {'lang':'wol','func':self.help}),
             # Dyuola    
@@ -135,13 +135,12 @@ class App(rapidsms.app.App):
             (['karees', 'karees'], {'lang':'dyu','func':self.register_name}),
             (['upur', 'oupour'], {'lang':'dyu','func':self.leave}),
             ('rambenom', {'lang':'dyu','func':self.help}),
-            ('ukaana', {'lang':'dyu','func':self.create_village}),
             # French
             ('entrer', {'lang':'fr','func':self.join}),
             ('nom', {'lang':'fr','func':self.register_name}),
             ('quitter', {'lang':'fr','func':self.leave}),
             ('aide', {'lang':'fr','func':self.help}),
-            ([u'créer', 'creer'], {'lang':'fr','func':self.create_village}),
+            (['créer', 'creer'], {'lang':'fr','func':self.create_village}),
             # English
             ('join', {'lang':'en','func':self.join}),
             ('name', {'lang':'en','func':self.register_name}),
@@ -297,7 +296,7 @@ class App(rapidsms.app.App):
             else:
                 # send the list of available langs by passing
                 # to the 'lang' command handler
-                return self.lang(msg)
+                return self.help(msg)
             
         self.__reply(msg, "help-with-commands")
         return True
