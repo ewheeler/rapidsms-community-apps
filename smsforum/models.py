@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-from django.db import models
+from datetime import datetime
+from django.db import models, transaction
 from apps.locations.models import Location
-from apps.nodegraph.models import NodeSet
+from apps.nodegraph.models import NodeSet, Node
 from apps.contacts.models import Contact
-
 
 class Village(NodeSet):
     # security masks
@@ -28,10 +28,20 @@ class Village(NodeSet):
     def __unicode__(self):
         return unicode(self.name)
     
+    @transaction.commit_on_success
+    def add_member(self, person):
+        person.add_to_parent(self)
+        MembershipLog(nodeset=self, node=person, action='C').save()
+
+    @transaction.commit_on_success
+    def remove_member(self, person):
+        person.remove_from_parent(self)
+        MembershipLog(nodeset=self, node=person, action='D').save()
+    
     ##############
     # properties #
     ##############
-
+    
     def __get_sec_blast_member_only(self):
         return bool(self._security & self.__SEC_BLAST_MEMBER_ONLY)
 
@@ -117,3 +127,16 @@ class Community(Village):
 def villages_for_contact(contact):
     return contact.get_ancestors(max_alt=1, klass=Village)
     
+# we don't currently log 'updates'
+# but maybe one day we'll want to...
+ACTION = (
+    ('C', 'Create'),
+    ('U', 'Update'),
+    ('D', 'Delete'),
+)
+
+class MembershipLog(models.Model):
+    date = models.DateTimeField(null=False, default = datetime.now )
+    nodeset = models.ForeignKey(NodeSet,null=True, related_name='parent') #can reference a deleted nodeset
+    node = models.ForeignKey(Node,null=True, related_name='child') #can reference a deleted node
+    action = models.CharField(max_length=1, choices=ACTION, null=False)
