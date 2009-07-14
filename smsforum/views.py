@@ -140,6 +140,7 @@ def members(req, pk, template="smsforum/members.html"):
     context = {}
     village = Village.objects.get(id=pk)
     members = village.flatten(klass=Contact)
+    total_incoming_messages = 0
     for member in members:
         connections = ChannelConnection.objects.filter(contact=member)
         if len(connections) > 0:
@@ -147,9 +148,12 @@ def members(req, pk, template="smsforum/members.html"):
             member.phone_number = connections[0].user_identifier
             last_week = ( datetime.now()-timedelta(weeks=1) )
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
+            total_incoming_messages = total_incoming_messages + member.message_count
             member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
     context['village'] = village
     context['members'] = paginated(req, members)
+    context['member_count'] = len(members)
+    context['incoming_message_count'] = total_incoming_messages
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
     format_messages_in_context(req, context, messages)
     return render_to_response(req, template, context)

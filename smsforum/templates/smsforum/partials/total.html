@@ -6,18 +6,18 @@
     <table>
         <thead>
             <tr>
-                <th scope="col">{% trans "Villages" %}</th>
+                {% if village_count %}<th scope="col">{% trans "Villages" %}</th>{% endif %}
                 <th scope="col">{% trans "Members" %}</th>
                 <th scope="col">{% trans "Messages Sent To Tostan" %}</th>
-                <th scope="col">{% trans "Messages Sent From Tostan" %}</th>
+                {% if outgoing_message_count %}<th scope="col">{% trans "Messages Sent From Tostan" %}</th>{% endif %}
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>{% if village_count %}{{ village_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if village_count %}<td>{{ village_count }}</td>{% endif %}
                 <td>{% if member_count %}{{ member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if incoming_message_count %}{{ incoming_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if outgoing_message_count %}{{ outgoing_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if outgoing_message_count %}<td>{{ outgoing_message_count }}</td>{% endif %}
             </tr>
         </tbody>
     </table>
