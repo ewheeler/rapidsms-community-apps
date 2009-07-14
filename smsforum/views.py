@@ -150,7 +150,9 @@ def members(req, pk, template="smsforum/members.html"):
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
             total_incoming_messages = total_incoming_messages + member.message_count
             member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
-            member.date_joined = NodeSetLog.objects.filter(node=member,nodeset=village).order_by('-id')[0].date
+            log = NodeSetLog.objects.filter(node=member,nodeset=village).order_by('-id')
+            if (log):
+                member.date_joined = log[0].date
     context['village'] = village
     context['members'] = paginated(req, members)
     context['member_count'] = len(members)
