@@ -3,11 +3,7 @@
 {% if cmd_messages or blast_messages %}
 <p/>
 
-<div class="split">
-
 {% if blast_messages %}
-<!-- TODO: put style in stylesheet -->
-<div class="left" style="width:70%">
 <div class="module">
     <h2>{% trans "Content Messages" %}</h2>
     <form action="" method="POST">
@@ -16,6 +12,10 @@
             <tr>
                 <th scope="col">{% trans "Date" %}</th>
                 <th scope="col">{% trans "Message" %}</th>
+                {% if user.is_staff %}
+	                <th scope="col">{% trans "Phone Number" %}</th>
+                {% endif %}
+                <th scope="col">{% trans "Community" %}</th>
                 <th scope="col">{% trans "Annotation" %}</th>
                 <th scope="col">{% trans "Flag" %}</th>
                 <th scope="col">{% trans "Code" %}</th>
@@ -25,6 +25,10 @@
             <tr>
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if user.is_staff %}
+	                <td>{% if message.identity %}{{ message.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% endif %}
+                <td>{% if message.domain.village %}{{ message.domain.village }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>
                     <input type="hidden" name="message" value="{{message.id}}"/>
                     <input type="text" name="text_{{message.id}}" value="{% if message.note %}{{ message.note }}{% else %}{% endif %}" maxlength="255" />
@@ -74,8 +78,6 @@
 {% endif %}
 
 {% if cmd_messages %}
-<!-- TODO: put style in stylesheet -->
-<div class="right" style="width:30%" >
 <div class="module">
     <h2>{% trans "Control Messages" %}</h2>
     <form action="" method="POST">
@@ -109,7 +111,6 @@
 </div>
 
 
-</div>
 {% endif %}
 <div class="clear-hack"></div>
 </div>

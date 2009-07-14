@@ -105,7 +105,7 @@ def format_messages_in_context(req, context, messages):
         if m is None: blast_messages.append(msg)
         else: cmd_messages.append(msg)
     if len(cmd_messages)>0:
-        context['cmd_messages'] = paginated(req, cmd_messages, per_page=10, prefix="cmd")
+        context['cmd_messages'] = paginated(req, cmd_messages, per_page=5, prefix="cmd")
     if len(blast_messages)>0:
         context['blast_messages'] = paginated(req, blast_messages, per_page=10, prefix="blast")
     context['codes'] = Code.objects.filter(set=CodeSet.objects.get(name="TOSTAN_CODE"))

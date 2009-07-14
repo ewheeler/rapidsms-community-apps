@@ -26,10 +26,8 @@ class Village(NodeSet):
     _admin_cmds_pwd = models.CharField(max_length=10, default='1212')
 
     def __unicode__(self):
-        member_sigs = \
-            [c.get_signature(max_len=20) for c in self.flatten(klass=Contact)]
-        return '%s: %s' % (self.name, ', '.join(member_sigs))
-
+        return unicode(self.name)
+    
     ##############
     # properties #
     ##############
