@@ -150,6 +150,7 @@ def members(req, pk, template="smsforum/members.html"):
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
             total_incoming_messages = total_incoming_messages + member.message_count
             member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
+            member.date_joined = NodeSetLog.objects.filter(node=member,nodeset=village).order_by('-id')[0].date
     context['village'] = village
     context['members'] = paginated(req, members)
     context['member_count'] = len(members)
@@ -185,6 +186,8 @@ def member(req, pk, template="smsforum/member.html"):
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
         pass
+    # if you decide to add 'date_joined', remember you need to do it for all villages
+    # this person is member of
     context['member'] = contact
     return render_to_response(req, template, context)
 
