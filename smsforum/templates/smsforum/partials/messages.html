@@ -23,7 +23,7 @@
         </thead>
         <tbody>{% if blast_messages.object_list %}{% for message in blast_messages.object_list %}
             <tr>
-                <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if message.received %}{{ message.received|date:"D M d H:i" }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 {% if user.is_staff %}
 	                <td>{% if message.identity %}{{ message.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
