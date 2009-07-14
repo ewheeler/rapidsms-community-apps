@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 from django.db import models
 from apps.locations.models import Location
 from apps.nodegraph.models import NodeSet
+from datetime import datetime
 from apps.contacts.models import Contact
 
 
@@ -27,6 +28,21 @@ class Village(NodeSet):
 
     def __unicode__(self):
         return unicode(self.name)
+    
+    #################################
+    # NodeSet overrides for logging #
+    #################################
+    def add_children(self,*sub_nodes):
+        NodeSet.add_children(self, *sub_nodes)
+        for n in sub_nodes:
+            c=n._downcast(klass=Contact)
+            VillageActivityLog(village=self, contact=c, action='C').save()
+
+    def remove_children(self, *subnodes):
+        NodeSet.remove_children(self,*subnodes)
+        for n in subnodes:
+            c=n._downcast(klass=Contact)
+            VillageActivityLog(village=self, contact=c, action='D').save()
     
     ##############
     # properties #
@@ -110,6 +126,25 @@ class VillageName(models.Model):
 
 class Community(Village):
     pass
+
+
+# we don't currently log 'updates'
+# but maybe one day we'll want to...
+ACTION = (
+    ('C', 'Create'),
+    ('U', 'Update'),
+    ('D', 'Delete'),
+)
+
+class VillageActivityLog(models.Model):
+    date = models.DateTimeField(null=False, default = datetime.utcnow )
+    village = models.ForeignKey(Village,null=True, related_name='parent') #can reference a deleted nodeset
+    contact = models.ForeignKey(Contact,null=True, related_name='child') #can reference a deleted node
+    action = models.CharField(max_length=1, choices=ACTION, null=False)
+    
+    def __unicode__(self):
+        return u'date: %s, village: %s, contact: %s, action: %s' % \
+            (self.date, self.village, self.contact, self.action)
 
 #
 # 'Statics' as module level

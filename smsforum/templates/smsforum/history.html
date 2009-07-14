@@ -20,7 +20,7 @@
 			{% if history.object_list %}{% for event in history.object_list %}
 			<tr>
                 <td>{{ event.date }}</td>
-                <td>{% if event.node %}{{ event.node }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if event.contact %}{{ event.contact.signature }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{{ event.action|human_readable_action }}</td>
 			</tr>{% endfor %}
 			{% else %}

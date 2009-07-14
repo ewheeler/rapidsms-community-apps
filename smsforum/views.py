@@ -11,9 +11,8 @@ from apps.smsforum.utils import *
 from apps.smsforum.forms import *
 from apps.smsforum.app import CMD_MESSAGE_MATCHER
 from apps.logger.models import *
-from apps.contacts.models import *
-from apps.contacts.forms import *
-from apps.nodegraph.models import *
+# from apps.contacts.models import *
+from apps.contacts.forms import ContactForm
 from utilities.export import export
 
 from datetime import datetime, timedelta
@@ -119,8 +118,7 @@ def SetFlag(flag):
     flag.code = code
 
 def IsFlag(tag):
-    if tag.code.set.name == "FLAGGED_CODE": return True
-    else: return False
+    return tag.code.set.name == "FLAGGED_CODE"
 
 # would declare this as a class but we don't need the extra database table
 def SetCode(tag, str):
@@ -131,7 +129,7 @@ def SetCode(tag, str):
 def village_history(req, pk, template="smsforum/history.html"):
     context = {}
     village = Village.objects.get(id=pk)
-    history = NodeSetLog.objects.filter(nodeset=village).select_related('Node')
+    history = VillageActivityLog.objects.filter(village=village).select_related('contact')
     context['village'] = village
     context['history'] = paginated(req, history)
     return render_to_response(req, template, context)
@@ -150,7 +148,7 @@ def members(req, pk, template="smsforum/members.html"):
             member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
             total_incoming_messages = total_incoming_messages + member.message_count
             member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
-            log = NodeSetLog.objects.filter(node=member,nodeset=village).order_by('-id')
+            log = VillageActivityLog.objects.filter(contact=member,village=village).order_by('-id')
             if (log):
                 member.date_joined = log[0].date
     context['village'] = village
@@ -228,9 +226,8 @@ def totals(context):
     return context
 
 def export_village_history(req, pk, format='csv'):
-    context = {}
     village = Village.objects.get(id=pk)
-    history = NodeSetLog.objects.filter(nodeset=village)
+    history = VillageActivityLog.objects.filter(village=village)
     if req.user.is_authenticated():
         return export(history, ['id','date','node','action'])
     return export(history, ['id','date','action'])
