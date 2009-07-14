@@ -445,7 +445,7 @@ class App(rapidsms.app.App):
             
             # ok, here we got just one
             assert(len(villages)==1)
-            msg.sender.add_to_parent(villages[0])
+            villages[0].add_children(msg.sender)
             rsp=_st(msg.sender, "join-success %(village)s") % {"village": village_names[0]}
             self.debug(rsp)
             self.__reply(msg,rsp)
@@ -659,7 +659,7 @@ class App(rapidsms.app.App):
             if len(villages)>0:
                 names = list()
                 for ville in villages:
-                    msg.sender.remove_from_parent(ville)
+                    ville.remove_children(msg.sender)
                     names.append(ville.name)
                 self.__reply(msg, "leave-success %(villages)s",
                              { "villages": ','.join(names)})

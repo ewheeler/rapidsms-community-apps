@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
-from django.db import models
+from datetime import datetime
+from django.db import models, transaction
 from apps.locations.models import Location
 from apps.nodegraph.models import NodeSet
 from datetime import datetime
 from apps.contacts.models import Contact
-
 
 class Village(NodeSet):
     # security masks
@@ -32,22 +32,23 @@ class Village(NodeSet):
     #################################
     # NodeSet overrides for logging #
     #################################
+    @transaction.commit_on_success
     def add_children(self,*sub_nodes):
         NodeSet.add_children(self, *sub_nodes)
         for n in sub_nodes:
             c=n._downcast(klass=Contact)
-            VillageActivityLog(village=self, contact=c, action='C').save()
+            MembershipLog(village=self, contact=c, action='C').save()
 
+    @transaction.commit_on_success
     def remove_children(self, *subnodes):
         NodeSet.remove_children(self,*subnodes)
         for n in subnodes:
             c=n._downcast(klass=Contact)
-            VillageActivityLog(village=self, contact=c, action='D').save()
+            MembershipLog(village=self, contact=c, action='D').save()
     
     ##############
     # properties #
     ##############
-
     def __get_sec_blast_member_only(self):
         return bool(self._security & self.__SEC_BLAST_MEMBER_ONLY)
 
@@ -127,7 +128,6 @@ class VillageName(models.Model):
 class Community(Village):
     pass
 
-
 # we don't currently log 'updates'
 # but maybe one day we'll want to...
 ACTION = (
@@ -136,7 +136,7 @@ ACTION = (
     ('D', 'Delete'),
 )
 
-class VillageActivityLog(models.Model):
+class MembershipLog(models.Model):
     date = models.DateTimeField(null=False, default = datetime.utcnow )
     village = models.ForeignKey(Village,null=True, related_name='parent') #can reference a deleted nodeset
     contact = models.ForeignKey(Contact,null=True, related_name='child') #can reference a deleted node

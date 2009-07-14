@@ -14,7 +14,7 @@ from django.template.defaultfilters import date as filter_date, time as filter_t
 
 @register.filter()
 def human_readable_action(action):
-    """Given a NodeSetLog Action, returns a human-readable interpretation of events"""
+    """Given a MessageLog Action, returns a human-readable interpretation of events"""
     if action == 'C':
         return "Join"
     elif action == 'D':

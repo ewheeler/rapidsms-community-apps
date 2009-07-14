@@ -300,3 +300,4 @@ class NodeSet(Node):
             return [l._downcast(klass) for l in leaves]
         else:
             return list(leaves)
+
