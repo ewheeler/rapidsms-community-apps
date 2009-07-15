@@ -8,6 +8,9 @@ from rapidsms.message import Message
 from rapidsms.connection import Connection
 from apps.nodegraph.models import Node
 from apps.locations.models import Location
+import math
+from rapidsms import utils
+import traceback
 
 # 
 # Definition of Contacts (people) and ChannelConnections (ways to contact 
@@ -44,35 +47,40 @@ class QuotaException(Exception):
 
     """
 
-    def __init__(self,message='',type=quota_type.SEND,period_remain=None):
-        self.message=message
+    def __init__(self,message=None,type=quota_type.SEND,period_remain=None):
         self.type=type
         self.remain=period_remain
         self.ts=datetime.utcnow()
         
-    def __unicode__(self):
-        msg=u'%s(%s): %s at %s' % (self.__class__.__name__,self.type,str(self.ts))
-        if self.period_remain is not None:
-            msg+=u'. %d minutes in quota period' % (self.remain.days*86400 + self.remain.seconds)
-        return msg
+        if message is None:
+            message = '%s(%s): %s at %s' % \
+                (self.__class__.__name__,self.type,str(self.ts))
+                
+            if self.period_remain is not None:
+                message+='. %d minutes in quota period' % \
+                    (self.remain.days*86400 + self.remain.seconds)
+        Exception.__init__(self,message)
+        
 
 class PermissionException(Exception):
     """
     Exception for going over a send or receive permissions
 
     """
-    def __init__(self,message='',type=permission_type.SEND):
-        self.message=message
-        self.type=type
+    def __init__(self,message=None,send=False, receive=False, ignore=False):
+        self.send=send
+        self.receive=receive
+        self.ignore=ignore
         
-    def __unicode__(self):
-        return u'%s: user does not have %s permission.' % (self.__class__.__name__,self.type)
+        if message is None:
+            message = '%s: perms: Send (%s)  Receive (%s) Ignore (%s)' % \
+                (self.__class__.__name__,self.send,self.receive,self.ignore)
+        Exception.__init__(self,message)
     
-
 #    
 # reimplementing stuff from Reporters to work with Node classes. 
-# bascically this should be agreed on and moved to core
-# TODO: harmonize
+# basically this should be agreed on and moved to core
+# TODO: harmonize with Reporters
 #
 class Contact(Node):
     """
@@ -143,7 +151,7 @@ class Contact(Node):
     # channel_connections[] -- is available via ForeignKey in ChannelConnection
     
     # Permissions and  Quota
-    # ----------------------
+    # 
     # There are 3 permissions stored in a bit mask. Properties on the 
     # contact object give simple 'perm_XXX' access to setting and reading these.
     # you shouldn't have to muck with '_permissions' directly.
@@ -156,6 +164,8 @@ class Contact(Node):
     # - 'IGNORE' -- Ignore should be interpreted by Apps as 'ignore this contact
     #               entirely'. E.g. if a Contact has IGNORE, just return False
     #               from 'App.handle' and do not respond.
+    # -  'ADMIN' -- Not used for anything right now but could indicate an admin
+    #               user who can do things others can't
     #
     # There are two quotas: Send and Receive, interpreted just like the 
     # permissions. They are expressed as '# messages/N-minutes (period)'
@@ -170,38 +180,16 @@ class Contact(Node):
     # TODO --normalize into a quota sub-table with 'send' and 'receive' entries?
     # worth it if we come up with more quota types, but won't worry about for now
     _quota_send_max = models.PositiveSmallIntegerField(default=0)
-    _quota_send_period = models.PositiveSmallIntegerField(default=0)
+    _quota_send_period = models.PositiveSmallIntegerField(default=0) # period in minutes
     _quota_send_period_begin = models.DateTimeField(null=True,blank=True)
     _quota_send_seen = models.PositiveSmallIntegerField(default=0) # num messages seen in current period
     _quota_receive_max = models.PositiveSmallIntegerField(default=0)
-    _quota_receive_period = models.PositiveSmallIntegerField(default=0)
-    _quota_receive_quota_period_begin = models.DateTimeField(null=True,blank=True)
+    _quota_receive_period = models.PositiveSmallIntegerField(default=0) # period in minutes
+    _quota_receive_period_begin = models.DateTimeField(null=True,blank=True)
     _quota_receive_seen = models.PositiveSmallIntegerField(default=0) # num messages seen in current period
 
-    """ Permissions for the webUI
-    class Meta:
-        ordering = ["last_name", "first_name"]
-        
-        # define a permission for this app to use the @permission_required
-        # decorator in reporter's views
-        # in the admin's auth section, we have a group called 'manager' whose
-        # users have this permission -- and are able to see this section
-        permissions = (
-            ("can_view", "Can view"),
-        )
-    """
     def __unicode__(self):
         return unicode(self.signature)
-
-    """
-    def __json__(self):
-    return {
-        "pk":         self.pk,
-        "identity":   self.identity,
-        "first_name": self.first_name,
-        "last_name":  self.last_name,
-        "str":        unicode(self) }
-    """
 
     #
     # Use the following to make sure quotas are enforced!!
@@ -239,6 +227,14 @@ class Contact(Node):
         NOTE: Preferred is not currently implemented!
         
         """
+        if self.perm_ignore or not self.perm_receive:
+            # read as 'Contact does not have right to receive messages'
+            raise PermissionException(
+                                        send=self.perm_send,
+                                        receive=self.perm_receive,
+                                        ignore=self.perm_ignore
+                                      )
+        
         if not self.under_quota_receive:
             # NOTE: to be strict we'd check this in the loop
             # but for efficiency we'll count all messages sent on all
@@ -255,10 +251,15 @@ class Contact(Node):
         else:
             connections=self.channel_connections.all()
 
+        # TODO: raise exception if no connections?
         try:
             for conn in connections:
                 self._quota_receive_seen+=1
-                Message(conn.connection, text).send()
+                try:
+                    Message(conn.connection, text).send()
+                except Exception:
+                    # TODO: fix the finding a backend mess..
+                    pass
         finally:
             self.save()
 
@@ -268,8 +269,17 @@ class Contact(Node):
         sent by the Contact, and increment their 'send' quota
 
         """
+        
+        if self.perm_ignore or not self.perm_send:
+            # read as 'Contact does not have right to send messages'
+            raise PermissionException(
+                                        send=self.perm_send,
+                                        receive=self.perm_receive,
+                                        ignore=self.perm_ignore
+                                      )
+        
         if not self.under_quota_send:
-            raise QuotaException('User over receive quota',quota_type.SEND)
+            raise QuotaException('User over Send quota',quota_type.SEND)
 
         self._quota_send_seen+=1
         self.save()
@@ -288,12 +298,23 @@ class Contact(Node):
     locale=property(__get_locale,__set_locale)
 
     def __get_age_years(self):
+        """
+        Always a float to account for things 6 month old
+        
+        6 months = 0.5 age_years
+        
+        """
         if self.age_months is None:
             return None
-        return self.age_months*12
+        return self.age_months/12.0
 
     def __set_age_years(self,value):
-        self.age_months=value*12
+        """
+        You may pass a float, but is always
+        stored as rounded-down integer months
+        
+        """
+        self.age_months=int(math.floor(value*12))
     age_years=property(__get_age_years,__set_age_years)
 
     def __can_receive(self):
@@ -306,7 +327,9 @@ class Contact(Node):
         permission and quota_type.
 
         """
-        return self.perm_receive and self.under_quota_receive
+        return not self.perm_ignore and \
+            self.perm_receive and \
+            self.under_quota_receive
     can_receive=property(__can_receive)
 
     def __get_can_send(self):
@@ -319,7 +342,9 @@ class Contact(Node):
         permission and quota_type.
 
         """
-        return self.perm_send and self.under_quota_send
+        return not self.perm_ignore and \
+            self.perm_send and \
+            self.under_quota_send
     can_send=property(__get_can_send)
 
     def __get_perm_receive(self):
@@ -348,11 +373,6 @@ class Contact(Node):
     perm_send=property(__get_perm_send,__set_perm_send)
 
     def __get_perm_admin(self):
-        """
-        Returns state of 'send' permission, regardless
-        of quota_type.
-
-        """
         return bool(self._permissions & self.__PERM_ADMIN)
 
     def __set_perm_admin(self,val):
@@ -382,7 +402,7 @@ class Contact(Node):
                  (including the case where there is no quota set)
         
         """
-        remain=self.__quota_period_remain(type)
+        remain=self.__get_quota_period_remain(type)
         
         if remain is not None and \
                 abs(remain) != remain:
@@ -396,14 +416,15 @@ class Contact(Node):
             return False
 
     def set_quota(self, type=quota_type.SEND, max=15, \
-                      period=timedelta(seconds=15*60)):
+                      period=15):
         """
         Set's quota and resets current period and count.
 
         """
+        
         setattr(self,'_quota_%s_max' % type,max)
         setattr(self,'_quota_%s_period' % type,period)
-        setattr(self,'_quota_%s_period_begin' % type, None)
+        setattr(self,'_quota_%s_period_begin' % type, datetime.utcnow())
         setattr(self,'_quota_%s_seen' % type, 0)
 
     def __get_quota_send(self):
@@ -411,16 +432,16 @@ class Contact(Node):
         returns a tuple of (max, period)
 
         """
-        return (self._quota_send_max,self._quota_send_priod)
+        return (self._quota_send_max,self._quota_send_period)
 
     def __set_quota_send(self,val):
         """
-        Takes a tupe (int: max, timedelta: period)
+        Takes a tupe (int: max, int: period minutes)
         or None to turn off quota
         
         """
         if val is None:
-            self.set_quota_send(quota_type.SEND,period=0)
+            self.set_quota(type=quota_type.SEND,period=0)
         else:
             self.set_quota(quota_type.SEND,val[0],val[1])
     quota_send=property(__get_quota_send,__set_quota_send)
@@ -434,7 +455,7 @@ class Contact(Node):
 
     def __set_quota_receive(self,val):
         if val is None:
-            self.set_quota_send(quota_type.RECEIVE,period=0)
+            self.set_quota(type=quota_type.RECEIVE,period=0)
         else:
             self.set_quota(quota_type.RECEIVE,val[0],val[1])
     quota_receive=property(__get_quota_receive,__set_quota_receive)
@@ -452,7 +473,7 @@ class Contact(Node):
         return self._get_has_quota(quota_type.RECEIVE)
     has_quota_receive=property(__get_has_quota_receive)
 
-    def _get_quota_head_room(self,type=quota_type.SEND):
+    def _get_quota_headroom(self,type=quota_type.SEND):
         """
         how many more messages can go under current quota
         OR None if infinite quota.
@@ -467,8 +488,8 @@ class Contact(Node):
         seen=getattr(self,'_quota_%s_seen' % type)
         max=getattr(self,'_quota_%s_max' % type)
         room=max-seen
-        if max-seen>=0:
-            return max
+        if room>0:
+            return room
         else:
             return 0
 
@@ -476,7 +497,7 @@ class Contact(Node):
         """
         PRIVATE VERSION needed to avoid recursion
 
-        Return a timedelta object of remaining time
+        Returns remaining time in minutes (rounded down) 
         in current period or None if infinite (no quota)
 
         Private version is also called by __check_quota_period
@@ -485,10 +506,10 @@ class Contact(Node):
         if not getattr(self,'has_quota_%s' % type):
             return None
         
-        num_seen=getattr(self,'_quota_%s_seen' % type)
         period_begin=getattr(self,'_quota_%s_period_begin' % type)
-        period=getattr(self,'_quota_%s_period' % type)
-        return (datetime.utcnow()+period)-period_begin
+        period=timedelta(minutes=\
+                         getattr(self,'_quota_%s_period' % type))
+        return utils.timedelta_as_minutes(period-(datetime.utcnow()-period_begin))
         
     def _get_quota_period_remain(self,type=quota_type.SEND):
         """
@@ -502,7 +523,7 @@ class Contact(Node):
         
     def __get_under_quota_send(self):
         """Return number of messages under quota or 0 if over"""
-        under=self._get_quota_head_room(type=quota_type.SEND)
+        under=self._get_quota_headroom(type=quota_type.SEND)
         if under is None:
             return True
         return bool(under)
@@ -510,18 +531,18 @@ class Contact(Node):
 
     def __get_under_quota_receive(self):
         """Return number of messages under quota or 0 if over"""
-        under=self._get_quota_head_room(type=quota_type.RECEIVE)
+        under=self._get_quota_headroom(type=quota_type.RECEIVE)
         if under is None:
             return True
         return bool(under)
     under_quota_receive=property(__get_under_quota_receive)
 
     def __get_period_remain_quota_send(self):
-        return self._get_quota_period_remain(self,quota_type.SEND)
+        return self._get_quota_period_remain(type=quota_type.SEND)
     period_remain_quota_send=property(__get_period_remain_quota_send)
 
     def __get_period_remain_quota_receive(self):
-        return self._get_quota_period_remain(self,quota_type.RECEIVE)
+        return self._get_quota_period_remain(type=quota_type.RECEIVE)
     period_remain_quota_receive=property(__get_period_remain_quota_receive)
 
     def get_signature(self, max_len=None,for_message=None):
@@ -558,9 +579,20 @@ class Contact(Node):
         # If that doesn't fit, return ''
 
         
-        name_part=self.common_name
-        if len(name_part.strip())==0:
-            name_part=u' '.join([self.given_name,self.family_name]).strip()
+        name_part= (None if utils.empty_str(self.common_name)
+                    else self.common_name.strip())
+        
+        if utils.empty_str(name_part):
+            gn = (None if utils.empty_str(self.given_name) 
+                  else self.given_name.strip())
+            fn = (None if utils.empty_str(self.family_name) 
+                  else self.family_name.strip())
+            if gn is not None and fn is not None:
+                name_part=u'%s %s' % (gn,fn)
+            elif gn is not None:
+                name_part=gn
+            else:
+                name_part=fn
 
         # default to DB id so you can at least look 'em up
         id_part=str(self.id) 
@@ -580,7 +612,7 @@ class Contact(Node):
             id_part=cc.user_identifier
         
         # make sig
-        if len(name_part)>0:
+        if not utils.empty_str(name_part):
             sig=': '.join([name_part, id_part])
         else:
             sig=id_part
@@ -655,7 +687,7 @@ class ChannelConnection(models.Model):
 
 #
 # Module level methods (more or less equiv to Java static methods)
-# Read online that this is a cleaner way to do this thatn @classmethod
+# Read online that this is a cleaner way to do this than @classmethod
 # or @staticmethod which can have weird calling behavior
 #
 def communication_channel_from_message(msg, save=True):

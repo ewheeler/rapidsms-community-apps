@@ -12,13 +12,11 @@ from rapidsms.parsers.bestmatch import BestMatch, MultiMatch
 import gettext
 import traceback
 from apps.smsforum.models import Village, villages_for_contact
-import apps.contacts.models as contacts_models
-from apps.contacts.models import Contact, contact_from_message
-from apps.logger.models import CodeSet, Code
+from apps.contacts.models import Contact
 from pygsm import gsmcodecs
 
 MAX_LATIN_SMS_LEN = 160 
-MAX_LATIN_BLAST_LEN = MAX_LATIN_SMS_LEN - 20 # resere 20 chars for us
+MAX_LATIN_BLAST_LEN = MAX_LATIN_SMS_LEN - 20 # reserve 20 chars for us
 MAX_UCS2_SMS_LEN = 70 
 MAX_UCS2_BLAST_LEN = MAX_UCS2_SMS_LEN - 10 # reserve 10 chars for info
 MAX_VILLAGE_NAME_LEN = 40
@@ -186,12 +184,6 @@ class App(rapidsms.app.App):
     #####################
     # Message Lifecycle #
     #####################
-    def parse(self, msg):
-
-        msg.sender = contact_from_message(msg,self.router)
-        self.info('Identified user: %r,%s with connections: %s', msg.sender, msg.sender.locale, \
-                      ', '.join([repr(c) for c in msg.sender.channel_connections.all()]))
-    
     def handle(self, msg):
         self.__log_incoming_message(msg, villages_for_contact(msg.sender))
         self.debug("In handle smsforums: %s" % msg.text)
@@ -215,9 +207,6 @@ class App(rapidsms.app.App):
         # commands start with '.' '*' or '#'--the cmd markers. e.g. '.join <something>'
         # addresses are of form cmd_marker address cmd_mark--e.g. '.jeff. hello'
         #
-        is_command=False
-        is_dm=False
-        cmd=None
         address=None
         rest=None
 
@@ -419,7 +408,6 @@ class App(rapidsms.app.App):
         return True
 
     def join(self,msg,arg=None):
-        suggest=False
         if arg is None or len(arg)==0:
             return self.__suggest_villages(msg)
         else:
