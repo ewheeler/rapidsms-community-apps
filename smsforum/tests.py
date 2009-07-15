@@ -3,15 +3,9 @@
 
 from rapidsms.tests.scripted import TestScript
 import apps.smsforum.app as smsforum_app
-import apps.smsforum.app as smsforum_app
 import apps.logger.app as logger_app
 import apps.contacts.app as contacts_app
 from app import App
-from django.core.management.commands.dumpdata import Command
-import time
-import random
-import os
-from datetime import datetime
  
 class TestApp (TestScript):
     apps = (smsforum_app.App, contacts_app.App, logger_app.App, App )
