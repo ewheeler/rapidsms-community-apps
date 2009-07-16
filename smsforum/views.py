@@ -139,15 +139,18 @@ def members(req, pk, template="smsforum/members.html"):
     village = Village.objects.get(id=pk)
     members = village.flatten(klass=Contact)
     total_incoming_messages = 0
+    total_incoming_messages_this_week = 0
     for member in members:
         connections = ChannelConnection.objects.filter(contact=member)
         if len(connections) > 0:
             # we can always click on the user to see a list of all their connections
             member.phone_number = connections[0].user_identifier
             last_week = ( datetime.now()-timedelta(weeks=1) )
-            member.message_count = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
+            member.message_count = IncomingMessage.objects.filter(identity=member.phone_number).count()
+            member.message_count_this_week = IncomingMessage.objects.filter(identity=member.phone_number,received__gte=last_week).count()
             total_incoming_messages = total_incoming_messages + member.message_count
-            member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number,sent__gte=last_week).count()
+            total_incoming_messages_this_week = total_incoming_messages_this_week + member.message_count_this_week
+            member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number).count()
             log = MembershipLog.objects.filter(contact=member,village=village).order_by('-id')
             if (log):
                 member.date_joined = log[0].date
@@ -155,6 +158,7 @@ def members(req, pk, template="smsforum/members.html"):
     context['members'] = paginated(req, members)
     context['member_count'] = len(members)
     context['incoming_message_count'] = total_incoming_messages
+    context['incoming_message_count_this_week'] = total_incoming_messages_this_week
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
     format_messages_in_context(req, context, messages)
     return render_to_response(req, template, context)
@@ -179,9 +183,10 @@ def member(req, pk, template="smsforum/member.html"):
         connections = ChannelConnection.objects.get(contact=contact)
         contact.phone_number = connections.user_identifier
         last_week = ( datetime.now()-timedelta(weeks=1) )
-        messages = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received')
+        messages = IncomingMessage.objects.filter(identity=contact.phone_number).order_by('-received')
         contact.message_count = len(messages)
-        contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number,sent__gte=last_week).count()
+        contact.message_count_this_week = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received').count()
+        contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number).count()
         format_messages_in_context(req, context, messages)
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
@@ -222,6 +227,8 @@ def totals(context):
     context['village_count'] = Village.objects.all().count()
     context['member_count'] = Contact.objects.all().count()
     context['incoming_message_count'] = IncomingMessage.objects.all().count()
+    last_week = ( datetime.now()-timedelta(weeks=1) )
+    context['incoming_message_count_this_week'] = IncomingMessage.objects.filter(received__gte=last_week).count()
     context['outgoing_message_count'] = OutgoingMessage.objects.all().count()
     return context
 
