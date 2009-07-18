@@ -182,10 +182,12 @@ def member(request, pk, template="smsforum/member.html"):
     try:
         connections = ChannelConnection.objects.get(contact=contact)
         contact.phone_number = connections.user_identifier
-        last_week = ( datetime.now()-timedelta(weeks=1) )
         messages = IncomingMessage.objects.filter(identity=contact.phone_number).order_by('-received')
         contact.message_count = len(messages)
+        last_week = ( datetime.now()-timedelta(weeks=1) )
+        last_month = ( datetime.now()-timedelta(days=30) )
         contact.message_count_this_week = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received').count()
+        contact.message_count_this_month = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_month).order_by('-received').count()
         contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number).count()
         format_messages_in_context(request, context, messages)
     except ChannelConnection.DoesNotExist:

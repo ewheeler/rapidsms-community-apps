@@ -24,7 +24,8 @@
 				<th scope="col">{% trans "Gender" %}</th>
                 <th scope="col">{% trans "Age" %}</th>
                 <th scope="col">{% trans "Sent to Tostan" %}</th>
-                <th scope="col">{% trans "Sent to Tostan This Week" %}</th>
+                <th scope="col">{% trans "Sent This Week" %}</th>
+                <th scope="col">{% trans "Sent This Month" %}</th>
                 <th scope="col">{% trans "Received from Tostan" %}</th>
 			</tr>
 		</thead>
@@ -43,6 +44,7 @@
                 <td>{% if member.age %}{{ member.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count %}{{ member.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count_this_week %}{{ member.message_count_this_week }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if member.message_count_this_month %}{{ member.message_count_this_month }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.received_message_count %}{{ member.received_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
 			</tr>
 		</tbody>
