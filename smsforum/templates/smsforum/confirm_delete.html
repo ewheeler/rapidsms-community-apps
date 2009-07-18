@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}Delete Village{% endblock %}
+
+{% block content %}
+
+
+<div class="module">
+    <p></p>
+
+	<h2>{% trans "Are you sure? " %}</h2>
+
+    <p></p>
+	Are you sure you want to delete the village called "{{village}}"? All of the associated data will be removed permanently.
+    <p></p>
+
+	<form action="" method="post">
+	<div>
+	<input type="hidden" name="confirm_delete" value="yes" />
+	<input type="submit" value="{% trans "Yes, I'm sure" %}" />
+	</div>
+	</form>
+
+</div>
+
+
+
+{% endblock %}
+

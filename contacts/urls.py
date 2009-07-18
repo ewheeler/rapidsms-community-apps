@@ -9,5 +9,6 @@ urlpatterns = patterns('',
     url(r'^contacts/csv/$',            views.csv),
     url(r'^contact/add/$',             views.add_contact),
     url(r'^contact/edit/(?P<pk>\d+)$', views.edit_contact),
+    url(r'^contact/delete/(?P<pk>\d+)$', views.delete_contact),
 )
 

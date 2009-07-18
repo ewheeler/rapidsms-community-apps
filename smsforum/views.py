@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 from django.utils.translation import ugettext as _
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 
@@ -17,11 +17,11 @@ from utilities.export import export
 
 from datetime import datetime, timedelta
 
-def index(req, template="smsforum/index.html"):
+def index(request, template="smsforum/index.html"):
     context = {}
-    if req.method == 'POST':    
+    if request.method == 'POST':    
         # now iterate through all the messages you learned about
-        for i in req.POST.getlist('message'):
+        for i in request.POST.getlist('message'):
             id = int(i)
             m = IncomingMessage.objects.select_related().get(id=id)
             # GATHER EXISTING TAGS
@@ -38,10 +38,10 @@ def index(req, template="smsforum/index.html"):
             if len(notes) > 0: note = notes[0]
             
             # CHECK FOR SUBMITTED VALUES
-            if 'flagged_'+ str(id) in req.POST: flag_bool = True
+            if 'flagged_'+ str(id) in request.POST: flag_bool = True
             else: flag_bool = False
-            note_txt = req.POST['text_'+str(id)]
-            code_txt = req.POST['code_'+str(id)]
+            note_txt = request.POST['text_'+str(id)]
+            code_txt = request.POST['code_'+str(id)]
             
             # MAP SUBMITTED VALUES TO NEW DB STATE
             if flag is None:
@@ -84,13 +84,13 @@ def index(req, template="smsforum/index.html"):
         village.member_count = len( members )
         last_week = ( datetime.now()-timedelta(weeks=1) )
         village.message_count = IncomingMessage.objects.filter(domain=village,received__gte=last_week).count()
-    context['villages'] = paginated(req, villages)
+    context['villages'] = paginated(request, villages)
     messages = IncomingMessage.objects.select_related().order_by('-received')
-    context.update( format_messages_in_context(req, context, messages) )
+    context.update( format_messages_in_context(request, context, messages) )
     context.update( totals(context) )
-    return render_to_response(req, template, context)
+    return render_to_response(request, template, context)
 
-def format_messages_in_context(req, context, messages):
+def format_messages_in_context(request, context, messages):
     cmd_messages = []
     blast_messages = []
     for msg in messages:
@@ -104,9 +104,9 @@ def format_messages_in_context(req, context, messages):
         if m is None: blast_messages.append(msg)
         else: cmd_messages.append(msg)
     if len(cmd_messages)>0:
-        context['cmd_messages'] = paginated(req, cmd_messages, per_page=5, prefix="cmd")
+        context['cmd_messages'] = paginated(request, cmd_messages, per_page=5, prefix="cmd")
     if len(blast_messages)>0:
-        context['blast_messages'] = paginated(req, blast_messages, per_page=10, prefix="blast")
+        context['blast_messages'] = paginated(request, blast_messages, per_page=10, prefix="blast")
     context['codes'] = Code.objects.filter(set=CodeSet.objects.get(name="TOSTAN_CODE"))
     return context
 
@@ -126,15 +126,15 @@ def SetCode(tag, str):
     tag.code = code
     return tag
 
-def village_history(req, pk, template="smsforum/history.html"):
+def village_history(request, pk, template="smsforum/history.html"):
     context = {}
     village = Village.objects.get(id=pk)
     history = MembershipLog.objects.filter(village=village).select_related('contact')
     context['village'] = village
-    context['history'] = paginated(req, history)
-    return render_to_response(req, template, context)
+    context['history'] = paginated(request, history)
+    return render_to_response(request, template, context)
 
-def members(req, pk, template="smsforum/members.html"):
+def members(request, pk, template="smsforum/members.html"):
     context = {}
     village = Village.objects.get(id=pk)
     members = village.flatten(klass=Contact)
@@ -155,19 +155,19 @@ def members(req, pk, template="smsforum/members.html"):
             if (log):
                 member.date_joined = log[0].date
     context['village'] = village
-    context['members'] = paginated(req, members)
+    context['members'] = paginated(request, members)
     context['member_count'] = len(members)
     context['incoming_message_count'] = total_incoming_messages
     context['incoming_message_count_this_week'] = total_incoming_messages_this_week
     messages = IncomingMessage.objects.filter(domain=village).order_by('-received')
-    format_messages_in_context(req, context, messages)
-    return render_to_response(req, template, context)
+    format_messages_in_context(request, context, messages)
+    return render_to_response(request, template, context)
 
-def member(req, pk, template="smsforum/member.html"):
+def member(request, pk, template="smsforum/member.html"):
     context = {}
     contact = Contact.objects.get(id=pk)
-    if req.method == "POST":
-        if req.POST["message_body"]:
+    if request.method == "POST":
+        if request.POST["message_body"]:
             pass
             """
             be = self.router.get_backend(pconn.backend.slug)
@@ -187,30 +187,48 @@ def member(req, pk, template="smsforum/member.html"):
         contact.message_count = len(messages)
         contact.message_count_this_week = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received').count()
         contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number).count()
-        format_messages_in_context(req, context, messages)
+        format_messages_in_context(request, context, messages)
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
         pass
     # if you decide to add 'date_joined', remember you need to do it for all villages
     # this person is member of
     context['member'] = contact
-    return render_to_response(req, template, context)
+    return render_to_response(request, template, context)
 
 @login_required
-def edit_village(req, pk, template="smsforum/edit.html"):
+def edit_village(request, pk, template="smsforum/edit.html"):
     context = {}
-    form = get_object_or_404(Village, id=pk)
-    if req.method == "POST":
-        f = VillageForm(req.POST, instance=form)
+    village = get_object_or_404(Village, id=pk)
+    if request.method == "POST":
+        f = VillageForm(request.POST, instance=village)
         f.save()
-    context['form'] = VillageForm(instance=form)
+    context['form'] = VillageForm(instance=village)
     context['title'] = _("Edit Village")
-    return render_to_response(req, template, context)
+    context['village'] = village
+    return render_to_response(request, template, context)
     
-def add_village(req, template="smsforum/add.html"):
+@login_required
+def delete_village(request, pk, template="smsforum/confirm_delete.html"):
     context = {}
-    if req.method == 'POST':
-        form = VillageForm(req.POST)
+    village = get_object_or_404(Village, id=pk)    
+    if request.method == "POST":
+        if request.POST["confirm_delete"]: # The user has already confirmed the deletion.
+            #workaround for django bug. 
+            #marginally useful, since we don't really want to delete the logs ever.
+            logs = MembershipLog.objects.filter(village=village)
+            for log in logs:
+                log.village = None
+                log.save()
+            village.delete()
+            return HttpResponseRedirect("../../villages")
+    context['village'] = village
+    return render_to_response(request, template, context)
+
+def add_village(request, template="smsforum/add.html"):
+    context = {}
+    if request.method == 'POST':
+        form = VillageForm(request.POST)
         if form.is_valid():
             v,created =Village.objects.get_or_create( name=form.cleaned_data['name'] )
             if created:
@@ -221,7 +239,7 @@ def add_village(req, template="smsforum/add.html"):
                 context['status'] = _("Form invalid")
     context['form'] = VillageForm()
     context['title'] = _("Add Village")
-    return render_to_response(req, template, context)    
+    return render_to_response(request, template, context)    
 
 def totals(context):
     context['village_count'] = Village.objects.all().count()
@@ -232,17 +250,17 @@ def totals(context):
     context['outgoing_message_count'] = OutgoingMessage.objects.all().count()
     return context
 
-def export_village_history(req, pk, format='csv'):
+def export_village_history(request, pk, format='csv'):
     village = Village.objects.get(id=pk)
     history = MembershipLog.objects.filter(village=village)
-    if req.user.is_authenticated():
+    if request.user.is_authenticated():
         return export(history, ['id','date','node','action'])
     return export(history, ['id','date','action'])
 
-def add_member(req, village_id=0, template="contacts/add.html"):
+def add_member(request, village_id=0, template="contacts/add.html"):
     context = {}
-    if req.method == 'POST':
-        form = ContactForm(req.POST)
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
         if form.is_valid():
             c = form.save()
             if village_id != 0:
@@ -252,4 +270,4 @@ def add_member(req, village_id=0, template="contacts/add.html"):
             context['error'] = form.errors
     context['form'] = ContactForm()
     context['title'] = _("Add Member")
-    return render_to_response(req, template, context)    
+    return render_to_response(request, template, context)    
