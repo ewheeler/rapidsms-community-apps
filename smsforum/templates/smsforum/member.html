@@ -23,6 +23,7 @@
 				{% endif %}
 				<th scope="col">{% trans "Gender" %}</th>
                 <th scope="col">{% trans "Age" %}</th>
+                <th scope="col">{% trans "Date Joined" %}</th>
                 <th scope="col">{% trans "Sent to Tostan" %}</th>
                 <th scope="col">{% trans "Sent This Week" %}</th>
                 <th scope="col">{% trans "Sent This Month" %}</th>
@@ -42,6 +43,7 @@
 				{% endif %}
                 <td>{% if member.gender %}{{ member.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.age %}{{ member.age }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if member.date_joined %}{{ member.date_joined|date:"D M d H:i" }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count %}{{ member.message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count_this_week %}{{ member.message_count_this_week }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if member.message_count_this_month %}{{ member.message_count_this_month }}{% else %}<span class="na">n/a</span>{% endif %}</td>

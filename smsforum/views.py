@@ -189,6 +189,10 @@ def member(request, pk, template="smsforum/member.html"):
         contact.message_count_this_week = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_week).order_by('-received').count()
         contact.message_count_this_month = IncomingMessage.objects.filter(identity=contact.phone_number,received__gte=last_month).order_by('-received').count()
         contact.received_message_count = OutgoingMessage.objects.filter(identity=contact.phone_number).count()
+        # note: this defaults to the first date the member joined any community in the system
+        log = MembershipLog.objects.filter(contact=contact).order_by('-id')
+        if (log):
+            contact.date_joined = log[0].date
         format_messages_in_context(request, context, messages)
     except ChannelConnection.DoesNotExist:
         #this is a contact without a phone number
