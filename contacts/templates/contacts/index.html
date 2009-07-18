@@ -23,9 +23,9 @@
 		</thead>
 		<tbody>{% if contacts.object_list %}{% for contact in contacts.object_list %}
 			<tr>
-				<td><a href="/contact/{{ contact.pk }}">{{ contact.pk }}</a></td>
+				<td>{{ contact.pk }}</td>
                 {% if user.is_staff %}
-	                <td><a href="/contact/{{ contact.pk }}"{% if contact.common_name %}>{{ contact.common_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
+	                <td><a href="/contact/edit/{{ contact.pk }}"{% if contact.common_name %}>{{ contact.common_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
 					<td>{% if contact.given_name %}{{ contact.given_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
 					<td>{% if contact.family_name %}{{ contact.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
 	                <td>{% if contact.phone_number %}{{ contact.phone_number }}{% else %}<span class="na">n/a</span>{% endif %}</td>
