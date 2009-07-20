@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^village/(?P<pk>\d+)/history/csv$',         views.export_village_history),
     url(r'^member/(?P<pk>\d+)$',                      views.member),
     url(r'^village/(?P<village_id>\d+)/member/add$',  views.add_member),
-    url(r'^member/edit/(?P<pk>\d+)$',                 edit_contact),
+    url(r'^member/edit/(?P<pk>\d+)$',                 views.edit_member),
     url(r'^i18n/',                                    include('django.conf.urls.i18n')),
     #url(r'^community/add$',                          views.add_community),
 )

@@ -12,7 +12,7 @@ from apps.smsforum.forms import *
 from apps.smsforum.app import CMD_MESSAGE_MATCHER
 from apps.logger.models import *
 # from apps.contacts.models import *
-from apps.contacts.forms import ContactForm
+from apps.contacts.forms import GSMContactForm
 from utilities.export import export
 
 from datetime import datetime, timedelta
@@ -266,7 +266,7 @@ def export_village_history(request, pk, format='csv'):
 def add_member(request, village_id=0, template="contacts/add.html"):
     context = {}
     if request.method == 'POST':
-        form = ContactForm(request.POST)
+        form = GSMContactForm(request.POST)
         if form.is_valid():
             c = form.save()
             if village_id != 0:
@@ -274,6 +274,25 @@ def add_member(request, village_id=0, template="contacts/add.html"):
             context['status'] = _("Member '%(member_name)s' successfully created" % {'member_name':c.signature} )
         else:
             context['error'] = form.errors
-    context['form'] = ContactForm()
+    context['form'] = GSMContactForm()
     context['title'] = _("Add Member")
     return render_to_response(request, template, context)    
+
+@login_required
+def edit_member(request, pk, template="contacts/edit.html"):
+    context = {}
+    contact = get_object_or_404(Contact, id=pk)
+    if request.method == "POST":
+        form = GSMContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            context['status'] = _("Member '%(contact_name)s' successfully updated" % \
+                                {'contact_name':contact.signature} )
+        else:
+            context['error'] = form.errors
+    else:
+        form = GSMContactForm(instance=contact)
+    context['form'] = form
+    context['title'] = _("Edit Member") + " " + contact.signature
+    context['contact'] = contact
+    return render_to_response(request, template, context)

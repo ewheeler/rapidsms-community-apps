@@ -3,21 +3,56 @@ from django.forms import ModelForm
 from apps.contacts.models import *
 from django.db import transaction
 
-class ContactForm(ModelForm):
-     perm_send = forms.BooleanField(required=False, label="Can blast messages")
-     perm_receive = forms.BooleanField(required=False, label="Can receive messages")
-     perm_ignore = forms.BooleanField(required=False, label="Is spam number")    
-     age = forms.IntegerField(required=False, label="Age in Years")    
-     phone_number = forms.IntegerField(required=False, label="Phone Number")    
-     communication_channel = forms.ModelChoiceField(CommunicationChannel.objects, required=False)    
-     
-     class Meta:
-         model = Contact
-         fields = ('common_name','given_name','family_name','gender')
+class BasicContactForm(ModelForm):
+    perm_send = forms.BooleanField(required=False, label="Can blast messages")
+    perm_receive = forms.BooleanField(required=False, label="Can receive messages")
+    perm_ignore = forms.BooleanField(required=False, label="Is spam number")    
+    age_years = forms.IntegerField(required=False, label="Age in Years")
     
-     @transaction.commit_on_success
-     def save(self):
-        contact = super(ContactForm, self).save()
+    class Meta:
+        model = Contact
+        fields = ('common_name','given_name','family_name','gender')
+   
+    def __init__(self, data=None, instance=None):
+        super(BasicContactForm, self).__init__(data=data, instance=instance)
+        if data is not None:
+            set = lambda x: x in data and True or False
+            self.fields['perm_send'].value = set( 'perm_send' )
+            self.fields['perm_receive'].value = set( 'perm_receive' )
+            self.fields['perm_ignore'].value = set( 'perm_ignore' )
+            self.fields['age_years'].value = data['age_years']
+        if instance is not None:
+            self.fields['perm_send'].initial = instance.perm_send
+            self.fields['perm_receive'].initial = instance.perm_receive
+            self.fields['perm_ignore'].initial = instance.perm_ignore
+            self.fields['age_years'].initial = instance.age_years
+
+    @transaction.commit_on_success
+    def save(self, force_insert=False, force_update=False, commit=True):
+        m = super(BasicContactForm, self).save(commit=False)
+        m.perm_send = self.fields['perm_send'].value
+        m.perm_receive = self.fields['perm_receive'].value
+        m.perm_ignore = self.fields['perm_ignore'].value
+        if self.fields['age_years'].value:
+            m.age_years = float( self.fields['age_years'].value )
+        if commit:
+            m.save()
+        return m
+
+class ContactWithChannelForm(BasicContactForm):
+    phone_number = forms.IntegerField(required=False, label="Phone Number")
+    communication_channel = forms.ModelChoiceField(CommunicationChannel.objects, required=False)
+     
+    def __init__(self, data=None, instance=None):
+        super(ContactWithChannelForm, self).__init__(data=data, instance=instance)
+        conns = ChannelConnection.objects.filter(contact=instance)
+        if conns:
+            self.fields['phone_number'].initial = conns[0].user_identifier
+            self.fields['communication_channel'].initial = conns[0].communication_channel
+    
+    @transaction.commit_on_success
+    def save(self):
+        contact = super(ContactWithChannelForm, self).save()
         if 'phone_number' in self.cleaned_data and self.cleaned_data['phone_number']:
             conns = ChannelConnection.objects.filter(contact=contact)
             if not conns:
@@ -34,38 +69,37 @@ class ContactForm(ModelForm):
             if conns: conns.delete()            
         return contact
 
-     def clean(self):
+    def clean(self):
          cleaned_data = self.cleaned_data
          if 'phone_number' in cleaned_data and cleaned_data['phone_number']: 
              if 'communication_channel' not in cleaned_data or not cleaned_data['communication_channel']:
                  # don't need to set the communication channel if there is only one in the system
                  raise forms.ValidationError("If you specify phone number, you must also add communication channel")
          return cleaned_data;
-     
-#gets/sets ContactForm with correct permissions
-def get_contact_form(instance):
-    form = ContactForm(instance=instance)
-    form.fields['perm_send'].initial = instance.perm_send
-    form.fields['perm_receive'].initial = instance.perm_receive
-    form.fields['perm_ignore'].initial = instance.perm_ignore
-    form.fields['age'].initial = instance.age_years
-    form.fields['phone_number'].initial = instance.age_years
-    conns = ChannelConnection.objects.filter(contact=instance)
-    if conns:
-        form.fields['phone_number'].initial = conns[0].user_identifier
-        form.fields['communication_channel'].initial = conns[0].communication_channel
-    return form
 
-# doesn't check for whether this contact exists already
-def create_contact_if_valid(post, contact):
-    # if no value posted, set to false
-    contact = ContactForm(post, instance=contact)
-    set = lambda x: x in post and True or False
-    contact.perm_send = set( 'perm_send' )
-    contact.perm_receive = set( 'perm_receive' )
-    contact.perm_ignore = set( 'perm_ignore' )
-    contact.age_years = post['age']
-    if not contact.is_valid():
+class GSMContactForm(BasicContactForm):
+    phone_number = forms.IntegerField(required=False, label="Phone Number")
+    communication_channel = None
+
+    def __init__(self, data=None, instance=None):
+        super(GSMContactForm, self).__init__(data=data, instance=instance)
+        conns = ChannelConnection.objects.filter(contact=instance)
+        if conns:
+            self.fields['phone_number'].initial = conns[0].user_identifier
+
+    @transaction.commit_on_success
+    def save(self):
+        contact = super(GSMContactForm, self).save()
+        # keep default channelconnection
+        # unless none exists, in which case create default one
+        if 'phone_number' in self.cleaned_data and self.cleaned_data['phone_number']:
+            # this is rather hack-ish
+            channel = CommunicationChannel.objects.get(backend_slug__icontains='gsm')
+            conns = ChannelConnection.objects.filter(contact=contact, communication_channel=channel)
+            if not conns:
+                conn = ChannelConnection( contact=contact, communication_channel=channel )
+            else:
+                conn = conns[0]
+            conn.user_identifier=self.cleaned_data['phone_number']
+            conn.save()
         return contact
-    contact.save()
-    return contact

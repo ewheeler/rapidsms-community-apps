@@ -28,13 +28,13 @@ def csv(request, format='csv'):
 def add_contact(request, template="contacts/add.html"):
     context = {}
     if request.method == 'POST':
-        form = ContactForm(request.POST)
+        form = GSMContactForm(request.POST)
         if form.is_valid():
             c = form.save()
             context['status'] = _("Contact '%(member_name)s' successfully created" % {'member_name':c.signature} )
         else:
             context['error'] = form.errors
-    context['form'] = ContactForm()
+    context['form'] = GSMContactForm()
     context['title'] = _("Add Member")
     return render_to_response(request, template, context)    
 
@@ -43,12 +43,15 @@ def edit_contact(request, pk, template="contacts/edit.html"):
     context = {}
     contact = get_object_or_404(Contact, id=pk)
     if request.method == "POST":
-        form = create_contact_if_valid(request.POST, contact)
-        context['error'] = form.errors
-        context['status'] = _("Contact '%(contact_name)s' successfully updated" % \
-                            {'contact_name':contact.signature} )
+        form = GSMContactForm(request.POST, contact)
+        if form.is_valid():
+            form.save()
+            context['status'] = _("Contact '%(contact_name)s' successfully updated" % \
+                                {'contact_name':contact.signature} )
+        else:
+            context['error'] = form.errors
     else:
-        form = get_contact_form(instance=contact)
+        form = GSMContactForm(instance=contact)
     context['form'] = form
     context['title'] = _("Edit Member") + " " + contact.signature
     context['contact'] = contact
