@@ -219,7 +219,7 @@ class App (rapidsms.app.App):
                     report.status = "F"
                     # we also should update the participant to the next interval
                     if participant:
-                        self.reset_participant_to_next_interval(participant)
+                        participant = self.reset_participant_to_next_interval(participant)
                         # the report is no longer active
                         participant.active_report = None
                         participant.save()
