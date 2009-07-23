@@ -2,12 +2,14 @@ from rapidsms.webui.utils import render_to_response
 from models import *
 from forms import *
 from datetime import datetime, timedelta
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AdminPasswordChangeForm
 
+from StringIO import StringIO
+import csv
 
 @login_required
 @permission_required("iavi.can_view")
@@ -90,6 +92,52 @@ def data(req):
     kenya_reports = KenyaReport.objects.filter(started__gte=tomorrow-seven_days).filter(reporter__location__in=locations).order_by("-started")
     uganda_reports = UgandaReport.objects.filter(started__gte=tomorrow-seven_days).filter(reporter__location__in=locations).order_by("-started")
     return render_to_response(req, template_name, {"kenya_reports":kenya_reports, "uganda_reports":uganda_reports})
+
+@login_required
+@permission_required("iavi.can_see_data")
+def csv_data(req, location):
+    user = req.user
+    try:
+        profile = user.get_profile()
+        locations = profile.locations.all()
+    except IaviProfile.DoesNotExist:
+        # if they don't have a profile they aren't associated with
+        # any locations and therefore can't view anything.  Only
+        # exceptions are the superusers
+        if user.is_superuser:
+            # todo: allow access to everything
+            locations = Location.objects.all()
+        else:
+            return render_to_response(req, "iavi/no_profile.html", { } )
+    
+    # for export get ALL FINISHED reports that match the location, 
+    # hard code the location types for now, there's only two
+    if location == "kenya":
+        reports = KenyaReport.objects.filter(status="F").\
+                    filter(reporter__location__in=locations).order_by("-started")
+        headings = ["Site #", "Participant Id", "Date",
+                    "Sex Last 24 hr", "Condoms Last 24 hr"]
+    elif location == "uganda":
+        reports = UgandaReport.objects.filter(status="F").\
+                    filter(reporter__location__in=locations).order_by("-started")
+        headings = ["Site #", "Participant Id", "Date",
+                    "Sex With Partner", "Condoms With Partner", 
+                    "Sex With Other", "Condoms With Other"]
+    else:
+        return HttpResponse("Unknown location: %s.  Valid options are 'kenya' and 'uganda'" % location)
+    output = StringIO()
+    w = csv.writer(output)
+    w.writerow(headings)
+    for report in reports:
+        w.writerow(report.summary_list())
+    # rewind the virtual file
+    output.seek(0)
+    response = HttpResponse(output.read(),
+                        mimetype='application/ms-excel')
+    response["content-disposition"] = "attachment; filename=%s_data_%s.csv" %\
+                                      (location,  str(datetime.now().date()))
+    return response
+
 
 @login_required
 @permission_required("iavi.is_admin")
