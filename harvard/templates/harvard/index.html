@@ -63,7 +63,7 @@ tr.totals { font-weight: bold; }
             <td>{{survey.get_status_display}}</td>
             <td>{% if survey.child %}Yes{% else %}No{% endif %}</td>
             <td>{{survey.question}}</td>
-            <td>{{survey.answer}}</td>
+            <td>{{survey.answer_display}}</td>
             <td>{{survey.num_tries}}</td>
         </tr>
         {% endfor %}

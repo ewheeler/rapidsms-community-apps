@@ -26,6 +26,11 @@ def index(req):
         totals["tries"] += survey.num_tries
         survey.question = get_display_question(survey.session.tree)
         survey.child = "child" in survey.session.tree.trigger
+        # None and finished means don't know, so use a display column 
+        if survey.status == "F" and survey.answer == None:
+            survey.answer_display = "Don't know"
+        else:
+            survey.answer_display = survey.answer
     if status_counts:
         totals["avg_tries"] = float(totals["tries"]) / float(totals["total"])
         for user in status_counts:

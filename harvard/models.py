@@ -65,6 +65,8 @@ class HarvardReport(models.Model):
     completed = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
     
+    # the answer they gave.  we are using 'none' for don't know right now
+    # which is a bit confusing.  
     answer = models.IntegerField(null=True, blank=True)
     # the number of times we had to initiate this survey before 
     # it was successful (if it was sucessful)
