@@ -40,7 +40,7 @@ class BasicContactForm(ModelForm):
         return m
 
 class ContactWithChannelForm(BasicContactForm):
-    phone_number = forms.IntegerField(required=False, label="Phone Number")
+    phone_number = forms.CharField(max_length=64, required=False, label="Phone Number")
     communication_channel = forms.ModelChoiceField(CommunicationChannel.objects, required=False)
      
     def __init__(self, data=None, instance=None):
@@ -78,7 +78,7 @@ class ContactWithChannelForm(BasicContactForm):
          return cleaned_data;
 
 class GSMContactForm(BasicContactForm):
-    phone_number = forms.IntegerField(required=False, label="Phone Number")
+    phone_number = forms.CharField(max_length=64, required=False, label="Phone Number")
     communication_channel = None
 
     def __init__(self, data=None, instance=None):
