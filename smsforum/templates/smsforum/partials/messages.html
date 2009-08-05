@@ -85,12 +85,20 @@
             <tr>
                 <th scope="col">{% trans "Date" %}</th>
                 <th scope="col">{% trans "Message" %}</th>
+                {% if user.is_staff %}
+	                <th scope="col">{% trans "Phone Number" %}</th>
+                {% endif %}
+                <th scope="col">{% trans "Community" %}</th>
             </tr>
         </thead>
         <tbody>{% if cmd_messages.object_list %}{% for message in cmd_messages.object_list %}
             <tr>
                 <td>{% if message.received %}{{ message.received }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if message.text %}{{ message.text }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if user.is_staff %}
+	                <td>{% if message.identity %}{{ message.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% endif %}
+                <td>{% if message.domain.village %}{{ message.domain.village }}{% else %}<span class="na">n/a</span>{% endif %}</td>
             </tr>{% endfor %}{% else %}
             <tr class="no-data">
                 <td colspan="2">
