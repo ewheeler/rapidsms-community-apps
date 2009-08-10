@@ -10,7 +10,7 @@ def index(req):
     # will store number of sucesses, failures per user
     totals = { "A" : 0, "C" : 0, "F" : 0, "total" : 0, "tries" : 0}
     status_counts = { }
-    surveys = HarvardReport.objects.all().order_by("started").order_by("reporter__alias")
+    surveys = HarvardReport.objects.all().order_by("reporter__alias").order_by("-started")
     for survey in surveys:
         if not survey.reporter.alias in status_counts:
             status_counts[survey.reporter.alias] = {"A" : 0, 
