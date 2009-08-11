@@ -1,13 +1,13 @@
 from django import forms
 from django.forms import ModelForm
+from django.db import transaction, IntegrityError
 from apps.contacts.models import *
-from django.db import transaction
 
 class BasicContactForm(ModelForm):
-    perm_send = forms.BooleanField(required=False, label="Can blast messages")
-    perm_receive = forms.BooleanField(required=False, label="Can receive messages")
+    perm_send = forms.BooleanField(required=False, label="Can blast messages", initial=True)
+    perm_receive = forms.BooleanField(required=False, label="Can receive messages", initial=True)
     perm_ignore = forms.BooleanField(required=False, label="Is spam number")    
-    age_years = forms.IntegerField(required=False, label="Age in Years")
+    age_years = forms.FloatField(required=False, label="Age in Years")
     
     class Meta:
         model = Contact
@@ -91,15 +91,29 @@ class GSMContactForm(BasicContactForm):
     def save(self):
         contact = super(GSMContactForm, self).save()
         # keep default channelconnection
-        # unless none exists, in which case create default one
+        # unless none exists, in which case create the default one
         if 'phone_number' in self.cleaned_data and self.cleaned_data['phone_number']:
             # this is rather hack-ish
-            channel = CommunicationChannel.objects.get(backend_slug__icontains='gsm')
+            phone_number = self.cleaned_data['phone_number']
+            try:
+                # default to gsm if it exists
+                channel = CommunicationChannel.objects.get(backend_slug__icontains='gsm')
+            except CommunicationChannel.DoesNotExist: 
+                # otherwise default to whatever
+                try:
+                    channel = CommunicationChannel.objects.get()
+                except CommunicationChannel.DoesNotExist:
+                    raise Exception("No Communication Channels are defined!")
             conns = ChannelConnection.objects.filter(contact=contact, communication_channel=channel)
             if not conns:
                 conn = ChannelConnection( contact=contact, communication_channel=channel )
             else:
                 conn = conns[0]
-            conn.user_identifier=self.cleaned_data['phone_number']
-            conn.save()
+            try:
+                conn.user_identifier = self.cleaned_data['phone_number']
+                conn.save()
+            except IntegrityError, e:
+                # More user friendly error message
+                if unicode(e).find('Duplicate') != -1:
+                    raise IntegrityError("That phone number is already in use!")
         return contact

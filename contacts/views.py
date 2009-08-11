@@ -13,6 +13,10 @@ from utilities.export import export
 def index(request, template="contacts/index.html"):
     context = {}
     contacts = Contact.objects.all()
+    for contact in contacts:
+        connections = ChannelConnection.objects.filter(contact=contact)
+        if connections:
+            contact.phone_number = connections[0].user_identifier
     context['contacts'] = paginated(request, contacts)
     return render_to_response(request, template, context)
 

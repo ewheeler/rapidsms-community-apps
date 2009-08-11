@@ -151,9 +151,9 @@ def members(request, pk, template="smsforum/members.html"):
             total_incoming_messages = total_incoming_messages + member.message_count
             total_incoming_messages_this_week = total_incoming_messages_this_week + member.message_count_this_week
             member.received_message_count = OutgoingMessage.objects.filter(identity=member.phone_number).count()
-            log = MembershipLog.objects.filter(contact=member,village=village).order_by('-id')
-            if (log):
-                member.date_joined = log[0].date
+        log = MembershipLog.objects.filter(contact=member,village=village).order_by('-id')
+        if (log):
+            member.date_joined = log[0].date
     context['village'] = village
     context['members'] = paginated(request, members)
     context['member_count'] = len(members)
@@ -263,20 +263,66 @@ def export_village_history(request, pk, format='csv'):
         return export(history, ['id','date','node','action'])
     return export(history, ['id','date','action'])
 
-def add_member(request, village_id=0, template="contacts/add.html"):
+def add_member(request, village_id=0, member_id=0, template="contacts/phone_number.html"):
+    """ adding a member to a village involves either
+    1. creating a new contact and adding that new contact to the village, or
+    2. finding an existing contact and adding that contact to this village
+    this view deals with both cases, by requiring the web user to specify
+    a phone number first, and using the phone number to search for existing matches
+    
+    """
     context = {}
-    if request.method == 'POST':
-        form = GSMContactForm(request.POST)
-        if form.is_valid():
-            c = form.save()
-            if village_id != 0:
-                c.add_to_parent( Village.objects.get(id=village_id) )
-            context['status'] = _("Member '%(member_name)s' successfully created" % {'member_name':c.signature} )
-        else:
-            context['error'] = form.errors
-    context['form'] = GSMContactForm()
     context['title'] = _("Add Member")
-    return render_to_response(request, template, context)    
+    if request.method == 'POST':
+        if 'phone_number_query' in request.POST:
+            # we received a post of the contact's phone number
+            phone_number_query = request.POST['phone_number_query'].strip()
+            if phone_number_query:
+                # try to find a matching contact
+                try:
+                    cxn = ChannelConnection.objects.get(user_identifier=phone_number_query)
+                except ChannelConnection.DoesNotExist:
+                    # if nothing matches, create new contact
+                    form = GSMContactForm()
+                    form.initial = {'phone_number':phone_number_query}
+                    template="contacts/add.html"
+                    context['form'] = form
+                    return render_to_response(request, template, context)
+                else:
+                    # if contact matches, redirect to that contact's edit page
+                    return HttpResponseRedirect("/village/%s/member/add/%s" % \
+                                                (village_id, cxn.contact.id) )
+                    # when we move to django 1.1, use the following intead:
+                    # redirect(add_member, village_id, cxn.contact.id)
+            else:
+                context['error'] = "Please enter a phone number for member."
+        else:
+            # we received a post from the add/edit_member form. save()
+            action = ""
+            if member_id != 0:
+                contact = get_object_or_404( Contact, pk=member_id )
+                form = GSMContactForm(request.POST, instance=contact)
+                action = "edited"
+            else:
+                form = GSMContactForm(request.POST)
+                action = "created"
+            if form.is_valid():
+                c = form.save()
+                context['status'] = _("Member '%(member_name)s' successfully %(action)s" % \
+                                      {'member_name':c.signature, 'action':action} )
+                if village_id != 0:
+                    village = Village.objects.get(id=village_id)
+                    village.add_children( c )
+                    context['status']  = context['status'] + _(" and added to village: %s") % village.name
+            else:
+                context['error'] = form.errors
+    if member_id != 0:
+        contact = get_object_or_404(Contact, pk=member_id)
+        form = GSMContactForm(instance=contact)
+        context['form'] = form
+        context['title'] = _("Add Member %s to village %s") % (contact.signature,village_id)
+        template = "contacts/add.html"
+    return render_to_response(request, template, context)
 
 @login_required
 def edit_member(request, pk, template="contacts/edit.html"):
