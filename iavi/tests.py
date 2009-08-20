@@ -9,10 +9,7 @@ import datetime
 
 class TestApp (TestScript):
     apps = (reporters_app.App, App, tree_app.App, form_app.App )
-    fixtures = ["iavi_locations", "iavi_trees", "iavi_forms"]
-    
-    
-    
+
     def testRegistration(self):
         reg_script = """
             # base case

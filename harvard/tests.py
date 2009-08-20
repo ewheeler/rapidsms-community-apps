@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 
 class TestApp (TestScript): 
     apps = (reporters_app.App, App, tree_app.App )
-    fixtures = ["harvard_trees"]
     
     def testHarvard(self):
         self._register(phone="harvard_1", alias="1")
