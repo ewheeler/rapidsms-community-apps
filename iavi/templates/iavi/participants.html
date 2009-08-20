@@ -13,13 +13,13 @@
         </tr>
     </thead>
     <tbody>
-        {% for reporter in reporters %}
+        {% for participant in participants %}
             <tr>
-                <td><a href="/iavi/participants/{{reporter.pk}}/">{{reporter.study_id}}</a></td>
-                <td>{{reporter.location}}</td>
-                <td>{{reporter.registered|date:"d-M-Y"}}</td>
-                <td>{{reporter.connection.identity}}</td>
-                <td>{{reporter.pin}}</td>
+                <td><a href="/iavi/participants/{{reporter.pk}}/">{{participant.reporter.study_id}}</a></td>
+                <td>{{participant.reporter.location}}</td>
+                <td>{{participant.start_date|date:"d-M-Y"}}</td>
+                <td>{{participant.reporter.connection.identity}}</td>
+                <td>{{participant.reporter.pin}}</td>
             </tr>
         {% endfor %}
     </tbody>

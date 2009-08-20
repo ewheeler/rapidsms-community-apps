@@ -2,17 +2,23 @@ from rapidsms.webui.utils import render_to_response
 from models import *
 from forms import *
 from datetime import datetime, timedelta
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AdminPasswordChangeForm
 
+from StringIO import StringIO
+import csv
+
+@login_required
+@permission_required("iavi.can_view")
 def index(req):
     template_name="iavi/index.html"
     return render_to_response(req, template_name, {})
 
 @login_required
+@permission_required("iavi.can_view")
 def compliance(req):
     template_name="iavi/compliance.html"
     
@@ -29,25 +35,36 @@ def compliance(req):
         else:
             return render_to_response(req, "iavi/no_profile.html", {})
     
-    reporters = IaviReporter.objects.filter(location__in=locations)
+    reporters = IaviReporter.objects.filter(location__in=locations).order_by('alias')
     seven_days = timedelta(days=7)
     thirty_days = timedelta(days=30)
-    tomorrow = datetime.today() + timedelta(days=1)
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
     for reporter in reporters:
         
         all_reports = Report.objects.filter(reporter=reporter)
-        last_7 = all_reports.filter(started__gte=tomorrow-seven_days)
-        last_30 = all_reports.filter(started__gte=tomorrow-thirty_days)
+        last_7 = all_reports.filter(started__gte=today-seven_days)
+        last_30 = all_reports.filter(started__gte=today-thirty_days)
         
         reporter.all_reports = len(all_reports)
         reporter.all_compliant = len(all_reports.filter(status="F"))
+        if reporter.all_reports != 0:
+            reporter.all_ratio = float(reporter.all_compliant) / float(reporter.all_reports)
+            reporter.all_flag = _get_flag(reporter.all_ratio)
+                
         
         reporter.past_7_reports = len(last_7)
         reporter.past_7_compliant = len(last_7.filter(status="F"))
-        
+        if reporter.past_7_reports != 0:
+            reporter.past_7_ratio = float(reporter.past_7_compliant) /float(reporter.past_7_reports)  
+            reporter.past_7_flag = _get_flag(reporter.past_7_ratio)
+            
         reporter.past_30_reports = len(last_30)
         reporter.past_30_compliant = len(last_30.filter(status="F"))
-        
+        if reporter.past_30_reports != 0:
+            reporter.past_30_ratio = float(reporter.past_30_compliant) /float(reporter.past_30_reports)  
+            reporter.past_30_flag = _get_flag(reporter.past_30_ratio)
+            
     return render_to_response(req, template_name, {"reporters":reporters })
 
 @login_required
@@ -75,6 +92,52 @@ def data(req):
     kenya_reports = KenyaReport.objects.filter(started__gte=tomorrow-seven_days).filter(reporter__location__in=locations).order_by("-started")
     uganda_reports = UgandaReport.objects.filter(started__gte=tomorrow-seven_days).filter(reporter__location__in=locations).order_by("-started")
     return render_to_response(req, template_name, {"kenya_reports":kenya_reports, "uganda_reports":uganda_reports})
+
+@login_required
+@permission_required("iavi.can_see_data")
+def csv_data(req, location):
+    user = req.user
+    try:
+        profile = user.get_profile()
+        locations = profile.locations.all()
+    except IaviProfile.DoesNotExist:
+        # if they don't have a profile they aren't associated with
+        # any locations and therefore can't view anything.  Only
+        # exceptions are the superusers
+        if user.is_superuser:
+            # todo: allow access to everything
+            locations = Location.objects.all()
+        else:
+            return render_to_response(req, "iavi/no_profile.html", { } )
+    
+    # for export get ALL FINISHED reports that match the location, 
+    # hard code the location types for now, there's only two
+    if location == "kenya":
+        reports = KenyaReport.objects.filter(status="F").\
+                    filter(reporter__location__in=locations).order_by("-started")
+        headings = ["Site #", "Participant Id", "Date",
+                    "Sex Last 24 hr", "Condoms Last 24 hr"]
+    elif location == "uganda":
+        reports = UgandaReport.objects.filter(status="F").\
+                    filter(reporter__location__in=locations).order_by("-started")
+        headings = ["Site #", "Participant Id", "Date",
+                    "Sex With Partner", "Condoms With Partner", 
+                    "Sex With Other", "Condoms With Other"]
+    else:
+        return HttpResponse("Unknown location: %s.  Valid options are 'kenya' and 'uganda'" % location)
+    output = StringIO()
+    w = csv.writer(output)
+    w.writerow(headings)
+    for report in reports:
+        w.writerow(report.summary_list())
+    # rewind the virtual file
+    output.seek(0)
+    response = HttpResponse(output.read(),
+                        mimetype='application/ms-excel')
+    response["content-disposition"] = "attachment; filename=%s_data_%s.csv" %\
+                                      (location,  str(datetime.now().date()))
+    return response
+
 
 @login_required
 @permission_required("iavi.is_admin")
@@ -128,8 +191,13 @@ def user_edit(req, id):
                 # make sure any super user is also staff so they
                 # can easily change passwords
                 user.is_staff = True;
+                
                 user.save()
-            profile_form.save()
+            
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
+            profile_form.save_m2m()
             return HttpResponseRedirect('/iavi/users')
     else:
         user_form =  UserForm(instance=user_to_edit)
@@ -168,7 +236,6 @@ def new_user(req):
 
 def password_change(req, id):
     user_to_edit = User.objects.get(id=id)
-    print req.user
     if req.method == 'POST': 
         password_form = AdminPasswordChangeForm(user_to_edit, req.POST)
         if password_form.is_valid():
@@ -199,8 +266,8 @@ def participants(req):
         else:
             return render_to_response(req, "iavi/no_profile.html", {})
     
-    reporters = IaviReporter.objects.filter(location__in=locations)
-    return render_to_response(req, template_name, {"reporters" : reporters })
+    parts = StudyParticipant.objects.filter(reporter__location__in=locations).order_by('reporter__alias')
+    return render_to_response(req, template_name, {"participants" : parts})
 
 
 @login_required
@@ -209,9 +276,15 @@ def participant_summary(req, id):
     template_name="iavi/participant_summary.html"
     try:
         reporter = IaviReporter.objects.get(pk=id)
-    except IaviReporter.NotFound:
-        reporter = None 
-    # todo - see if we wnat to put these back in
+        data = StudyParticipant.objects.get(reporter=reporter)
+        reporter.start_date = data.start_date 
+        reporter.end_date = data.end_date 
+    except IaviReporter.DoesNotExist:
+        reporter = None
+    except StudyParticpant.DoesNotExist:
+        # no study data, this is okay, the fields will just show up blank
+        pass 
+    # todo - see if we want to put these back in
     kenya_reports = KenyaReport.objects.filter(reporter=reporter).order_by("-started")
     uganda_reports = UgandaReport.objects.filter(reporter=reporter).order_by("-started")
     return render_to_response(req, template_name, {"reporter" : reporter,"kenya_reports":kenya_reports, "uganda_reports":uganda_reports})
@@ -236,18 +309,58 @@ def participant_edit(req, id):
             conn = reporter.connection() 
             conn.identity = form.cleaned_data["phone"]
             conn.save()
+            end_date = form.cleaned_data["end_date"]
+            try:
+                participant = StudyParticipant.objects.get(reporter=reporter)
+                participant.end_date = end_date
+                participant.save()
+            except StudyParticipant.DoesNotExist:
+                # nothing to do with the end date
+                pass
             return HttpResponseRedirect('/iavi/participants/%s/' % id) 
     else:
         try:
             reporter = IaviReporter.objects.get(pk=id)
+            try:
+                study_data = StudyParticipant.objects.get(reporter=reporter)
+                reporter.end_date = study_data.end_date
+            except StudyParticipant.DoesNotExist:
+                reporter.end_date = None
             if reporter.location:
                 form = IaviReporterForm(initial={"participant_id" :reporter.study_id, "location" : reporter.location.pk,
-                                                 "pin" : reporter.pin, "phone" : reporter.connection().identity } )
+                                                 "pin" : reporter.pin, "phone" : reporter.connection().identity, 
+                                                 "end_date" : reporter.end_date } )
             else: 
                 form = IaviReporterForm({"participant_id" :reporter.study_id, 
-                                         "pin" : reporter.pin, "phone" : reporter.connection().identity } )
-        except IaviReporter.NotFound:
+                                         "pin" : reporter.pin, "phone" : reporter.connection().identity, 
+                                         "end_date" : reporter.end_date } )
+        except IaviReporter.DoesNotExist:
             form = IaviReporterForm()
 
     template_name="iavi/participant_edit.html"
     return render_to_response(req, template_name, {"form" : form, "reporter" : reporter})
+
+
+@login_required
+@permission_required("iavi.can_write_participants")
+def participant_delete(req, id):
+    template_name="iavi/participant_delete.html"
+    num_reports = 0
+    try:
+        reporter = IaviReporter.objects.get(pk=id)
+        num_reports = len(Report.objects.filter(reporter=reporter))
+    except IaviReporter.DoesNotExist:
+        reporter = None
+    if req.method == 'POST': 
+        if reporter:
+            reporter.delete()
+        reporter = None
+    return render_to_response(req, template_name, {"reporter" : reporter, "num_reports" : num_reports})
+
+def _get_flag(ratio):
+    if ratio <= .6:
+        return "severe"
+    elif ratio <= .75:
+        return "warning"
+    return "good"
+            

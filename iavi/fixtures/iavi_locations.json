@@ -1,21 +1,21 @@
 [
   {
     "pk": 1, 
-    "model": "reporters.locationtype", 
+    "model": "locations.locationtype", 
     "fields": {
       "name": "Uganda Location"
     }
   }, 
   {
     "pk": 2, 
-    "model": "reporters.locationtype", 
+    "model": "locations.locationtype", 
     "fields": {
       "name": "Kenya Location"
     }
   }, 
   {
     "pk": 1, 
-    "model": "reporters.location", 
+    "model": "locations.location", 
     "fields": {
       "code": "19", 
       "name": "MRC - Masaka", 
@@ -27,7 +27,7 @@
   }, 
   {
     "pk": 2, 
-    "model": "reporters.location", 
+    "model": "locations.location", 
     "fields": {
       "code": "21", 
       "name": "CGMRC - Mtwapa/Kilifi", 
@@ -39,7 +39,7 @@
   }, 
   {
     "pk": 3, 
-    "model": "reporters.location", 
+    "model": "locations.location", 
     "fields": {
       "code": "22", 
       "name": "KAVI - Kangemi", 

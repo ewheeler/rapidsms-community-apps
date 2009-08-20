@@ -1,6 +1,22 @@
 <tr>
     <td><a href="/iavi/participants/{{reporter.pk}}/">{{reporter.study_id}}</a></td>
-    <td>{{reporter.past_7_compliant}}/{{reporter.past_7_reports}}</td>
-    <td>{{reporter.past_30_compliant}}/{{reporter.past_30_reports}}</td>
-    <td>{{reporter.all_compliant}}/{{reporter.all_reports}}</td>
+    <td>{{reporter.location}}</td>
+    <td {% ifequal reporter.past_7_flag "severe" %}class="severe-compliance"
+        {% else %}
+            {% ifequal reporter.past_7_flag "warning" %}class="warn-compliance"{% endifequal %}   
+        {% endifequal %}>
+        {{reporter.past_7_compliant}}/{{reporter.past_7_reports}}
+    </td>
+    <td {% ifequal reporter.past_30_flag "severe" %}class="severe-compliance"
+        {% else %}
+            {% ifequal reporter.past_30_flag "warning" %}class="warn-compliance"{% endifequal %}   
+        {% endifequal %}>
+        {{reporter.past_30_compliant}}/{{reporter.past_30_reports}}
+    </td>
+    <td {% ifequal reporter.all_flag "severe" %}class="severe-compliance"
+        {% else %}
+            {% ifequal reporter.all_flag "warning" %}class="warn-compliance"{% endifequal %}   
+        {% endifequal %}>
+        {{reporter.all_compliant}}/{{reporter.all_reports}}
+    </td>
 </tr>

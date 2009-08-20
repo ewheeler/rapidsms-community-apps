@@ -109,15 +109,15 @@ class TestApp (TestScript):
            12345 > llin my status
            12345 < Please register your phone with RapidSMS.
            12345 > llin register 45 DL hello world 
-           12345 < Invalid form. 45 not in list of location codes
+           12345 < Error. 45 not in list of location codes
            12345 > llin my status
            12345 < Please register your phone with RapidSMS.
            12345 > llin register 20 pp hello world 
-           12345 < Invalid form. Unknown role code: pp
+           12345 < Error. Unknown role code: pp
            12345 > llin my status
            12345 < Please register your phone with RapidSMS.
            12345 > llin register 6803 AL hello world 
-           12345 < Invalid form. 6803 not in list of location codes. Unknown role code: AL
+           12345 < Error. 6803 not in list of location codes. Unknown role code: AL
            12345 > llin my status
            12345 < Please register your phone with RapidSMS.
          """
@@ -156,7 +156,7 @@ class TestApp (TestScript):
            8005551213 > llin nets 2001 123 456 78 90
            8005551213 < Thank you net. Received report for LLIN NETS: location=AJINGI, distributed=123, expected=456, actual=78, discrepancy=90
            8005551213 > llin nets 2001 123 456 78 
-           8005551213 < Invalid form. The following fields are required: discrepancy
+           8005551213 < Error. The following fields are required: discrepancy
            # test some of the different form prefix options
            # case sensitivity
            8005551213 > llin NETS 2001 123 456 78 90
@@ -183,7 +183,7 @@ class TestApp (TestScript):
            8005551214 > llin net cards 200201 123 456 78 
            8005551214 < Thank you card. Received report for LLIN NET CARDS: location=ALBASU CENTRAL, settlements=123, people=456, distributed=78
            8005551214 > llin net cards 200201 123 456  
-           8005551214 < Invalid form. The following fields are required: issued
+           8005551214 < Error. The following fields are required: issued
            # test some of the different form prefix options
            # case sensitivity
            8005551214 > llin NET CARDS 200201 123 456 78
