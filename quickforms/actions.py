@@ -21,7 +21,10 @@ class KeywordActions():
 
 class FormActions():
     ''' Methods in this class will be called after a keyword's form
-        has been parsed. Methods should have the same name as the keyword. '''
+        has been parsed. Methods should have the same name as the keyword. 
+        Anything returned by these functions are ignored. If you need to
+        respond to the form entry sender, you'll need to use a 'responding'
+        keyword action. '''
 
     @staticmethod
     def alpha(formentry, errors):
