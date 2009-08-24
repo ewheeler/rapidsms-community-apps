@@ -7,11 +7,11 @@ from django import template
 register = template.Library()
 
 from datetime import datetime, timedelta
-from apps.reporters.models import *
-from apps.locations.models import *
-from apps.supply.models import *
-from apps.bednets import constants
-from apps.bednets.models import *
+from reporters.models import *
+from locations.models import *
+from supply.models import *
+from bednets import constants
+from bednets.models import *
 from rapidsms.webui.utils import * 
 
 @register.inclusion_tag("bednets/partials/recent.html")

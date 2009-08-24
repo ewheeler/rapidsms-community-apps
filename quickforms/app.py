@@ -19,6 +19,9 @@ class App (rapidsms.app.App):
                 "bool": "(yes|y|yeah|true|t|no|n|nope|false|f)"}
 
     def find_keywords_in(self, msg_list):
+        """ This method finds keywords within a list of words, returning one
+            list of keywords and another list of non-keywords. Called by handle() 
+            with a list of all the words in the incoming message. """
         keywords = Keyword.objects.all()
         matches = []
         def lookup(piece):
@@ -34,15 +37,20 @@ class App (rapidsms.app.App):
         return (matches, msg_list) 
 
     def match_form_fields(self, keyword, pieces):
+        """ Attempts to match non-keyword words from a message to the appropriate 
+            form fields, given a keyword and non-keyword words. 
+            Returns a FormEntry object along with a confirmation message, as well 
+            as any parsing/matching errors. """
         # get this keyword's form
         form = keyword.form
         # fetch its fields
         fields = form.field_set.all()
+        # brace for errors
         errors = []
         info = []
 
         # create and save a FormEntry
-        # TODO also save Reporter
+        # TODO also save Reporter or Contact?
         formentry = FormEntry(form=form)
         formentry.save()
         for f, p in zip(fields, pieces):
@@ -56,6 +64,8 @@ class App (rapidsms.app.App):
                 # booleans are a special case, because we want to
                 # save a consistent representation in the db rather
                 # than whatever the reporter submitted -- so we can analyze
+                # TODO maybe instead of a single 'bool' type there should be
+                #      'affirmative' and 'negatory' types?
                 if f.data_type == "bool":
                     if data.startswith(('y','t')):
                         data = "True"
@@ -70,12 +80,15 @@ class App (rapidsms.app.App):
             else:
                 # if we cant match (maybe there was a string where we expected
                 # a number), prepare a descriptive error message 
+                # TODO i18n!
                 errors.append("Could not parse '%s' into '%s' for %s" % (p, f.data_type, f.title))
 
         if fields.count() != len(pieces):
             # if we are lacking data, prepare a descriptive error message
+            # TODO i18n!
             errors.append("%s form has %d data fields. You submitted %d pieces of data" % (form.title, fields.count(), len(pieces)))
         # prepare confirmation message
+        # TODO i18n!
         confirmation = ("Received form for %s: %s.\nIf this is not correct, reply with CANCEL" % \
             (form.description, ", ".join(info)))                        
         return (formentry, confirmation, errors)
