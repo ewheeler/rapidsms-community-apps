@@ -1,12 +1,13 @@
 # vim: ai sts=4 ts=4 et sw=4
 from django.db import models
-from reporters.models import Location, Reporter, PersistantConnection
+from reporters.models import Reporter, PersistantConnection
+from locations.models import ReporterLocation
 import time as taim
 
 class NetDistribution(models.Model):
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
     connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(ReporterLocation)
     time = models.DateTimeField()
     distributed = models.PositiveIntegerField()
     expected = models.PositiveIntegerField()
@@ -52,7 +53,7 @@ class NetDistribution(models.Model):
 class CardDistribution(models.Model):
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
     connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(ReporterLocation)
     time = models.DateTimeField()
     settlements = models.PositiveIntegerField()
     people = models.PositiveIntegerField()
