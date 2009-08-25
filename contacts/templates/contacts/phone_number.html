@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block stylesheets %} 
+<link rel="stylesheet" href="/static/stylesheets/style.css" />
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+    <h2>{{ title }}</h2>
+    <p/>
+    <!-- TODO: put this in a stylesheet -->
+    {% if status %}<div>{{ status }}</div>{% endif %}
+    {% if error %}<div style="color:red">{{ error }}</div>{% endif %}
+
+	<form action="" method="POST">
+
+	<label for="phone_number_label">Phone Number:</label>
+	<input id="phone_number_query" type="text" name="phone_number_query" maxlength="64" />	
+	
+	<input type="submit" value="Submit" />
+	</form>
+
+</div>
+
+{% endblock %}
+

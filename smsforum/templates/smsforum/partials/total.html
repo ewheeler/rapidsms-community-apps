@@ -1,0 +1,29 @@
+{% load i18n %}
+
+<div class="module">
+    <h2>{% trans "Totals" %}</h2>
+    <form action="" method="POST">
+    <table>
+        <thead>
+            <tr>
+                {% if village_count %}<th scope="col">{% trans "Villages" %}</th>{% endif %}
+                <th scope="col">{% trans "Members" %}</th>
+                <th scope="col">{% trans "Sent To Tostan" %}</th>
+                <th scope="col">{% trans "Sent To Tostan This Week" %}</th>
+                {% if outgoing_message_count %}<th scope="col">{% trans "Sent From Tostan" %}</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% if village_count %}<td>{{ village_count }}</td>{% endif %}
+                <td>{% if member_count %}{{ member_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if incoming_message_count %}{{ incoming_message_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if incoming_message_count_this_week %}{{ incoming_message_count_this_week }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                {% if outgoing_message_count %}<td>{{ outgoing_message_count }}</td>{% endif %}
+            </tr>
+        </tbody>
+    </table>
+    </form>
+</div>
+
+

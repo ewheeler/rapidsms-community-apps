@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block stylesheets %} 
+<link rel="stylesheet" href="/static/stylesheets/style.css" />
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+    <h2>{{ title }}</h2>
+    <p/>
+    <!-- TODO: put this in a stylesheet -->
+    {% if status %}<div>{{ status }}</div>{% endif %}
+    {% if error %}<div style="color:red">{{ error }}</div>{% endif %}
+
+	<form action="" method="POST">
+	{{ form }}
+	<input type="submit" value="Submit" />
+	</form>
+
+</div>
+
+{% endblock %}
+
