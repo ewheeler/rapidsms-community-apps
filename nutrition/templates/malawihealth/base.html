@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block stylesheets %}<link type="text/css" rel="stylesheet" href="/static/questions/stylesheets/questions.css" />{% endblock %}
+{% block title %}Malawi{% endblock %}
+
+{% block page_tabs %}
+<ul id="page-tabs">{% for d in all_data %}
+    
+	{{ d.id }} <br>
+    {% endfor %}
+</ul>
+{% endblock %}
