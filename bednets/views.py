@@ -4,7 +4,8 @@
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError, Http404
 from django.template import RequestContext
-from reporters.models import Location, LocationType
+from locations.models import ReporterLocation as Location
+from locations.models import LocationType
 from supply.models import Shipment, Transaction, Stock, PartialTransaction
 from bednets import constants
 from bednets.models import NetDistribution, CardDistribution 
