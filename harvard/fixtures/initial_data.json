@@ -1,0 +1,556 @@
+[
+  {
+    "pk": 7, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "Hello. Send me your PIN.", 
+      "error_response": "That's not the PIN I was expecting. Please send it again."
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of your medicine did you miss in the past 7 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of your medicine did you miss in the past 30 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did you miss since the last time you picked up your medicine from the pharmacy? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss in the past 7 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss in the past 30 days? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "tree.question", 
+    "fields": {
+      "text": "How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type \"n\".", 
+      "error_response": "I'm sorry. That's not an answer I was expecting."
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 9, 
+      "trigger": "harvard 1", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 10, 
+      "trigger": "harvard 2", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 11, 
+      "trigger": "harvard 3", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 15, 
+      "trigger": "harvard child 1", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 16, 
+      "trigger": "harvard child 2", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "tree.tree", 
+    "fields": {
+      "root_state": 17, 
+      "trigger": "harvard child 3", 
+      "completion_text": "Thank you for your response. Good-bye."
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "tree.answer", 
+    "fields": {
+      "answer": "validate_birth_year", 
+      "type": "C", 
+      "name": "birth year validation", 
+      "description": "the year of your birth"
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "tree.answer", 
+    "fields": {
+      "answer": "(n)", 
+      "type": "R", 
+      "name": "don't know", 
+      "description": "n"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "tree.answer", 
+    "fields": {
+      "answer": "validate_0_to_7", 
+      "type": "C", 
+      "name": "0 to 7", 
+      "description": "a number between 0 and 7"
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "tree.answer", 
+    "fields": {
+      "answer": "validate_0_to_30", 
+      "type": "C", 
+      "name": "0 to 30", 
+      "description": "a number between 0 and 30"
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "tree.answer", 
+    "fields": {
+      "answer": "([0-9]+)", 
+      "type": "R", 
+      "name": "a number", 
+      "description": "any number"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard 1 root"
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard 2 root"
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard 3 root"
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 8, 
+      "name": "harvard 1 main"
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 9, 
+      "name": "harvard 2 main"
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 10, 
+      "name": "harvard 3 main"
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 1 root"
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 2 root"
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": 2, 
+      "question": 7, 
+      "name": "harvard child 3 root"
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 11, 
+      "name": "harvard child 1 main"
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 12, 
+      "name": "harvard child 2 main"
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "tree.treestate", 
+    "fields": {
+      "num_retries": null, 
+      "question": 13, 
+      "name": "harvard child 3 main"
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 9, 
+      "next_state": 12
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 10, 
+      "next_state": 13
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 11, 
+      "next_state": 14
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 12, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 13, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 14, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 9, 
+      "current_state": 12, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 10, 
+      "current_state": 13, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 22, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 11, 
+      "current_state": 14, 
+      "next_state": null
+    }
+  },
+  {
+    "pk": 23, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 15, 
+      "next_state": 18
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 16, 
+      "next_state": 19
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 7, 
+      "current_state": 17, 
+      "next_state": 20
+    }
+  }, 
+  {
+    "pk": 26, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 9, 
+      "current_state": 18, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 27, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 10, 
+      "current_state": 19, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 28, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 11, 
+      "current_state": 20, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 29, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 18, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 30, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 19, 
+      "next_state": null
+    }
+  }, 
+  {
+    "pk": 31, 
+    "model": "tree.transition", 
+    "fields": {
+      "answer": 8, 
+      "current_state": 20, 
+      "next_state": null
+    }
+  },
+  {
+    "pk": 200, 
+    "model": "patterns.pattern", 
+    "fields": {
+      "regex": "(nyn)", 
+      "name": "nyn"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "i18n.language", 
+    "fields": {
+      "pattern": 200, 
+      "name": "Runyankole"
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Agandi, nyoherereza omwaka oguwazarirwemu.", 
+      "original": "Hello. Send me the year of your birth.", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Ogwotigwomwaka oguwabiire ongambiire.Ninkushaba ogugarukemu.", 
+      "original": "That's not the year of birth I was expecting. Please send it again.", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro mushanju eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of your medicine did you miss in the past 7 days? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro makumi ashatu eyobuziire kumiira omubazi gwawe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of your medicine did you miss in the past 30 days? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi eyobuziire kumiira omubazi gwawe kuruga obwohererukiire kwiiha emibazi yaawe  omwirwariro rya Mbarara? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of medicine did you miss since the last time you picked up your medicine from the pharmacy? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 22, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Webaare kungarukamu. Ogume nobusingye.", 
+      "original": "Thank you for your response. Good-bye.", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 23, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro mushanju eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of medicine did your child miss in the past 7 days? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi omubiiro maku ashatu eyo mwaana wawe abuziire kumiira omubazi gwe? Ku orabe otarikugyimanya, handiika \"n\".", 
+      "original": "How many doses of medicine did your child miss in the past 30 days? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Nemirundi engahi eyo mwaana waawe abuzire kumira omubazi gwe kuruga obwohererukire kwiha omubazi gwe omwirwariro Mbarara? Waba otarikugyimanya handiika \"n\".\r\n", 
+      "original": "How many doses of medicine did your child miss since the last time you picked up his or her medicine from the pharmacy? If you do not know, type \"n\".", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 34, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Agandi, nyoherereza enamba yaawe.", 
+      "original": "Hello. Send me your PIN.", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 35, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Egyo tiiyo namba yaawe. Ninkushaba ogigarukyemu.", 
+      "original": "That's not the PIN I was expecting. Please send it again.", 
+      "language": 4
+    }
+  },
+  {
+    "pk": 36, 
+    "model": "i18n.translation", 
+    "fields": {
+      "translation": "Ekiwangarukamu tikyo nabaninyenda.", 
+      "original": "I'm sorry. That's not an answer I was expecting.", 
+      "language": 4
+    }
+  }
+]

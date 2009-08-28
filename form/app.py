@@ -24,6 +24,7 @@ class App(rapidsms.app.App):
         self.token_separator = "[,\.\s]*"
         self.leading_pattern = "[\"'\s]*"
         self.trailing_pattern = "[\.,\"'\s]*"
+        self.trailing_catchall = "(.*)"
         self.form_patterns = [] 
         self.domains_forms_tokens = []
         self.setup()
@@ -90,12 +91,13 @@ class App(rapidsms.app.App):
                 # and add the dict to the running form_tokens list
                 forms_tokens.append(dict([((f.form.code.abbreviation.upper(), f.form.code.regex), tokens)]))
 
-                # put together domain pattern, form pattern, and token patterns
-                # along with leading patterns, separators, etc
+                # put together domain pattern, form pattern
+                # the tokens will be processsed serially, pending the
+                # match of a domain and form.
+                # include leading patterns, separators, and a trailing catch-all
                 form_pattern = self.leading_pattern + d.code.regex + \
                     self.separator + f.form.code.regex + self.separator + \
-                    ''.join(['(?:%s%s)?' % (self.token_separator, t[1]) for t in tokens]) + \
-                    self.trailing_pattern
+                    self.trailing_catchall
                 self.form_patterns.append(form_pattern)
 
             # make a dictionary mapping this domain code to its form list
@@ -116,9 +118,9 @@ class App(rapidsms.app.App):
 
     # SUBMIT A FORM --------------------------------------------------------
 
-    def form(self, app, message, code, type, *data): 
+    def form(self, app, message, code, type, body_text): 
         self.debug("FORM")
-        self.debug(data)
+        self.debug(body_text)
         for domain in self.domains_forms_tokens:
             domain_matched = self._get_code(code, domain)
             self.debug(domain_matched)
@@ -146,7 +148,15 @@ class App(rapidsms.app.App):
                             form=this_form, date=message.date)
                         # gather list of token tuples for this form type
                         tokens = form[form_matched]
-
+                        
+                        # this assumes the form is separated by spaces, although
+                        # there's no reason this couldn't be configured per form
+                        data = re.split(self.token_separator, body_text) 
+                        # append some empty tokens on the end, to match the previous
+                        # behavior. otherwise we will get key errors accessing the
+                        # data
+                        while len(tokens) > len(data):
+                            data.append('')
                         self.debug("FORM MATCH")
                         info = []
                         for t, d in zip(tokens, data):
@@ -187,7 +197,7 @@ class App(rapidsms.app.App):
                         # and note that we've handled this one
                         else:
                             self.debug("Invalid form. %s", ". ".join(validation_errors))
-                            message.respond("Invalid form. %s" % ". ".join(validation_errors), StatusCodes.APP_ERROR)
+                            message.respond("Error. %s" % ". ".join(validation_errors), StatusCodes.APP_ERROR)
                             return
                         
                         # stop processing forms, move

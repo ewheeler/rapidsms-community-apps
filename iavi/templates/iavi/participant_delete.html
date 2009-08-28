@@ -1,0 +1,53 @@
+{% extends "iavi/layout.html" %}
+{% block title %}Delete Participant{% endblock %}
+{% block pagecontent %}
+{% if reporter %}
+<h2>Are you sure you want to delete this participant?</h2>
+<table>
+    <tr>
+        <td align="right">Participant #</td>
+        <td><b>{{reporter.study_id}}</b></td>
+    </tr>
+    <tr>
+        <td align="right">Location</td>
+        <td><b>{{reporter.location}}</b></td>
+    </tr>
+    <tr>
+        <td align="right">Started</td>
+        <td><b>{% if reporter.start_date %}
+                  {{reporter.start_date|date:"d-M-Y"}}
+               {% else %}
+                  N/A
+               {% endif %}
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td align="right">Ends</td>
+        <td><b>{% if reporter.end_date %}
+                  {{reporter.end_date|date:"d-M-Y"}}
+               {% else %}
+                  Never
+               {% endif %}
+            </b>
+        </td>
+    </tr>
+    <tr>
+        <td align="right">Phone #</td>
+        <td><b>{{reporter.connection.identity}}</b></td>
+    </tr>
+    <tr>
+        <td align="right">PIN</td>
+        <td><b>{{reporter.pin}}</b></td>
+    </tr>
+</table>
+<h4>{{ num_reports }} reports will also be deleted.  This cannot be undone!</h4>
+<form method="POST">
+    <input type="submit" value="Yes, delete" />
+</form>
+<br>
+{% else %}
+<h4>There's nobody here anymore...</h4>
+<a href="/iavi/participants">back to participant list</a>
+{% endif %}
+{% endblock %}

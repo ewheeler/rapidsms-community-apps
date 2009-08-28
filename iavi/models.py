@@ -41,12 +41,14 @@ class IaviProfile(models.Model):
     
     class Meta:
         permissions = (
+            # the permission required for this tab to display in the UI
+            ("can_view", "Can view iavi data"),
             ("can_read_participants", "Can view participant data"),
             ("can_write_participants", "Can edit participant data"),
             ("can_see_data", "Can view study data"),
             ("is_admin", "Is an administrator for IAVI"),
         )
-
+    
     def __unicode__(self):
         return "%s --> %s" % (self.user, self.reporter)
     
@@ -94,6 +96,13 @@ class Report(models.Model):
     @classmethod
     def pending_sessions(klass):
         return klass.objects.filter(completed=None)
+
+        
+    def summary_list(self):
+        '''Gets a summary list of this report.  Inheritors should override this.'''
+        # by default this implementation will return an empty list
+        return []
+
     
     def __unicode__(self):
         return "%s: %s (%s)" % (self.reporter, self.started, self.get_status_display())
@@ -103,6 +112,13 @@ class KenyaReport(Report):
     sex_past_day = models.PositiveIntegerField(null=True, blank=True)
     condoms_past_day = models.PositiveIntegerField(null=True, blank=True)
     
+    def summary_list(self):
+        return [self.reporter.location.code, 
+                self.reporter.study_id, 
+                self.started.date(), 
+                self.sex_past_day,
+                self.condoms_past_day]
+
     
 
 class UgandaReport(Report):
@@ -110,4 +126,13 @@ class UgandaReport(Report):
     condom_with_partner = models.BooleanField(null=True, blank=True)
     sex_with_other = models.BooleanField(null=True, blank=True)
     condom_with_other = models.BooleanField(null=True, blank=True)
+
+    def summary_list(self):
+        return [self.reporter.location.code, 
+                self.reporter.study_id, 
+                self.started.date(),
+                self.sex_with_partner,
+                self.condom_with_partner,
+                self.sex_with_other, 
+                self.condom_with_other]
     

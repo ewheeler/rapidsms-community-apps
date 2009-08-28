@@ -1,8 +1,15 @@
-import rapidsms
 import re
+import threading
+import time
+from datetime import datetime, timedelta
+from datetime import time as dtt
+
+import rapidsms
 from rapidsms.connection import Connection 
 from rapidsms.message import Message
+
 from reporters.models import Reporter, Location
+from tree.models import Tree
 from models import *
 from i18n.utils import get_translation as _
 from i18n.utils import get_language_code
@@ -12,30 +19,51 @@ import time
 from datetime import datetime, timedelta
 from datetime import time as dtt
 
+from rapidsms.parsers.keyworder import * 
+from formslogic import *
+
+
 class App (rapidsms.app.App):
     
+    kw = Keyworder()
     tree_app = None
     pending_pins = {}
+    bootstrapped = False
+    
     def start (self):
         """Configure your app in the start phase."""
-        # we have to register our functions with the tree app
-        self.tree_app = self.router.get_app("tree")
-        self.tree_app.register_custom_transition("validate_pin", self.validate_pin)
-        self.tree_app.register_custom_transition("validate_1_to_19", self.validate_1_to_19)
-        self.tree_app.register_custom_transition("validate_num_times_condoms_used", 
-                                                 self.validate_num_times_condoms_used)
-        
-        self.tree_app.set_session_listener("iavi uganda", self.uganda_session)
-        self.tree_app.set_session_listener("iavi kenya", self.kenya_session)
-        
-        # interval to check for new surveys (in seconds)
-        survey_interval = 60
-        # start a thread for initiating surveys
-        survey_thread = threading.Thread(
-                target=self.survey_initiator_loop,
-                args=(survey_interval,))
-        survey_thread.daemon = True
-        survey_thread.start()
+        if not self.bootstrapped:
+            # we have to register our functions with the tree app
+            self.tree_app = self.router.get_app("tree")
+            self.tree_app.register_custom_transition("validate_pin", self.validate_pin)
+            self.tree_app.register_custom_transition("validate_1_to_19", self.validate_1_to_19)
+            self.tree_app.register_custom_transition("validate_num_times_condoms_used", 
+                                                     self.validate_num_times_condoms_used)
+            
+            
+            self.tree_app.set_session_listener("iavi uganda", self.uganda_session)
+            self.tree_app.set_session_listener("iavi kenya", self.kenya_session)
+            
+            # initialize the forms app for our registration and test strings
+            self._form_app = self.router.get_app("form")
+            # this tells the form app to add itself as a message handler 
+            # which registers the regex and function that this will dispatch to 
+            self._form_app.add_message_handler_to(self)
+            
+            formslogic = IaviFormsLogic()
+            formslogic.app = self
+            # this tells the form app that this is also a form handler 
+            self._form_app.add_form_handler("iavi", formslogic)
+            
+            # interval to check for new surveys (in seconds)
+            survey_interval = 60
+            # start a thread for initiating surveys
+            survey_thread = threading.Thread(
+                    target=self.survey_initiator_loop,
+                    args=(survey_interval,))
+            survey_thread.daemon = True
+            survey_thread.start()
+            self.boostrapped = True
         
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
@@ -55,112 +83,34 @@ class App (rapidsms.app.App):
             # ASSUMES ORDERING OF APPS AND THAT THIS IS BEFORE TREE
             return not self._allowed_to_participate(message)
         
-        # we'll be using the language in all our responses so
-        # keep it handy
-        language = get_language_code(message.persistant_connection)
-        
         # check pin conditions and process if they match
         if message.reporter and message.reporter.pk in self.pending_pins:
             return self._process_pin(message)
             
-        # registration block
-        # first make sure the string starts and ends with the *# - #* combination
-        match = re.match(r"^\*\#(.*?)\#\*$", message.text)
-        if match:
-            self.info("Message matches! %s", message)
-            body_groups = match.groups()[0].split("#")
-            if len(body_groups)== 3 and body_groups[0] == "8377":
-                # this is the testing format
-                # this is the (extremely ugly) format of testing
-                # *#8377#<Site Number>#<Last 4 Digits of Participant ID>#*
-                # TODO: implement testing
+        # use the keyworder to see if the forms app can help us
+        try:
+            if hasattr(self, "kw"):
+                self.debug("HANDLE")
                 
-                code, site, id = body_groups
-                alias = IaviReporter.get_alias(site, id)
-                try: 
-                    # lookup the user in question and initiate the tree
-                    # sequence for them.  If there are errors, respond
-                    # with them
-                    user = IaviReporter.objects.get(alias=alias)
-                    
-                    errors = self._initiate_tree_sequence(user, message.persistant_connection)
-                    if errors:
-                        message.respond(errors)
-                except IaviReporter.DoesNotExist:
-                    message.respond(_(strings["unknown_user"], language) % {"alias":id})
-                return True
-            
+                # attempt to match tokens in this message
+                # using the keyworder parser
+                results = self.kw.match(self, message.text)
+                if results:
+                    func, captures = results
+                    # if a function was returned, then a this message
+                    # matches the handler _func_. call it, and short-
+                    # circuit further handler calls
+                    func(self, message, *captures)
+                    return True
+                else:
+                    self.debug("NO MATCH FOR %s" % message.text)
             else:
-                # assume this is the registration format
-                # this is the (extremely ugly) format of registration
-                # time is optional
-                # *#<Country/Language Group>#<Site Number>#<Last 3 Digits of Participant ID>#<time?>#*
-                if len(body_groups) == 3:
-                    language, site, id = body_groups
-                    study_time = "1600"
-                elif len(body_groups) == 4:
-                    language, site, id, study_time = body_groups
-                else:
-                    message.respond(_(strings["unknown_format"], get_language_code(message.persistant_connection)))
-                
-                # validate the format of the id, existence of location
-                if not re.match(r"^\d{3}$", id):
-                    message.respond(_(strings["id_format"], get_language_code(message.persistant_connection)) % {"alias" : id})
-                    return True
-                try:
-                    location = Location.objects.get(code=site)
-                except Location.DoesNotExist:
-                    message.respond(_(strings["unknown_location"], get_language_code(message.persistant_connection)) % {"alias" : id, "location" : site})
-                    return True
-                
-                # TODO: validate the language
-                
-                # validate and get the time object
-                if re.match(r"^\d{4}$", study_time):
-                    hour = int(study_time[0:2])
-                    minute = int(study_time[2:4])
-                    if hour < 0 or hour >= 24 or minute < 0 or minute >= 60:
-                        message.respond(_(strings["time_format"], get_language_code(message.persistant_connection)) % {"alias" : id, "time" : study_time})
-                        return
-                    real_time = dtt(hour, minute)
-                else:
-                    message.respond(_(strings["time_format"], get_language_code(message.persistant_connection)) % {"alias" : id, "time" : study_time})
-                    return 
-                
-                # user ids are unique per-location so use location-id
-                # as the alias
-                alias = IaviReporter.get_alias(location.code, id)
-                
-                # make sure this isn't a duplicate alias
-                if len(IaviReporter.objects.filter(alias=alias)) > 0:
-                    message.respond(_(strings["already_registered"], language) % {"alias": id, "location":location.code})
-                    return True
-                
-                # create the reporter object for this person 
-                reporter = IaviReporter(alias=alias, language=language, location=location, registered=message.date)
-                reporter.save()
-                
-                # create the study participant for this too.  Assume they're starting
-                # tomorrow and don't set a stop date.  
-                start_date = (datetime.today() + timedelta(days=1)).date()
-                participant = StudyParticipant.objects.create(reporter=reporter, 
-                                                              start_date = start_date,
-                                                              notification_time = real_time)
-                
-                # also attach the reporter to the connection 
-                message.persistant_connection.reporter=reporter
-                message.persistant_connection.save()
-                
-                message.respond(_(strings["registration_complete"], language) % {"alias": id })
-                
-                # also send the PIN request and add this user to the 
-                # pending pins
-                self.pending_pins[reporter.pk] = None
-                message.respond(_(strings["pin_request"], language))
-        else:
-            self.info("Message doesn't match. %s", message)
-            # this is okay.  one of the other apps may yet pick it up
-            
+                self.debug("App does not instantiate Keyworder as 'kw'")
+        except Exception, e:
+            self.log_last_exception()
+
+        # this is okay.  one of the other apps may yet pick it up
+        self.info("Message doesn't match iavi. %s", message)
     
     def cleanup (self, message):
         """Perform any clean up after all handlers have run in the
@@ -174,6 +124,13 @@ class App (rapidsms.app.App):
     def stop (self):
         """Perform global app cleanup when the application is stopped."""
         pass
+    
+    
+    def add_message_handler(self, regex, function):
+        '''Registers a message handler with this app.  Incoming messages that match this 
+           will call the function'''
+        self.info("Registering regex: %s for function %s, %s" %(regex, function.im_class, function.im_func.func_name))
+        self.kw.regexen.append((re.compile(regex, re.IGNORECASE), function))
     
     def _allowed_to_participate(self, message):
         if message.reporter:
@@ -218,44 +175,30 @@ class App (rapidsms.app.App):
     def _initiate_tree_sequence(self, user, initiator=None):
         user_conn = user.connection()
         if user_conn:
-            db_backend = user_conn.backend
-            # we need to get the real backend from the router 
-            # to properly send it 
-            real_backend = self.router.get_backend(db_backend.slug)
-            if real_backend:
-                connection = Connection(real_backend, user_conn.identity)
-                text = self._get_tree_sequence(user)
-                if not text:
-                    return _(strings["unknown_survey_location"], get_language_code(user.connection)) % ({"location":user.location, "alias":user.study_id})
-                else:
-                    # first ask the tree app to end any sessions it has open
-                    if self.tree_app:
-                        self.tree_app.end_sessions(user_conn)
-                    if initiator:
-                        # if this was initiated by someone else
-                        # create an entry for this so they can be
-                        # notified upon completion, and also so 
-                        # we can ignore the data
-                        TestSession.objects.create(initiator=initiator, tester=user,
-                                                   status="A")
-                    start_msg = Message(connection, text)
-                    self.router.incoming(start_msg)
-                    return
-            else:
-                error = "Can't find backend %s.  Messages will not be sent" % connection.backend.slug
-                self.error(error)
-                return error
+            tree= self._get_tree(user)
+            if not tree:
+                return _(strings["unknown_survey_location"], get_language_code(user.connection)) % ({"location":user.location, "alias":user.study_id})
+            if initiator:
+                # if this was initiated by someone else
+                # create an entry for this so they can be
+                # notified upon completion, and also so 
+                # we can ignore the data
+                TestSession.objects.create(initiator=initiator, tester=user,
+                                           status="A")
+            if self.tree_app:
+                self.tree_app.start_tree(tree, user_conn)
+            
         else:
             error = "Can't find connection %s.  Messages will not be sent" % user_conn
             self.error(error)
             return error
 
-    def _get_tree_sequence(self, user):
+    def _get_tree(self, user):
         # this is very hacky
         if user.location.type.name == "Kenya Location":
-            return "iavi kenya"
+            return Tree.objects.get(trigger="iavi kenya")
         elif  user.location.type.name == "Uganda Location":
-            return "iavi uganda"
+            return Tree.objects.get(trigger="iavi uganda")
         else:
             return None
     
@@ -375,14 +318,23 @@ class App (rapidsms.app.App):
         rep = IaviReporter.objects.get(pk=msg.reporter.pk)
         return msg.text == rep.pin
     
-    # we need to save these in order to validate the other
     sex_answers = {}
     
     def validate_1_to_19(self, msg):
+        if self.validate_numeric_range(msg, 1, 19):
+            # we need to save these in order to validate the next
+            # answer
+            self.sex_answers[msg.reporter.pk] = int(msg.text.strip())
+            return True
+        
+    
+    def validate_numeric_range(self, msg, lower_bound, upper_bound):
+        '''Validates a numeric range, parsing the message as a number
+           and then checking if that number falls between the lower and
+           upper bound (inclusive).'''
         value = msg.text.strip()
         if value.isdigit():
-            if 0 < int(value) < 20:
-                self.sex_answers[msg.reporter.pk] = int(value)
+            if lower_bound <= int(value) <= upper_bound:
                 return True
         return False
     
@@ -395,7 +347,7 @@ class App (rapidsms.app.App):
                 # interrupted between questions. we could
                 # look this up in the DB but for now we'll
                 # be dumb.  
-                # TODO: do this for real from the DB
+                # TODO?: do this for real from the DB
                 old_value = 20
             if 0 <= int(value) <= old_value:
                 self.sex_answers.pop(msg.reporter.pk)
@@ -413,9 +365,9 @@ class App (rapidsms.app.App):
             # and when it is, start it
             
             try: 
-                # super hack... add 3 hours because of the time zone difference
+                # super hack... add 2 hours because of the time zone difference
                 # i'm sure there is a better way to do this with real time zones
-                # but i'm also sure I don't want to figure it out right nowx 
+                # but i'm also sure I don't want to figure it out right now
                 now_adjusted =  datetime.now() + timedelta(hours=2) 
                 next_time = now_adjusted.time()
                 self.debug("Adjusted time: %s, checking for participants to notify" % next_time)

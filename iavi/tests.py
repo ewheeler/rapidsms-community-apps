@@ -3,43 +3,40 @@ from app import App
 from models import *
 import reporters.app as reporters_app
 import tree.app as tree_app
-#import i18n.app as i18n_app
+import form.app as form_app
 from reporters.models import Reporter
 import datetime
 
 class TestApp (TestScript):
-    apps = (reporters_app.App, App, tree_app.App )
-    fixtures = ["iavi_locations", "iavi_trees", 'test_backend']
-    
-    
-    
+    apps = (reporters_app.App, App, tree_app.App, form_app.App )
+
     def testRegistration(self):
         reg_script = """
             # base case
-            reg_1 > *#En#22#001#*
+            reg_1 > prep register En 22 001
             reg_1 < Confirm 001 Registration is Complete
             reg_1 < Please Enter Your PIN Code
             # we'll deal with pins later
             # bad location id
-            reg_2 > *#En##002#*
-            reg_2 < Error 002. Unknown location
-            reg_2 > *#En#34#002#*
-            reg_2 < Error 002. Unknown location 34
+            reg_2 > prep register En a 002
+            reg_2 < Error. Unknown location a
+            reg_2 > prep register En 34 002
+            reg_2 < Error. Unknown location 34
             # bad participant ids
-            reg_3 > *#En#22##*
-            reg_3 < Error. Id must be 3 numeric digits. You sent 
-            reg_3 > *#En#22#03#*
+            reg_3 > prep register En 22 a
+            reg_3 < Error. Id must be 3 numeric digits. You sent a 
+            reg_3 > prep register En 22 03
             reg_3 < Error. Id must be 3 numeric digits. You sent 03 
-            reg_3 > *#En#22#0003#*
+            reg_3 > prep register En 22 0003
             reg_3 < Error. Id must be 3 numeric digits. You sent 0003 
-            reg_3 > *#En#22#o003#*
+            reg_3 > prep register En 22 o003
             reg_3 < Error. Id must be 3 numeric digits. You sent o003 
             # test a duplicate id
-            reg_4 > *#En#22#001#*
+            reg_4 > prep register En 22 001
             # but allow them to register with the same id in a different location
-            reg_4 < Sorry, 001 has already been registered. Please choose a new user id.
+            reg_4 < Error. 001 has already been registered. Please choose a new user id.
             # but a duplicate at a new location should be ok
-            reg_5 > *#En#19#001#*
+            reg_5 > prep register En 19 001
             reg_5 < Confirm 001 Registration is Complete
             reg_5 < Please Enter Your PIN Code
         """
@@ -58,19 +55,19 @@ class TestApp (TestScript):
         reg_script = """
             # test time format failures
             # That's an "oh" 
-            time_format_1 > *#En#22#004#140O#*
-            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 140O
-            time_format_1 > *#En#22#004#2400#*
-            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 2400
-            time_format_1 > *#En#22#004#1460#*
-            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 1460
-            time_format_1 > *#En#22#004#0000#*
+            time_format_1 > prep register En 22 004 140O
+            time_format_1 < Error. Time must be 4 numeric digits between 0000 and 2359. You sent 140O
+            time_format_1 > prep register En 22 004 2400
+            time_format_1 < Error. Time must be 4 numeric digits between 0000 and 2359. You sent 2400
+            time_format_1 > prep register En 22 004 1460
+            time_format_1 < Error. Time must be 4 numeric digits between 0000 and 2359. You sent 1460
+            time_format_1 > prep register En 22 004 0000
             time_format_1 < Confirm 004 Registration is Complete
             time_format_1 < Please Enter Your PIN Code
-            time_format_2 > *#En#22#005#*
+            time_format_2 > prep register En 22 005
             time_format_2 < Confirm 005 Registration is Complete
             time_format_2 < Please Enter Your PIN Code
-            time_format_3 > *#En#22#006#1838#*
+            time_format_3 > prep register En 22 006 1838
             time_format_3 < Confirm 006 Registration is Complete
             time_format_3 < Please Enter Your PIN Code
         """
@@ -99,12 +96,13 @@ class TestApp (TestScript):
     
         
     def testTestSubmission(self):
-        tester = self._register("tester", "001", "1234", "19", "en")
         nurse = self._register("nurse", "002", "1234", "19", "en")
+        tester = self._register("tester", "001", "1234", "19", "en")
         script = """
             # base case
-            nurse > *#8377#19#001#*
+            nurse > prep test 19 001
             tester < Hello, Please Reply With Your PIN
+            nurse < Your test sequence to 001 was initiated.
             tester > 1234
             tester < Did you have sex with your main partner in the last 24 hours?
             tester > no
@@ -122,14 +120,16 @@ class TestApp (TestScript):
             nurse < 001 Passes Test            
             tester < Questionnaire is complete. Thank you.
             # unknown user
-            nurse > *#8377#19#003#*
-            nurse < Error 003. Unknown user.
+            nurse > prep test 19 003
+            nurse < Error. Unknown user.
         """
         self.runScript(script)
         # try in another language 
         self._register("tester2", "003", "1234", "19", "lg")
         script = """
-            nurse > *#8377#19#003#*
+            nurse > prep test 19 003
+            nurse < Your test sequence to 003 was initiated.
+            
             tester2 < Ssebo/Nnyabo Yingiza ennamba yo eye'kyaama mu ssimu yo. Era ennamba eyo giwereze ku kompyuta yaffe.
             tester2 > 1234
             tester2 < Wetabyeeko mu kikolwa eky'omukwano n'omwagalwawo gw'olinaye mukunoonyereza kuno mu lunaku lumu oluyise?
@@ -139,13 +139,15 @@ class TestApp (TestScript):
             tester2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
             tester2 > no
             nurse < 003 Passes Test            
-            tester2 < Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.
+            tester2 < Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.
         """
         self.runScript(script)
         # try another location
         self._register("tester3", "004", "1234", "22", "en")
         script = """
-            nurse > *#8377#22#004#*
+            nurse > PREP TEST 22 004
+            nurse < Your test sequence to 004 was initiated.
+            
             tester3 < Hello, Please Reply With Your PIN
             tester3 > 1234
             tester3 < How many times did you have sex in the last 24 hours?
@@ -178,22 +180,22 @@ class TestApp (TestScript):
         self.assertEqual("4567", rep.pin)
         
         pin_script = """
-            pin_2 > *#En#22#002#*
+            pin_2 > prep register En 22 002
             pin_2 < Confirm 002 Registration is Complete
             pin_2 < Please Enter Your PIN Code
             # test some poor formats
             pin_2 > 
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
             pin_2 > 123
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
             pin_2 > 12345
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
             pin_2 > 123 4
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
             pin_2 > 123a
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
             pin_2 > I don't understand
-            pin_2 < Error 002. Poorly formatted PIN, must be 4 numbers. Please try again.
+            pin_2 < Error. Poorly formatted PIN, must be 4 numbers. Please try again.
         """
         self.runScript(pin_script)
         
@@ -202,18 +204,18 @@ class TestApp (TestScript):
         self.assertEqual(None, rep.pin)
         
         pin_script = """
-            pin_3 > *#En#22#003#*
+            pin_3 > prep register En 22 003
             pin_3 < Confirm 003 Registration is Complete
             pin_3 < Please Enter Your PIN Code
             pin_3 > 1234
             # test mismatch
             pin_3 < Please Enter Your PIN Code Again
             pin_3 > 1235
-            pin_3 < Error 003. PINs did not match. Please enter your PIN Code
+            pin_3 < Error. PINs did not match. Please enter your PIN Code
             pin_3 > 1234
             pin_3 < Please Enter Your PIN Code Again
             pin_3 > 1235
-            pin_3 < Error 003. PINs did not match. Please enter your PIN Code
+            pin_3 < Error. PINs did not match. Please enter your PIN Code
         """
         self.runScript(pin_script)
         
@@ -230,7 +232,7 @@ class TestApp (TestScript):
             rejected_guy > iavi uganda
             rejected_guy < Sorry, only known respondants are allowed to participate in the survey. Please register before submitting.
             # register but don't set a PIN
-            rejected_guy > *#En#22#001#*
+            rejected_guy > prep register En 22 001
             rejected_guy < Confirm 001 Registration is Complete
             rejected_guy < Please Enter Your PIN Code
             rejected_guy > iavi uganda
@@ -322,7 +324,21 @@ class TestApp (TestScript):
             ugb_2 > yes
             ugb_2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
             ugb_2 > no
-            ugb_2 < Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.
+            ugb_2 < Ebibuuzo bino bikomye wano. Webale nnyo kuwaayo budde bwo.
+        """
+        self.runScript(script)
+        # test error messages
+        script = """
+            ugb_2 > iavi uganda
+            ugb_2 < Ssebo/Nnyabo Yingiza ennamba yo eye'kyaama mu ssimu yo. Era ennamba eyo giwereze ku kompyuta yaffe.
+            ugb_2 > 1235
+            ugb_2 < Tusonyiwe, ennamba gyoyingiza sintuufu. Ddamu ogezeeko nga'onyiga ennamba nnya ez'akuwebwa.
+            ugb_2 > 1234
+            ugb_2 < Wetabyeeko mu kikolwa eky'omukwano n'omwagalwawo gw'olinaye mukunoonyereza kuno mu lunaku lumu oluyise?
+            ugb_2 > abc
+            ugb_2 < "abc" tekirizibwa. Olina kunyiga emu (1) bwekiba nga kituufu oba bbiri (2) bwekiba nga tekikirizibwa.
+            ugb_2 > nedda
+            ugb_2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
         """
         self.runScript(script)
         
@@ -387,7 +403,7 @@ class TestApp (TestScript):
             kenya_2 > 1234
             kenya_2 < Umefanya mapenzi mara ngapi kwa masaa ishirini na nne iliopita?
             kenya_2 > 2
-            kenya_2 < Kwa masaa hiyo kumi na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
+            kenya_2 < Kwa masaa hiyo ishirini na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
             kenya_2 > 2
             kenya_2 < Maswali yamekwisha. Kumbuka kutumia mpira mpya wa kondom kila unavyo fanya mapenzi na kumeza dawa kama ulivyoshauriwa. Asante sana
         """
@@ -403,7 +419,7 @@ class TestApp (TestScript):
             kenya_2 > abc
             kenya_2 < "abc" sio jibu sahihi. Lazima ubonyeze nambari kati ya sufuri hadi kumi na tisa
             kenya_2 > 2
-            kenya_2 < Kwa masaa hiyo kumi na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
+            kenya_2 < Kwa masaa hiyo ishirini na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
             kenya_2 > 6
             kenya_2 < "6" silo jibu sahihi. Lazima ubonyeze nambari inayolingana au iliyo chini ya jibu uliopeana hapo awali
             kenya_2 > 6
@@ -477,13 +493,13 @@ class TestApp (TestScript):
         self.assertEqual(True, u_report.condom_with_other)
         self.assertEqual("F", u_report.status)
         
-        
-         
+    
+    
     def _register(self, phone="55555", id="001", pin="1234", location= "22", language="En"):
         """ Register a user, via the test script. """
         script = """
             # base case - everything's all good
-            %(phone)s > *#%(language)s#%(location)s#%(id)s#*
+            %(phone)s > prep register %(language)s %(location)s %(id)s
             %(phone)s < Confirm %(id)s Registration is Complete
             %(phone)s < Please Enter Your PIN Code
             %(phone)s > %(pin)s

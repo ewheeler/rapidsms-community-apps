@@ -1,0 +1,59 @@
+/* Name and/or Title
+ * vim:set noet:
+ * --
+ * Two or three lines of purpose and/or
+ * justification for the existence of this */
+
+
+/* shrink the rapidsms logo enough to hide the cellphone,
+ * since we're going to replace it with javascript */
+#branding h1 a {
+	width: 210px;
+}
+
+#branding span.signal {
+	background-repeat: no-repeat;
+	background-position: 0 50%;
+	display: block;
+	margin-left: 3px;
+	width: 32px;
+	height: 65px;
+	float: left;
+}
+
+
+#branding span.signal.s-unknown { background-image: url("../images/rapidsms-cellphone-unknown.png"); }
+#branding span.signal.s-0 { background-image: url("../images/rapidsms-cellphone-0.png"); }
+#branding span.signal.s-1 { background-image: url("../images/rapidsms-cellphone-1.png"); }
+#branding span.signal.s-2 { background-image: url("../images/rapidsms-cellphone-2.png"); }
+#branding span.signal.s-3 { background-image: url("../images/rapidsms-cellphone-3.png"); }
+#branding span.signal.s-4 { background-image: url("../images/rapidsms-cellphone-4.png"); }
+
+
+#branding span.signal ul {
+	position: absolute;
+	display: none;
+	margin: 0;
+	padding: 0;
+	top: 32px;
+}
+
+#branding.backends-1 span.signal ul { left: 265px; }
+#branding.backends-2 span.signal ul { left: 300px; }
+#branding.backends-3 span.signal ul { left: 335px; }
+#branding.backends-4 span.signal ul { left: 370px; }
+#branding.backends-5 span.signal ul { left: 405px; }
+
+	#branding span.signal li {
+		list-style: none;
+		margin: 0 0 0.25em 0;
+		padding: 0;
+		color: #fff;
+	}
+
+	#branding span.signal li.title {
+		font-weight: bold; }
+
+#branding span.signal:hover ul {
+	display: block;
+}
