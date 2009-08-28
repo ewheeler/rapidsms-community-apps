@@ -7,7 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from form.models import Domain
-from reporters.models import Location, Reporter, PersistantConnection
+from reporters.models import Reporter, PersistantConnection
+from locations.models import ReporterLocation as Location
 from datetime import date
 import re
 

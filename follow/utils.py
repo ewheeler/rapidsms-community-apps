@@ -6,11 +6,10 @@ import django
 
 
 def followable_models():
-    """Returns an array containing every model that implements the
-       __search__ API. Does not search the django.* namespace."""
+    """Returns an array of every followable model in the current project. Models
+       contained by apps which are present but not running are ignored. To make
+       a model followable, set the "followable" attribute to True."""
 
-    return [
-        model
-        for model in django.db.models.loading.get_models()
-        if model.__module__[0:7] != "django." and
-           hasattr(model, "__search__")]
+    return filter(
+        lambda o: getattr(o, "followable", False),
+        django.db.models.loading.get_models())
