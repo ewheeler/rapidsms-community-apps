@@ -1,0 +1,150 @@
+[
+    {
+        "pk": 1,
+        "model": "locations.locationtype",
+        "fields": {
+            "name": "Country"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "locations.locationtype",
+        "fields": {
+            "name": "Region"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "locations.locationtype",
+        "fields": {
+            "name": "District"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "locations.locationtype",
+        "fields": {
+            "name": "GMCSite"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "locations.location",
+        "fields": {
+            "code": "MW",
+            "name": "Malawi",
+            "parent": null,
+            "longitude": null,
+            "latitude": null,
+            "type": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "locations.location",
+        "fields": {
+            "code": "2",
+            "name": "CentralRegion",
+            "parent": 1,
+            "longitude": null,
+            "latitude": null,
+            "type": 2
+        }
+    },
+    {
+        "pk": 3,
+        "model": "locations.location",
+        "fields": {
+            "code": "10",
+            "name": "Kasungu",
+            "parent": 2,
+            "longitude": null,
+            "latitude": null,
+            "type": 3
+        }
+    },
+    {
+        "pk": 4,
+        "model": "locations.location",
+        "fields": {
+            "code": "15",
+            "name": "Salima",
+            "parent": 2,
+            "longitude": null,
+            "latitude": null,
+            "type": 3
+        }
+    },
+    {
+        "pk": 5,
+        "model": "locations.location",
+        "fields": {
+            "code": "17",
+            "name": "Dedza",
+            "parent": 2,
+            "longitude": null,
+            "latitude": null,
+            "type": 3
+        }
+    },
+    {
+        "pk": 6,
+        "model": "locations.location",
+        "fields": {
+            "code": "01",
+            "name": "Chamwabvi",
+            "parent": 3,
+            "longitude": null,
+            "latitude": null,
+            "type": 4
+        }
+    },
+    {
+        "pk": 7,
+        "model": "locations.location",
+        "fields": {
+            "code": "02",
+            "name": "Kamboni",
+            "parent": 3,
+            "longitude": null,
+            "latitude": null,
+            "type": 4
+        }
+    },
+    {
+        "pk": 8,
+        "model": "locations.location",
+        "fields": {
+            "code": "03",
+            "name": "Santhe",
+            "parent": 3,
+            "longitude": null,
+            "latitude": null,
+            "type": 4
+        }
+    },
+    {
+        "pk": 9,
+        "model": "locations.location",
+        "fields": {
+            "code": "04",
+            "name": "Nikhamenya",
+            "parent": 3,
+            "longitude": null,
+            "latitude": null,
+            "type": 4
+        }
+    },
+    {
+        "pk": 10,
+        "model": "locations.location",
+        "fields": {
+            "code": "05",
+            "name": "Simlemba",
+            "parent": 3,
+            "longitude": null,
+            "latitude": null,
+            "type": 4
+        }
+    }
+    ]
