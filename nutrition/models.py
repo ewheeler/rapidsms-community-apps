@@ -8,6 +8,11 @@ from datetime import date
 from apps.locations.models import Location  
 from apps.reporters.models import Reporter
 
+#This should go someplace else 
+class LocationReporter(models.Model):
+    location   = models.ForeignKey(Reporter)
+    reporter   = models.ForeignKey(Location)
+
 #Perhaps these tables should be a different type of model
 class WastingTable(models.Model): 
     WASTING_TYPES = (
@@ -50,9 +55,9 @@ class Nutrition(models.Model):
         (3,"Error"),
     )
 
+    reporter  = models.ForeignKey(LocationReporter)
     patient   = models.ForeignKey(Reporter)
-    reporter  = models.ForeignKey(Reporter)
-    location  = models.ForeignKey(Location)
+    location  = models.ForeignKey(Location) #redundant but in specs (why cant I a have 2 foreign keys of the same type 
     height    = models.DecimalField(max_digits=3,decimal_places=1) 
     weight    = models.DecimalField(max_digits=3,decimal_places=1) 
     muac      = models.DecimalField(max_digits=2,decimal_places=2) 
@@ -64,7 +69,7 @@ class Nutrition(models.Model):
     def __unicode__(self):
 		# these are not all strings  :)
         return "%s %s %s %s %s %s %s %s %s %s %s %s" % \
-			(self.patient.alias, self.reporter.id, self.location.title, self.patient.gender, self.age(), self.height, self.weight, self.muac, self.oedima, self.diarreah, self.alertself.ts.month,self.ts.year, ts.strftime("%Y-%m-%d %H:%M:%S"))
+			(self.patient.alias, self.reporter.reporter.id, self.reporter.location.title, self.patient.gender, self.age(), self.height, self.weight, self.muac, self.oedima, self.diarreah, self.alertself.ts.month,self.ts.year, ts.strftime("%Y-%m-%d %H:%M:%S"))
    
 	def alertLevel(self):
 		metric = weight/height #check stanley

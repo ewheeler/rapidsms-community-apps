@@ -11,46 +11,13 @@ from apps.reporters.utils import insert_via_querydict, update_via_querydict
 from models import *
 
 
-def __global(req):
-    return {
-        "all_data": INFSSS.objects.all() }
-
-
-def message(req, msg, link=None):
-    return render_to_response(req,
-        "message.html", {
-            "message": msg,
-            "link": link
-    })
-
-
-
-@require_GET
-def view_all_gmc(req):
-    return render_to_response(req,
-        "malawihealth/dashboard.html", {
-            "all_gmc": GMC.objects.all() })
-
 @require_GET
 def dashboard(req):
     return render_to_response(req,
-        "malawihealth/dashboard.html", {
-            "all_data": INFSSS.objects.all() })
+        "nutrition/dashboard.html", {
+            "all_nutrition": Nutrition.objects.all()})
+            #"all_wasting": WastingTable.objects.all(),
+            #"all_stunting": StuntingTable.objects.all(),
+            #"all_locrep": LocationReporter.objects.all() })
 
-@require_GET
-def view_all_data(req):
-    return render_to_response(req,
-        "malawihealth/dashboard.html", {
-            "all_data": INFSSS.objects.all() })
 
-@require_GET
-def view_all_patients(req):
-    return render_to_response(req,
-        "malawihealth/dashboard.html", {
-            "all_patients": Patient.objects.all() })
-
-@require_GET
-def view_by_date_range(req,d1,d2):
-    return render_to_response(req,
-        "malawihealth/dashboard.html", {
-            "all_data": INFSSS.objects.all() })
