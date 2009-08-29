@@ -20,13 +20,13 @@ class WastingTable(models.Model):
         (2, "Moderate"),
         (3, "Severe"),
     )
-    height        = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_100    = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_85     = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_80     = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_75     = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_70     = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight_60     = models.DecimalField(max_digits=3,decimal_places=1) 
+    height        = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_100    = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_85     = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_80     = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_75     = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_70     = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight_60     = models.DecimalField(max_digits=4,decimal_places=1) 
 
     def __unicode__(self): 
         return "%s %s %s %s %s %s %s" % (height,weight_100,weight_85, weight_80,weight_75, weight_70, weight_60)
@@ -38,8 +38,8 @@ class WastingTable(models.Model):
         return 1
         
 class StuntingTable(models.Model): 
-    age       = models.DecimalField(max_digits=3,decimal_places=1) 
-    height    = models.DecimalField(max_digits=3,decimal_places=2) 
+    age       = models.DecimalField(max_digits=4,decimal_places=1) 
+    height    = models.DecimalField(max_digits=5,decimal_places=2) 
     gender    = models.CharField(max_length=1) 
     
     def __unicode__(self): 
@@ -58,9 +58,9 @@ class Nutrition(models.Model):
     reporter  = models.ForeignKey(LocationReporter)
     patient   = models.ForeignKey(Reporter)
     location  = models.ForeignKey(Location) #redundant but in specs (why cant I a have 2 foreign keys of the same type 
-    height    = models.DecimalField(max_digits=3,decimal_places=1) 
-    weight    = models.DecimalField(max_digits=3,decimal_places=1) 
-    muac      = models.DecimalField(max_digits=2,decimal_places=2) 
+    height    = models.DecimalField(max_digits=4,decimal_places=1) 
+    weight    = models.DecimalField(max_digits=4,decimal_places=1) 
+    muac      = models.DecimalField(max_digits=4,decimal_places=2) 
     oedema    = models.BooleanField()
     diarrea   = models.BooleanField()
     ts        = models.DateTimeField(auto_now_add=True)
