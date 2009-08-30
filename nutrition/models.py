@@ -50,9 +50,9 @@ class StuntingTable(models.Model):
 
 class Nutrition(models.Model): 
     QUALITY_TYPES=(
-        (1,"None"),
-        (2,"Clean"),
-        (3,"Error"),
+        ("None",1),
+        ("Clean",2),
+        ("Error",3),
     )
 
     reporter  = models.ForeignKey(LocationReporter,null=True)
@@ -64,7 +64,7 @@ class Nutrition(models.Model):
     oedema    = models.BooleanField()
     diarrea   = models.BooleanField()
     ts        = models.DateTimeField(auto_now_add=True)
-    quality   = models.IntegerField(max_length=1,choices=QUALITY_TYPES,null=True)
+    quality   = models.IntegerField(max_length=1,choices=QUALITY_TYPES,default=1)
 
     def __unicode__(self):
 		# these are not all strings  :)
