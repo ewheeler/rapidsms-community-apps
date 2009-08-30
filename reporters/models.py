@@ -71,10 +71,10 @@ class Reporter(models.Model):
     )
 
     alias      = models.CharField(max_length=20, unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name  = models.CharField(max_length=30, blank=True)
-    dob        = models.DateTimeField(auto_now_add=True, blank=True)
-    gender     = models.CharField(max_length=2, choices=GENDER_TYPES, blank=True)
+    first_name = models.CharField(max_length=30, blank=True,null=True)
+    last_name  = models.CharField(max_length=30, blank=True,null=True)
+    dob        = models.DateTimeField(null=True)
+    gender     = models.CharField(max_length=1, choices=GENDER_TYPES, null=True)
     groups     = models.ManyToManyField(ReporterGroup, related_name="reporters", blank=True)
 
     def __unicode__(self):
