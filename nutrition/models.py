@@ -55,16 +55,16 @@ class Nutrition(models.Model):
         (3,"Error"),
     )
 
-    reporter  = models.ForeignKey(LocationReporter)
+    reporter  = models.ForeignKey(LocationReporter,null=True)
     patient   = models.ForeignKey(Reporter)
     location  = models.ForeignKey(Location) #redundant but in specs (why cant I a have 2 foreign keys of the same type 
-    height    = models.DecimalField(max_digits=4,decimal_places=1) 
-    weight    = models.DecimalField(max_digits=4,decimal_places=1) 
-    muac      = models.DecimalField(max_digits=4,decimal_places=2) 
+    height    = models.DecimalField(max_digits=4,decimal_places=1,blank=True) 
+    weight    = models.DecimalField(max_digits=4,decimal_places=1,blank=True) 
+    muac      = models.DecimalField(max_digits=4,decimal_places=2,blank=True) 
     oedema    = models.BooleanField()
     diarrea   = models.BooleanField()
     ts        = models.DateTimeField(auto_now_add=True)
-    quality   = models.IntegerField(max_length=1,choices=QUALITY_TYPES)
+    quality   = models.IntegerField(max_length=1,choices=QUALITY_TYPES,null=True)
 
     def __unicode__(self):
 		# these are not all strings  :)
