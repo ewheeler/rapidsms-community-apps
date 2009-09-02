@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime, date
 from apps.locations.models import Location  
 from apps.reporters.models import Reporter
+from apps.logger.models import *
 
    
    
@@ -22,6 +23,8 @@ class Person(models.Model):
     reporter    = models.ForeignKey(Reporter)
     lastupdated = models.DateTimeField(auto_now_add=True)
     type        = models.CharField(max_length=10,choices=P_TYPES,default="Child") #bogus
+    errors      = models.IntegerField(max_length=5,default=0) # this is an HSA field
+    active      = models.BooleanField(default=True) #check this in view 
 
     def __unicode__(self): 
         #h = dict(P_TYPES)
@@ -38,22 +41,44 @@ class Person(models.Model):
         return self.reporter.gender
     
     def age(self):
-
         dob  = self.reporter.dob.strftime("%Y%m%d")
         last  = self.lastupdated.strftime("%Y%m%d")
 
         dob = datetime(int(dob[0:4]),int(dob[4:6]),1)
         last = datetime(int(last[0:4]),int(last[4:6]),int(last[6:8]))
-        #dobs are wrong  
+        #dobs are wrong   in json
         return (last - dob).days/30
 
-        
+	def contact(self):
+		return "to implement" #self.lastupdated.strftime("%Y-%m-%d %H:%m")
+
+
+    #oops just saw this -patient only this should be its own class 
+    def lastreport(self):
+        return [n for n in Nutrition.objects.filter(patient=self.id).order_by("lastupdated")].pop()  
+        #use django call i forget it
+    
+    def status(self):
+        nutrition = self.lastreport()
+        return nutrition.report() 
+
+    def dateregistered(self):
+        nutrition = self.lastreport()
+        return nutrition.ts.strftime("%Y-%m-%d %H:%m")
+
 	def contact(self):
 		return self.lastupdated.strftime("%Y-%m-%d %H:%m")
 
+    def smsmsgs(self):
+		return sum([ 1 for i in IncomingMessage.objects.filter(alias=self.id)]) #what is the django count command again
+         
+
+    @classmethod #Again BOGUS hack
+    def childheader(cls):
+        return ["District","GMC","Id","Age","Gender","Status", "Last Report","Date Registered","Contact"] #should be reflected
     @classmethod
     def header(cls):
-        return ["District","GMC","Id","Age","Gender","Contact"] #should be reflected
+        return ["District","GMC","Id","Age","Gender", "SMS Msgs", "Errors","Contact"] #should be reflected
 
 
 
@@ -150,7 +175,7 @@ class Nutrition(models.Model):
     def isStunting(self):
         try: 
             stunting = StuntingTable.objects.filter(gender=self.patient.reporter.gender,age=self.patient.age())
-        #crap
+        #crap improve
             for s in stunting:
                 return self.height < s
         except:
@@ -162,10 +187,15 @@ class Nutrition(models.Model):
             if self.weight <= malnurished.weight_70 : return "severe"
             if self.weight <= malnurished.weight_80 : return "moderate"
         except:
-            return "no" #log
-        return "no"
+            return "" #log 
+        return ""
         
-
+    def report(self):
+        malnutrition = self.isMalnurished() 
+        if '' != malnutrition: malnutrition += " malnutrition"
+        stunting = not(self.isStunting()) * " and stunting "
+        return "%s%s" % (malnutrition,stunting,)
+        
     @classmethod
     def header(cls):
         return ["District","GMC","Reporter","Child","Weight","Height","MUAC","Oedema","Diarrea","Quality","Received"] #should be reflection 
