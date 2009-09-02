@@ -1,0 +1,40 @@
+{% extends "infsss/base.html" %}
+{% block title %}Malawi Health INFSSS{% endblock %}
+
+{% block left %}
+<table>
+<h3>RapidSMS Enabled Locations</h3>
+
+{% for l in rapidsms_locations %}
+    <a href="region/{{l.id}}">{{ l.name  }}</a> 
+{% endfor %} 
+
+<p></p>
+<h3>Other Locations</h3>
+{% for l in other_locations %}
+    <a href="region/{{l.id}}">{{ l.name  }}</a> 
+{% endfor %} 
+</table>
+{% endblock %}
+{#which i could inherit}
+{% block right %}
+<table>
+        <tr> 
+        {% for h in header %}
+        <th><b> {{ h }}</b> </th>
+        {% endfor %}
+        </tr>
+		{% for datum in data %}
+            <tr>
+                {% for d in datum %} 
+                <td>{{ d }}</td>
+                {% endfor %}
+                {% if link %}
+                    <td><a href={{ datum }}>-></a></td>
+                {% endif %}
+             </tr>
+        {% endfor %}
+</table>
+{% endblock %}
+
+

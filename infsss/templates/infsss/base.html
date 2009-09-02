@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% load reporters %}
+
+{% block title %}Malawi{% endblock %}
+{% block content %}
+                    <center>
+
+                    <table><tr>
+                        <td><a href="/infsss/Country">National Level</a></td>
+                        <td><a href="/infsss/Region">Region Level</a></td>
+                        <td><a href="/infsss/District">District Level</a></td>
+                        <td><a href="/infsss/GMC">GMC Level</a></td>
+                        <td>|</td>
+                        <td><a href="/infsss/Child">Children</a></td>
+                        <td>|</td>
+                        <td><a href="/infsss/HSA">HSAs</a></td>
+                        <td>|</td>
+                        <td align="right">Filter</td>
+                        <td align="right">
+		                <form method="post" action="/infsss/{% if status %}{{ status }}/{% endif %}date">
+				            <input type="textfield" name="start-date" value="YYYYMMDD" size="8">to
+				            <input type="textfield" name="end-date" value="YYYYMMDD" size="8">
+				            <input type="submit" value="Search"/>
+                            MM/DD optional
+
+                        </form>
+                        </td>
+                    </tr></table>
+                        </center>
+
+                    {% block subheader %}
+                         <p></p><center><h2> {{ title }} </h2></center><br>
+                    {% endblock %}
+                    {% block bodyarea %}
+                    <div class="split">
+	                    <div class="left">
+		                    {% block left %}{% endblock %}
+	                    </div>
+	                    <div class="right">
+		                    {% block right %}{% endblock %}
+	                    </div>
+	                    <div class="clear-hack"></div>
+                    </div>
+                    {% endblock %}
+                    <br>
+                    <h2></h2>
+                    <br>
+<a href="{% url export-xls type='Nutrition' %}">Export to Excel</a>
+{% endblock %}

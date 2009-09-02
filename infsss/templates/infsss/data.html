@@ -1,0 +1,21 @@
+{% extends "infsss/base.html" %}
+{% block title %}Malawi Health INFSSS{% endblock %}
+
+{% block left %}
+<table>
+        <tr> 
+        {% for h in header %}
+        <th><b> {{ h }}</b> </th>
+        {% endfor %}
+        </tr>
+		{% for datum in data %}
+            <tr>
+                {% for d in datum %} 
+                
+                <td>{{ d }}</td>
+                {% endfor %}
+             </tr>
+        {% endfor %}
+</table>
+{% endblock %}
+
