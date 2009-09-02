@@ -12,6 +12,14 @@ urlpatterns = patterns('',
     url(r'^nutrition$',
         v.dashboard,
         name="nutrition"),
+    
+    url(r'^wastingtable$',
+        v.dashboard,
+        name="wasting"),
+    
+    url(r'^stuntingtable$',
+        v.dashboard,
+        name="stunting"),
 
 )
 

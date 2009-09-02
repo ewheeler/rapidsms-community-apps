@@ -4,21 +4,65 @@
 from django.db import models
 from django.contrib.auth import models as auth_models
 from django.core.exceptions import ObjectDoesNotExist 
-from datetime import date
+from datetime import datetime, date
 from apps.locations.models import Location  
 from apps.reporters.models import Reporter
 
+   
+   
+
 #This should go someplace else 
-class LocationReporter(models.Model):
-    location   = models.ForeignKey(Reporter)
-    reporter   = models.ForeignKey(Location)
+class Person(models.Model):
+    P_TYPES=(
+        ("Child","Child"),
+        ("HSA","HSA"),
+    )
+
+    location    = models.ForeignKey(Location)
+    reporter    = models.ForeignKey(Reporter)
+    lastupdated = models.DateTimeField(auto_now_add=True)
+    type        = models.CharField(max_length=10,choices=P_TYPES,default="Child") #bogus
+
+    def __unicode__(self): 
+        #h = dict(P_TYPES)
+        if self.type == "": self.type = "Child" #I dont think I need this anymore
+        return "%s %s %s" % (self.type,self.reporter.id,self.location.name)
+   
+    def district(self):
+        return self.location.parent
+
+    def gmc(self):
+        return self.location.name
+
+    def gender(self):
+        return self.reporter.gender
+    
+    def age(self):
+
+        dob  = self.reporter.dob.strftime("%Y%m%d")
+        last  = self.lastupdated.strftime("%Y%m%d")
+
+        dob = datetime(int(dob[0:4]),int(dob[4:6]),1)
+        last = datetime(int(last[0:4]),int(last[4:6]),int(last[6:8]))
+        #dobs are wrong  
+        return (last - dob).days/30
+
+        
+	def contact(self):
+		return self.lastupdated.strftime("%Y-%m-%d %H:%m")
+
+    @classmethod
+    def header(cls):
+        return ["District","GMC","Id","Age","Gender","Contact"] #should be reflected
+
+
 
 #Perhaps these tables should be a different type of model
 class WastingTable(models.Model): 
     WASTING_TYPES = (
-        (1, "None"),
-        (2, "Moderate"),
-        (3, "Severe"),
+        ("None",1),
+        ("Moderate",2),
+        ("Severe",3),
     )
     height        = models.DecimalField(max_digits=4,decimal_places=1) 
     weight_100    = models.DecimalField(max_digits=4,decimal_places=1) 
@@ -27,9 +71,12 @@ class WastingTable(models.Model):
     weight_75     = models.DecimalField(max_digits=4,decimal_places=1) 
     weight_70     = models.DecimalField(max_digits=4,decimal_places=1) 
     weight_60     = models.DecimalField(max_digits=4,decimal_places=1) 
+    
+    class Meta:
+        verbose_name = "Wasting"
 
     def __unicode__(self): 
-        return "%s %s %s %s %s %s %s" % (height,weight_100,weight_85, weight_80,weight_75, weight_70, weight_60)
+        return "%f-%s" % (self.height,self.id) #fix to correct formatting
 
     def wastingLevel(self,w):
         #alerts - 3 severe, 2 moderate, 1, nome
@@ -42,9 +89,14 @@ class StuntingTable(models.Model):
     height    = models.DecimalField(max_digits=5,decimal_places=2) 
     gender    = models.CharField(max_length=1) 
     
-    def __unicode__(self): 
-        return "%s %s %s" % (age,height,gender)
+    class Meta:
+        verbose_name = "Stunting"
+        
+        #return "%s %s %s" % (self.age,self.height,self.gender)
     
+    def __unicode__(self):
+        return "age %s, height %s, gender %s" % (self.age,self.height,self.gender)
+
     def isStunted(self,h):
         return h <= height
 
@@ -55,9 +107,8 @@ class Nutrition(models.Model):
         ("Error",3),
     )
 
-    reporter  = models.ForeignKey(LocationReporter,null=True)
-    patient   = models.ForeignKey(Reporter)
-    location  = models.ForeignKey(Location) #redundant but in specs (why cant I a have 2 foreign keys of the same type 
+    reporter  = models.ForeignKey(Person,null=True)
+    patient   = models.ForeignKey(Person)
     height    = models.DecimalField(max_digits=4,decimal_places=1,null=True) 
     weight    = models.DecimalField(max_digits=4,decimal_places=1,null=True) 
     muac      = models.DecimalField(max_digits=4,decimal_places=2,null=True) 
@@ -66,15 +117,57 @@ class Nutrition(models.Model):
     ts        = models.DateTimeField(auto_now_add=True)
     quality   = models.IntegerField(max_length=1,choices=QUALITY_TYPES,default=1)
 
+    class Meta:
+        verbose_name = "Nutrition"
+
     def __unicode__(self):
-		# these are not all strings  :)
-        return "%s %s %s %s %s %s %s %s %s %s %s %s" % \
-			(self.patient.alias, self.reporter.reporter.id, self.reporter.location.title, self.patient.gender, self.age(), self.height, self.weight, self.muac, self.oedima, self.diarreah, self.alertself.ts.month,self.ts.year, ts.strftime("%Y-%m-%d %H:%M:%S"))
+        return "%s - %s" % (self.ts.strftime("%Y-%m-%d"), self.patient.id)
    
 	def alertLevel(self):
-		metric = weight/height #check stanley
-		return (metriic >= 70) * 2 + ((metric < 70) and (metric  > 30))* 1
+		pass 
 
-	def age(self):
-		return (self.datetime - self.patient.dob).days/30
 
+    #for reflection
+    def received(self):
+        return "%s" % (self.ts.strftime("%Y-%m-%d %H:%m"))
+
+    def district(self): 
+        return self.patient.location.parent
+    
+    def gmc(self): 
+        return self.patient.location.name
+
+    def reporter(self): 
+        return self.reporter.reporter.id #phone number - ask adam how to get this
+
+    def child(self): 
+        return self.patient.id
+
+    def dataquality(self): #rename quality - the train of being
+        return dict(QUALITY_TYPES).keys()[self.quality-1]
+
+    # should these go in view
+    def isStunting(self):
+        try: 
+            stunting = StuntingTable.objects.filter(gender=self.patient.reporter.gender,age=self.patient.age())
+        #crap
+            for s in stunting:
+                return self.height < s
+        except:
+            return False
+
+    def isMalnurished(self):
+        try:
+            malnurished = WastingTable.objects.get(height=self.height)
+            if self.weight <= malnurished.weight_70 : return "severe"
+            if self.weight <= malnurished.weight_80 : return "moderate"
+        except:
+            return "no" #log
+        return "no"
+        
+
+    @classmethod
+    def header(cls):
+        return ["District","GMC","Reporter","Child","Weight","Height","MUAC","Oedema","Diarrea","Quality","Received"] #should be reflection 
+        
+        

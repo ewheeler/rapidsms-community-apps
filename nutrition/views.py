@@ -11,6 +11,10 @@ from apps.reporters.utils import insert_via_querydict, update_via_querydict
 from models import *
 
 
+def __global(req):
+    return {
+        "nutrition": Nutrition.objects.all() }
+
 @require_GET
 def dashboard(req):
     return render_to_response(req,
