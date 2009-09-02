@@ -3,9 +3,9 @@ from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.connection import Connection
 from rapidsms.message import Message
 from app import App
-import apps.contacts.app as contacts_app
-from apps.contacts.models import *
-from apps.nodegraph.models import NodeSet
+import contacts.app as contacts_app
+from contacts.models import *
+from nodegraph.models import NodeSet
 from time import sleep
 
 # helpers

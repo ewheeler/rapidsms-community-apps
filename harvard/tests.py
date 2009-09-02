@@ -1,8 +1,8 @@
 from rapidsms.tests.scripted import TestScript
 from app import App
-import apps.reporters.app as reporters_app
-import apps.tree.app as tree_app
-from apps.reporters.models import PersistantBackend, PersistantConnection
+import reporters.app as reporters_app
+import tree.app as tree_app
+from reporters.models import PersistantBackend, PersistantConnection
 from models import *
 from datetime import datetime, timedelta
 

@@ -4,7 +4,7 @@
 
 from utils import followable_models
 from django.db import models
-from apps.reporters.models import Reporter, PersistantConnection
+from reporters.models import Reporter, PersistantConnection
 
 
 for model in followable_models():

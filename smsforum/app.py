@@ -11,8 +11,8 @@ import rapidsms
 from rapidsms.parsers.bestmatch import BestMatch, MultiMatch
 import gettext
 import traceback
-from apps.smsforum.models import Village, villages_for_contact
-from apps.contacts.models import Contact
+from smsforum.models import Village, villages_for_contact
+from contacts.models import Contact
 
 MAX_LATIN_SMS_LEN = 160 
 MAX_LATIN_BLAST_LEN = MAX_LATIN_SMS_LEN - 20 # reserve 20 chars for us

@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.harvard.views as views
+import harvard.views as views
 
 urlpatterns = patterns('',
     url(r'^harvard/?$', views.index),

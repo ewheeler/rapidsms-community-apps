@@ -3,7 +3,7 @@
 
 
 from django.contrib import admin
-from apps.people.models import *
+from people.models import *
 
 
 admin.site.register(PersonType)

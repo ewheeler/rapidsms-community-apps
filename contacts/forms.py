@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.db import transaction, IntegrityError
-from apps.contacts.models import *
+from contacts.models import *
 
 class BasicContactForm(ModelForm):
     perm_send = forms.BooleanField(required=False, label="Can blast messages", initial=True)

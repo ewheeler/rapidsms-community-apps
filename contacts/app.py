@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 import rapidsms
-from apps.contacts.models import contact_from_message
+from contacts.models import contact_from_message
 
 #
 # NEARLY a pure data-model 'project'

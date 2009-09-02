@@ -5,7 +5,7 @@ import sys
 import random
 
 from models import *
-from apps.tree.models import Tree
+from tree.models import Tree
 from datetime import datetime, timedelta
 
 class App (rapidsms.app.App):

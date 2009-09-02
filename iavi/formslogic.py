@@ -10,10 +10,10 @@ from rapidsms.message import StatusCodes
 from models import *
 from strings import strings
 
-from apps.reporters.models import Reporter
-from apps.form.formslogic import FormsLogic
-from apps.i18n.utils import get_translation as _
-from apps.i18n.utils import get_language_code
+from reporters.models import Reporter
+from form.formslogic import FormsLogic
+from i18n.utils import get_translation as _
+from i18n.utils import get_language_code
 
 class IaviFormsLogic(FormsLogic):
     ''' This class will hold the IAVI-specific forms logic. '''

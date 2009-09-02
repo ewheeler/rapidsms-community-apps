@@ -3,8 +3,8 @@
 
 
 from django.conf.urls.defaults import *
-from apps.contacts.views import edit_contact
-import apps.smsforum.views as views
+from contacts.views import edit_contact
+import smsforum.views as views
 
 urlpatterns = patterns('',
     url(r'^$',                                        views.index),

@@ -1,7 +1,7 @@
 from django.db import models
 
-from apps.reporters.models import Reporter
-from apps.tree.models import Session
+from reporters.models import Reporter
+from tree.models import Session
 
 class HarvardReporter(Reporter):
     """This model represents a reporter in the Harvard Study.  

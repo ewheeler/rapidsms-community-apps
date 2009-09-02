@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from rapidsms.webui.utils import *
-from apps.smsforum.models import *
-from apps.smsforum.utils import *
-from apps.smsforum.forms import *
-from apps.smsforum.app import CMD_MESSAGE_MATCHER
-from apps.logger.models import *
-# from apps.contacts.models import *
-from apps.contacts.forms import GSMContactForm
+from smsforum.models import *
+from smsforum.utils import *
+from smsforum.forms import *
+from smsforum.app import CMD_MESSAGE_MATCHER
+from logger.models import *
+# from contacts.models import *
+from contacts.forms import GSMContactForm
 from utilities.export import export
 
 from datetime import datetime, timedelta

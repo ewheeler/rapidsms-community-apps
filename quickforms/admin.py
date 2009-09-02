@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.contrib import admin
-from apps.quickforms.models import *
+from quickforms.models import *
 
 admin.site.register(Form)
 admin.site.register(Field)

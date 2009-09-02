@@ -1,8 +1,8 @@
 # vim: ai sts=4 ts=4 et sw=4
 from django.db import models
-from apps.reporters.models import Location, Reporter, PersistantConnection
+from reporters.models import Location, Reporter, PersistantConnection
 import time as taim
-from apps.form.models import Domain
+from form.models import Domain
 from datetime import datetime,timedelta
 
 class Report(models.Model):

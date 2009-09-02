@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
-from apps.smsforum.models import *
-from apps.contacts.models import * 
+from smsforum.models import *
+from contacts.models import * 
 
 # On this page, users can upload an xsd file from their laptop
 # Then they get redirected to a page where they can download the xsd

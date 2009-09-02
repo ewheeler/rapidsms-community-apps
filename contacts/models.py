@@ -6,8 +6,8 @@ from datetime import datetime,timedelta
 from django.db import models
 from rapidsms.message import Message
 from rapidsms.connection import Connection
-from apps.nodegraph.models import Node
-from apps.locations.models import Location
+from nodegraph.models import Node
+from locations.models import Location
 import math
 from rapidsms import utils
 import traceback

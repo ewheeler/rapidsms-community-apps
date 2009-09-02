@@ -3,10 +3,10 @@
 
 from datetime import datetime
 from django.db import models, transaction
-from apps.locations.models import Location
-from apps.nodegraph.models import NodeSet
+from locations.models import Location
+from nodegraph.models import NodeSet
 from datetime import datetime
-from apps.contacts.models import Contact
+from contacts.models import Contact
 
 class Village(NodeSet):
     # security masks

@@ -15,7 +15,7 @@ class App(rapidsms.app.App):
        and integrates with the Django admin nicely.
 
        To make a Model followable, just add a "followable=True" attribute. The
-       apps.follow.models module will notice, and create an intermediate model
+       follow.models module will notice, and create an intermediate model
        to link your model with Reporter and/or PersistantConnection.
        For example:
 
@@ -35,7 +35,7 @@ class App(rapidsms.app.App):
 
        For a model to be followable over SMS, it also needs to be searchable.
        Luckily, this is also easy. See the rapidsms.search module for docs, or
-       apps.reporters.models.Reporter.__search__ for an example. Once your model
+       reporters.models.Reporter.__search__ for an example. Once your model
        is searchable, it can be followed by anyone over SMS with some fairly
        simple syntax:
 

@@ -3,8 +3,8 @@
 
 
 from django.db import models
-from apps.reporters.models import Reporter
-from apps.locations.models import Location
+from reporters.models import Reporter
+from locations.models import Location
 
 
 class PersonType(models.Model):

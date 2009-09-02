@@ -2,9 +2,9 @@
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 from rapidsms.tests.scripted import TestScript
-import apps.smsforum.app as smsforum_app
-import apps.logger.app as logger_app
-import apps.contacts.app as contacts_app
+import smsforum.app as smsforum_app
+import logger.app as logger_app
+import contacts.app as contacts_app
 from app import App
  
 class TestApp (TestScript):

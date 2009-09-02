@@ -3,7 +3,7 @@
 
 from django.db import models
 
-from apps.reporters.models import Reporter
+from reporters.models import Reporter
 
 class Form(models.Model):
     """ Collection of fields defining data to be collected. """

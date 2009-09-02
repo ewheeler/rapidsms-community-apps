@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.quickforms.views as views
+import quickforms.views as views
 
 urlpatterns = patterns('',
     url(r'^keywords$', views.index),

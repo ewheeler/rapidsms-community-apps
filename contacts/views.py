@@ -6,8 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from rapidsms.webui.utils import render_to_response, paginated
-from apps.contacts.models import Contact
-from apps.contacts.forms import *
+from contacts.models import Contact
+from contacts.forms import *
 from utilities.export import export
 
 def index(request, template="contacts/index.html"):

@@ -1,7 +1,7 @@
 from rapidsms.tests.scripted import TestScript
 from app import App
-import apps.nodegraph.app as nodegraph_app
-from apps.nodegraph.models import Node, NodeSet
+import nodegraph.app as nodegraph_app
+from nodegraph.models import Node, NodeSet
 
 # helpers
 def _user(name, *grps):
