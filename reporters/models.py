@@ -66,13 +66,13 @@ class Reporter(models.Model):
        model should be created through the WebUI, in advance of the reporter
        using the system - but there are always exceptions to these rules..."""
     GENDER_TYPES= (
-        ('Male','M'),
-        ('Female','F'),
+        ('M','Male'),
+        ('F','Female'),
     )
 
     alias      = models.CharField(max_length=20, unique=True)
-    first_name = models.CharField(max_length=30, blank=True,null=True)
-    last_name  = models.CharField(max_length=30, blank=True,null=True)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name  = models.CharField(max_length=30, blank=True)
     dob        = models.DateTimeField(null=True)
     gender     = models.CharField(max_length=1, choices=GENDER_TYPES, null=True)
     groups     = models.ManyToManyField(ReporterGroup, related_name="reporters", blank=True)
