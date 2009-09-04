@@ -1,77 +1,174 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+from datetime import date, datetime
 
-import re
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db.models import F
+
 import rapidsms
-import datetime
-from models import *
+from rapidsms.message import Message
+from apps.logger.models import * 
+from rapidsms.connection import Connection
+from rapidsms.parsers.keyworder import * 
 
-
-#CRAPPY WITH TOO MUCH HARD CODING - BUT WANT SOMETHING TO GET STARTED WITH
+from  models import * 
+import messages
 
 class App(rapidsms.app.App):
-    #Upgrade this to keyword parser
-    #NEW = re.compiler(r"^(new|add|exit|help)\ (.*?)\ ?(.*?)\ ?(.*?)\ ?(.*?)\ ?(.*?)\ ?
-    RESP = ["new reading: n GMCid ChildID Weight(0.0) Height(0.0) MUAC(0.00) Oedema(Y/N) Diarrhoea(Y/N)",\
-            "add child: a Sex(M/F) AgeInMonths GMCid Weight(0.0) Height(0.0) MUAC(0.00) Oedema(Y/N) Diarrhoea(Y/N)",\
-            "h ([N]ew reading,[A]dd child)- enter h n or h a",\
-            "Please resend your message, type h for more help",\
-            "Unable to find GMCId - please fix the Id and resend the message. type: h n -for more help"\
-            "Please add a child: a Sex(M/F) AgeInMonths"\
-            "Thank you for the excellent data reading."\
-            "Thank you for the excellent data reading - The Child Id is %s"]
+
+    # lets use the Keyworder parser!
+    kw = Keyworder()
+
+    def parse(self, message):
+        self.handled = False 
 
 
 
-
-    def __find_patient(self, text):
+    def handle(self, message):
+        # log message
         try:
-            return Patient.objects.get(id=text)
+            if hasattr(self, "kw"):
+                try:
+                    # attempt to match tokens in this message
+                    # using the keyworder parser
+                    func, captures = self.kw.match(self, message.text)
+                    func(self, message, *captures)
+                    # short-circuit handler calls because 
+                    # we are responding to this message
+                    return self.handled 
+                except Exception, e:
+                    # TODO only except NoneType error
+                    # nothing was found, use default handler
+                    self.incoming_entry(message)
+                    return self.handled 
+            else:
+                self.debug("App does not instantiate Keyworder as 'kw'")
+        except Exception, e:
+	    # TODO maybe don't log here bc any message not meant
+	    # for this app will log this error
+	    #
+            # self.error(e) 
+	    pass
 
-        except Patient.DoesNotExist:
-            return None
 
-    #can i inherit this?
-    def __find_gmc(self, text):
+    def outgoing(self, message):
+        pass 
+
+    def __log_status(self, message, status,person): 
+        pass
+    
+    def __log_error(self, e,message, *args, **kwargs): 
+        pass
+   
+
+    def __get_reporter(self,message): #THIS SHOULD BE IN REPORTER CLASS
+        conn = PersistantConnection.from_message(message)
+        if conn.reporter is null: 
+            reporter = Reporter(alias=message.identity,last_name  = message.identity)
+            reporter.save()
+        conn.reporter = reporter
+        conn.save()
+        return conn.reporter
+
+
+    def __get_person_by_identity(self,message):
         try:
-            #we only want gmc sites
-            return Location.objects.get(id=text,type=4)
+            reporter = PersistantConnection.objects.filter(backend=message.connection.backend,identity=message.connection.identity).reporter
+            person = Person.objects.filter(reporter=reporter,active=True) #this should be only one
+            return person
+        except Exception,e:
+            raise Exception(EXCEPT_MSG["NO PERSON"])
 
-        except Location.DoesNotExist:
-            return None
+    def __check_gmc(self,message,gmc,person):
+        return person.location == gmc
 
-    def parse(self, msg):
-      
-        #Use Keyword parser - I dont need regex for this test
+    def __get_person(self,message,id):
+        try:
+            return Person.objects().get(id=id) #exists
+        except:
+            raise Exception(EXCEPT_MSG["NO_PERSON"])
 
-        #sort of crap bu lets get something out teh door
-        #not so into index paradigm
-        #creates will not work
-        param = ()
+    def __validate_data(self,*args,**kwargs):
+        #use reflection
+        status = []
+        person, reporter, height,weight,muac,oedema,diarrea = args
+        return status 
 
-        respindex = 3 
-        if msg is not None: 
+    # Report 9 from outer space
+    @kw("help (.+?)")
+    def report(self, message, more=None):
+        pass #handle this by infss client
 
-            v = msg.split(" ") #tokenize because I am bogus - will fix w/ field feedback
-            if ("h" in v[0] ):
-                respindex = int("a" in msg)
-                #respindex = "h" in v[0] * int("a" in msg) too insane perhaps
-            else: 
-                # is first token a number or letter  set i
-                i = 0
-                        
-                if ("n" in v[0]) or (len(v) == 7): 
-                    patient = self.__find_patient_id(v[i+1]) 
-                elif ("a" in v[0]):
-                        patient =   Patient(gender=v[i],system=1, dob=datetime.datetime.now()+datetime.timedelta(v[i+1]*30)
-                        patient.save()
-                gmc = self.__find_gmc(v[i])
-                if patient is None : respindex = 5
-                if gmc is None : respindex = 4
-                infsss = INFSS(patient=patient, location=gmc,height=v[i+1],weight=v[i+2],muac=v[i+3],oedema=v[i+4],diarrea=v[i+5])
-                infsss.save()
-                param =  (patient.id)
-             
-            msg.respond = RESP[respindex] % param
+
+    @kw("report (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)")  #we dont need gmc
+    def report(self, message, gmc, child, wt, ht, muac, oedema, diarrhea):
+
+        #this should be reflection 
+        person = self.__get_person_by_identity(message)
+        status = self.__validate_nutrition_data(person,gmc,child,wt,ht,muac,oedema,diarrea)
+         
+        try:
+            nut = Nutrition(patient=patient_id,reporter=person.id, height=ht, weight=wt,muac=muac,oedema=oedema,diarrea=diarrea)
+            nut.save()
+        except Exception,e:
+            self.__log_error("report",e,message,gmc,child,wt,ht,muac,oedema,diarrea)
+
+        
+    @kw("reporter (.*?) (.*?)")
+    def reporter(self, message, gmc):
+        try: 
+            person = self.__get_person_by_identity(message)
+            if not(self._check_gmc(gmc,person)): 
+                person.location = gmc
+                person.save()
+            else:
+                self.__log_error("reporter","no change",message,gmc,child) #hard coded bad
+        except:
+                try:
+                    reporter = self.__get_reporter(message)
+                    person = Person(location=gmc,reporter=reporter,type="HSA")  #type wil change)
+                    person.save()
+                except Exception,e:
+                    self.__log_error("reporter",e,message,gmc,child)
+                
+        
+    
+    @kw("cancel (.*?) (.*?)")
+    def cancel(self, message, gmc,child):
+        try: 
+            person = self.__get_person_by_identity(message)
+            if (self.__check_gmc(message,person)):
+                n = Nutrition.objects().filter(reporter=person,patient=child).latest()[0]
+                n.delete()
+            else:
+                self.__log_error("cancel","no person",message,gmc,child) #hard coded bad
+        except Exception,e:
+                self.__log_error("cancel",e,message,gmc,child) #hard coded bad
+    
+    @kw("exit (.*?) (.*?)")
+    def exitpatient (self, message, gmc,child):
+        try:
+            person = Person.objects.filter(location=gmc,reporter=child) #change this to id
+            person.active = False
+            person.save()
+        except Exception,e:
+            self.__log_error("newpatient",e,message,gmc,child,gender,age,contact)
+
+    @kw("new (.*?) (.*?) (.*?) (.*?) (.*?)")
+    def newpatient(self, message, gmc, child, gender, age, contact):
+        try:
+
+            reporter = self.__get_reporter(message)
+            reporter.gender = sex
+            reporter.dob = Reporter.dob_from_age(float(age),"M") #is M bogus
+            r.save()
+            if contact: 
+                conn = PersistantConnection.from_message(message)
+                conn.reporter = r
+                conn.save()
+            person = Person(location=gmc,reporter=reporter,type="Child")  #type wil change)
+            person.save()
+        except:
+            self.__log_error("newpatient",e,message,gmc,child,gender,age,contact)
 
