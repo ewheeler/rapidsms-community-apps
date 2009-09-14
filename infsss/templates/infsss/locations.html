@@ -1,22 +1,37 @@
 {% extends "infsss/base.html" %}
+{% load pagination %}
 {% block title %}Malawi Health INFSSS{% endblock %}
 
 {% block left %}
-<table>
+
 <h3>RapidSMS Enabled Locations</h3>
-
-{% for l in rapidsms_locations %}
-    <a href="region/{{l.id}}">{{ l.name  }}</a> 
+{% for l in test.object_list %}
+    <a href="region/{{l}}">{{ l  }}</a> 
 {% endfor %} 
-
 <p></p>
-<h3>Other Locations</h3>
-{% for l in other_locations %}
+{% paginator test %}
+
+
+<table>
+{% if rapidsms_locations %}
+<h3>RapidSMS Enabled Locations</h3>
+{% for l in rapidsms_locations.object_list %}
     <a href="region/{{l.id}}">{{ l.name  }}</a> 
 {% endfor %} 
+{% paginator rapidsms_locations %}
+<p></p>
+{% endif %}
+{% if other_locations %}
+<h3>Locations</h3>
+{% for l in other_locations.object_list %}
+    <a href="region/{{l.id}}">{{ l.name  }}</a> <br>
+{% endfor %} 
+{% paginator other_locations %}
+
+{% endif %}
 </table>
 {% endblock %}
-{#which i could inherit}
+{#which i could inherit#}
 {% block right %}
 <table>
         <tr> 

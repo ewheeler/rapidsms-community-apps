@@ -10,19 +10,24 @@ class MessageBase(models.Model):
 	# TODO save connection title rather than wacky object string?
     identity = models.CharField(max_length=150)
     backend = models.CharField(max_length=150)
-    alias = models.CharField(max_length=100) # an id to another table instead of referencing reporter
-    
     
     def __unicode__(self):
         return "%s (%s) %s:" % (self.identity, self.backend, self.text)
     
     class Meta:
         abstract = True
+
     
     
 class IncomingMessage(MessageBase):
     received = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        get_latest_by = 'received'
+    
 
 class OutgoingMessage(MessageBase):
     sent = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        get_latest_by = 'sent'

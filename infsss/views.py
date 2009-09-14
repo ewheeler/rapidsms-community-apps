@@ -1,49 +1,59 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-import io
+import datetime
+import os,sys
+
 from django.core.servers.basehttp import FileWrapper
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.db import IntegrityError
 from django.template import RequestContext
-
+from django import forms
 from django.core.urlresolvers import reverse
-from models import *
-from apps.export.utils import excel,download
 
 
 from rapidsms.webui.utils import render_to_response, paginated
-#from apps.reporters.utils import insert_via_querydict, update_via_querydict
+from apps.export.utils import excel,download
 from apps.nutrition.models import *
 from apps.locations.models import *
 from apps.docmanager.models import *
-from django import forms
-import datetime
-import os,sys
+from apps.displaymanager.models import *
+from models import *
 
-#Doing this on front end with hrefs
-# There is a better place for this class
-#def class DateSearchForm(forms.Form): 
-#    fromdate = models.DateTimeField(auto_now_add=True)
-#    todate = models.DateTimeField(auto_now_add=True)
-
-
-
-
-def renderdata(req, data, link=None):
-    return render_to_response(req,
-        "infsss/data.html", {
-            "data": []
-    })
-
-
+#put in utils class
 def divide(n,d): 
     try: 
         return n/d
     except:
         return 0
+
+
+#header and data are hash->list.  The key is the column, the list are order
+def CreateResultSet(req,header,data,exceldata,title,breadcrumbs)
+    resultset = {}
+    dataset_count = len(data)
+
+    
+    object_data = {}
+    list_data = [] #list-i-fy excel data
+        
+
+    for c in  object_data:
+        od = object_data[c]
+        h = header[c]
+        for i in range(0,len(od))
+            resultset["header_col%s_%s"%(c,i)] = h[i]
+            resultset["data_col%s_%s"%(c,i)] = paginated(req,od[i],prefix="data_col%s_%s"%(c,i)),
+        resultset["column_count%s_%s"] = (c,len(od))
+
+    resultset["column_count"] = len(object_data)
+    resultset["excel"] = excel(list_data)
+    resultset["title"] = title
+    resultset["breadcrumbs"] = breadcrumbs
+    return resultset
+
 
 #SHOULD GO IN NUTRITION VIEW    
 def statsoverview(locations):
@@ -165,21 +175,20 @@ def bylocation(req,location):
     rapidsms_locations =[]
     other_locations = []
     status_location =  [l.location.id for l in LocationStatus.objects.all()] 
-    for l in locations: 
-        if l.id in status_location: 
-            rapidsms_locations.append(l)
-        else:
-            other_locations.append(l)
+    rapidsms_loctions = Location.objects.filter(type=type_id,id__in=status_location).order_by("name")
+    other_locations = Location.objects.filter(type=type_id)#.exclude(id__in=status_location).order_by("name")
             
     header,data = statsoverview([l for l in locations])
     #header,data = statsoverview(rapidsms) #replace with  this
 
     title = "Data on a %s Level"  % location
 
+    locations = Location.objects.filter(type=type_id).order_by("name")
     return render_to_response(req,
         "infsss/locations.html", {
-            "rapidsms_locations": rapidsms_locations,
-            "other_locations": other_locations,
+            "rapidsms_locations": paginated(req,rapidsms_locations,prefix="rapidsms"),
+            "other_locations": paginated(req,other_locations,prefix="other"),
+            "test": paginated(req,test,prefix="test"),
             "title": title,
             "header":header,
             "data": data })
