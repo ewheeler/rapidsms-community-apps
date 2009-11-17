@@ -6,9 +6,9 @@ from django.contrib.auth import models as auth_models
 from django.core.exceptions import ObjectDoesNotExist 
 from datetime import datetime, date
 
-from apps.locations.models import Location
-from apps.reporters.models import Reporter
-from apps.logger.models import *
+from locations.models import Location
+from reporters.models import Reporter
+from logger.models import *
 
 
 class PersonBase(models.Model): 

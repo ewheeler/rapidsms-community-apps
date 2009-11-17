@@ -3,9 +3,7 @@
 
 
 from django.conf.urls.defaults import *
-from apps.docmanager.models import *
-
-import views as v
+import infsss.views as v
 
 
 urlpatterns = patterns('',
@@ -14,16 +12,16 @@ urlpatterns = patterns('',
     url(r'^infsss$',
         v.dashboard),
     
-    url(r'^infsss/(?P<location>Country|Region|District|GMC)$',
+    url(r'^infsss/(?P<location>\w+)$',
         v.bylocation),
     
-    url(r'^infsss/(?P<type>Child|HSA)$',
+    url(r'^infsss/(?P<type>\w+)$',
         v.people),
     
-    url(r'^infsss/(?P<type>Child)/(?P<id>\d+)$',
+    url(r'^infsss/(?P<type>\w+)/(?P<id>\d+)$',
         v.bychildid),
     
-    url(r'^infsss/(?P<type>HSA)/(?P<id>\d+)$',
+    url(r'^infsss/(?P<type>\w+)/(?P<id>\d+)$',
         v.byhsaid),
 
     url(r'^infsss/region/(?P<id>\d+)$',
@@ -40,7 +38,7 @@ urlpatterns = patterns('',
         v.download_file,
         name='download-file'),
 
-    url(r'^infsss/(?P<type>Nutrition|Wasting|Stunting|Children|HSAs|Location)/xls$',
+    url(r'^infsss/(?P<type>\w+)/xls$',
         v.export_xls,
         name="export-xls"),
 

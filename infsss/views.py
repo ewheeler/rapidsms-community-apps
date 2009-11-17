@@ -15,12 +15,13 @@ from django.core.urlresolvers import reverse
 
 
 from rapidsms.webui.utils import render_to_response, paginated
-from apps.export.utils import excel,download
-from apps.nutrition.models import *
-from apps.locations.models import *
-from apps.docmanager.models import *
-from apps.displaymanager.models import *
+from export.utils import excel#,download
+#from nutrition.models import *
+from locations.models import *
+from docmanager.models import *
+from displaymanager.models import *
 from models import *
+from person.models import PersonBase as Person
 
 #put in utils class
 def divide(n,d): 
@@ -31,7 +32,7 @@ def divide(n,d):
 
 
 #header and data are hash->list.  The key is the column, the list are order
-def CreateResultSet(req,header,data,exceldata,title,breadcrumbs)
+def CreateResultSet(req,header,data,exceldata,title,breadcrumbs):
     resultset = {}
     dataset_count = len(data)
 
@@ -43,7 +44,7 @@ def CreateResultSet(req,header,data,exceldata,title,breadcrumbs)
     for c in  object_data:
         od = object_data[c]
         h = header[c]
-        for i in range(0,len(od))
+        for i in range(0,len(od)):
             resultset["header_col%s_%s"%(c,i)] = h[i]
             resultset["data_col%s_%s"%(c,i)] = paginated(req,od[i],prefix="data_col%s_%s"%(c,i)),
         resultset["column_count%s_%s"] = (c,len(od))
@@ -57,7 +58,7 @@ def CreateResultSet(req,header,data,exceldata,title,breadcrumbs)
 
 #SHOULD GO IN NUTRITION VIEW    
 def statsoverview(locations):
-    now = datetime.datetime.now()
+    now = datetime.now()
     days = 1000
 
     #OPTIMIZE
@@ -170,7 +171,7 @@ def data_date_filter(req,date1,date2):
 
 @require_GET
 def bylocation(req,location):
-    type_id = LocationType.objects.get(name=location).id
+    type_id = LocationType.objects.get(slug=location).id
     locations = Location.objects.filter(type=type_id).order_by("name")
     rapidsms_locations =[]
     other_locations = []
@@ -188,7 +189,6 @@ def bylocation(req,location):
         "infsss/locations.html", {
             "rapidsms_locations": paginated(req,rapidsms_locations,prefix="rapidsms"),
             "other_locations": paginated(req,other_locations,prefix="other"),
-            "test": paginated(req,test,prefix="test"),
             "title": title,
             "header":header,
             "data": data })
@@ -219,11 +219,11 @@ def bylocationid(req,id):
 @require_GET
 def people(req,type):
     if type == "Child": #hack because I just realized this was a requirement
-        header = Person.childheader()
+        header = "wtf"#Person.childheader()
     else:
-        header = Person.header()
+        header = "wtf"#Person.header()
 
-    p =Person.objects.filter(type=type,active=True).order_by("lastupdated")
+    p =Person.objects.filter(active=True).order_by("lastupdated")
     data = parsedata(p,header,"%s/"%type)
     title = "%s Data" % type
     return render_to_response(req,

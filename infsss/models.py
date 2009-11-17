@@ -5,8 +5,8 @@ from django.db import models
 from django.contrib.auth import models as auth_models
 from django.core.exceptions import ObjectDoesNotExist 
 from datetime import datetime, date
-from apps.locations.models import Location  
-from apps.reporters.models import Reporter
+from locations.models import Location  
+from reporters.models import Reporter
 
 #bogus
 class LocationStatus(models.Model):

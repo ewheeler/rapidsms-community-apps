@@ -5,10 +5,10 @@ from django.db.models import Avg,Max,Min,Count
 import re,sys,os
 from datetime import *
 from rapidsms.webui.utils import render_to_response, paginated
-from apps.locations.models import *
-from apps.reporters.models import *
-from apps.healthtables.models import *
-from apps.childhealth.models import *
+from locations.models import *
+from reporters.models import *
+from healthtables.models import *
+from childhealth.models import *
 from models import *
 #auto gen this
 

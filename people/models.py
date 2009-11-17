@@ -76,6 +76,7 @@ class Person(models.Model):
     # over time, so should be linked via a ForeignKey
     date_of_birth = models.DateField("Date of Birth", blank=True)
     gender        = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    created_at    = models.DateTimeField(auto_now_add=True)
 
 
     class Meta:

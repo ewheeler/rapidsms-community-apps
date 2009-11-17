@@ -6,8 +6,8 @@ from django.template import Library
 from django.utils.safestring import *
 
 from rapidsms.webui.utils import render_to_response, paginated
-from apps.displaymanager.models import *
-from apps.displaymanager.utils import *
+from displaymanager.models import *
+from displaymanager.utils import *
 register = Library()
 
 

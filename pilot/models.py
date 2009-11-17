@@ -6,7 +6,7 @@ from django.contrib.auth import models as auth_models
 from django.core.exceptions import ObjectDoesNotExist 
 from datetime import datetime, date
 
-from apps.locations.models import * 
+from locations.models import * 
 
 #Add a document manager class that pegs docs with projects - although later
 
