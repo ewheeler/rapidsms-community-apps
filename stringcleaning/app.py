@@ -18,7 +18,7 @@ class App (rapidsms.app.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '+', '-']
+        separators = [',', ';', '*', '+']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
 
