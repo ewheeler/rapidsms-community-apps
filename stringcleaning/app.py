@@ -18,9 +18,15 @@ class App (rapidsms.app.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
-        separators = [',', ';', '*', '+']
+        #separators = [',', ';', '*', '+']
+        separators = [';', '*', '+']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
+
+        # replace french decimal ',' with u.s.a. decimal '.'
+        alternate_decimals = [',']
+        for alt in alternate_decimals:
+            msgtxt = msgtxt.replace(alt, '.')
 
         # remove other marks (we'll deal with . later) 
         junk = ['\'', '\"', '`', '(', ')']
