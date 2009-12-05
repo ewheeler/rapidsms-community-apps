@@ -74,7 +74,7 @@ class Person(models.Model):
     # feel free to add things here, but ONLY immutable
     # values. things like _height_ and _weight_ change
     # over time, so should be linked via a ForeignKey
-    date_of_birth = models.DateField("Date of Birth", blank=True)
+    date_of_birth = models.DateField("Date of Birth", blank=True, null=True)
     gender        = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     created_at    = models.DateTimeField(auto_now_add=True)
 
