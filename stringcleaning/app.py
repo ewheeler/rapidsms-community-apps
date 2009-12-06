@@ -19,7 +19,7 @@ class App (rapidsms.app.App):
 
         # replace separation marks with a space
         #separators = [',', ';', '*', '+']
-        separators = [';', '*', '+']
+        separators = [';', '*']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
 
