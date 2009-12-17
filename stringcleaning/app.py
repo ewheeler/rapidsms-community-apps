@@ -1,5 +1,8 @@
-import rapidsms
+#!/usr/bin/env python
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 import re
+
+import rapidsms
 
 class App (rapidsms.app.App):
 
@@ -18,8 +21,9 @@ class App (rapidsms.app.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
+        # TODO replace plus unless injecter app is running
         #separators = [',', ';', '*', '+']
-        separators = [';', '*']
+        separators = [';', '*', ':']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
 
@@ -77,16 +81,20 @@ class App (rapidsms.app.App):
             # location of the next . within the substring beyond the marker
             marker = marker + txt[marker:].index('.')
 
-            if txt[marker-1].isdigit() and txt[marker+1].isdigit():
-                # if the . is between two digits, move the marker to the
-                # next character and find another . 
-                marker += 1
-                continue 
-            else:
-                # save the slice up to and the slice beyond this . and move on
-                # (leave out the .)
-                txt = txt[:marker] + txt[marker+1:]
-                marker += 1
+            try:
+                if txt[marker-1].isdigit() and txt[marker+1].isdigit():
+                    # if the . is between two digits, move the marker to the
+                    # next character and find another .
+                    marker += 1
+                    continue
+                else:
+                    # save the slice up to and the slice beyond this . and move on
+                    # (leave out the .)
+                    txt = txt[:marker] + txt[marker+1:]
+                    marker += 1
+            except IndexError:
+                # string probably ends with .
+                continue
         return txt
 
 
